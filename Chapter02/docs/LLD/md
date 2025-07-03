@@ -1,0 +1,107 @@
+**Bookstore Microservice Architecture - Detailed Design Documentation (Based on Microservices Design Image)**
+
+---
+
+### 1. Purpose of This Document
+
+This document provides a technical walkthrough of the microservice-specific building blocks used in the Bookstore application. Based on the microservices HLD diagram, this breakdown serves backend developers and system architects by identifying key frameworks, data integration options, and Spring Boot-based API construction principles.
+
+> Understanding the underlying microservice technologies helps ensure clean architecture, extensibility, and future-proof implementation.
+
+---
+
+### 2. Spring Boot REST API Core
+
+The foundation of each microservice is a Spring Boot 3.5 application exposing RESTful APIs. Services follow the layered architecture pattern: Controller → Service → Repository.
+
+* **Key Features**:
+
+  * Spring Boot auto-configuration
+  * Clean dependency injection via `@Service` and `@Repository`
+  * Use of REST controllers (`@RestController`) and HATEOAS for discoverability
+  * OpenAPI/Swagger-based API documentation
+
+> These APIs expose domain-specific operations and enable stateless, HTTP-driven communication across services.
+
+---
+
+### 3. Spring Data JPA (Relational Data)
+
+This integration is used in the **Inventory Service**, leveraging JPA to interact with PostgreSQL databases.
+
+* **Technology Stack**:
+
+  * Spring Data JPA
+  * Hibernate ORM
+  * Java 21 Records or Lombok for model classes
+* **Benefits**:
+
+  * Simplifies repository-layer implementations
+  * Supports pagination, query derivation, and dynamic queries
+  * Transactions and consistency via `@Transactional`
+
+> JPA empowers domain-driven persistence in services handling structured and transactional data.
+
+---
+
+### 4. Spring Data MongoDB (Document-Oriented Data)
+
+The **User Management Service** leverages MongoDB for flexible storage of user profiles, order history, and cart documents.
+
+* **Technology Stack**:
+
+  * Spring Data MongoDB
+  * MongoRepository interfaces
+  * Nested collections for embedded structures
+* **Use Cases**:
+
+  * Document modeling for user-centric data
+  * Flexible schema evolution without migrations
+
+> MongoDB supports quick iteration and adaptable design in dynamic user interaction contexts.
+
+---
+
+### 5. Spring JDBC Template (Low-Level SQL Access)
+
+For scenarios requiring fine-grained control over queries or performance optimization, Spring’s JDBC Template is available.
+
+* **Use Cases**:
+
+  * Batch updates
+  * Custom joins or SQL not expressible in JPQL
+* **Integration**:
+
+  * Direct `JdbcTemplate` bean injection
+  * Declarative transaction support
+
+> JDBC access provides fallback and optimization paths for high-performance data scenarios.
+
+---
+
+### 6. Spring Boot with Hexagonal Architecture
+
+Microservices are encouraged to follow Hexagonal (Ports & Adapters) Architecture for testability and separation of concerns.
+
+* **Concept**:
+
+  * Inbound adapters: Controllers, scheduled jobs
+  * Outbound adapters: Repositories, external APIs, queues
+* **Benefits**:
+
+  * Pluggable infrastructure
+  * Improved unit and integration testing boundaries
+
+> Hexagonal design makes the application logic infrastructure-independent and easily extendable.
+
+---
+
+### Conclusion
+
+This microservice-level design guide aligns with the principles of domain-driven design, clean architecture, and cloud-native best practices. Whether you are developing data-intensive services (JPA), flexible user-driven services (MongoDB), or performance-tuned APIs (JDBC), the design accommodates both.
+
+> These design principles ensure that each microservice is independently scalable, easy to maintain, and robust enough to evolve alongside business needs.
+
+---
+
+End of Microservices Design Documentation

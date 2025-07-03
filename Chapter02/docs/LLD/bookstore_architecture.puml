@@ -1,0 +1,16 @@
+@startuml
+skinparam componentStyle rectangle
+package "Bookstore Microservices" {
+    [API Gateway] --> [Book Service]
+    [Book Service] --> [Book Repository]
+    [Book Service] --> [User Service]
+    [Book Service] --> [Inventory Service]
+    [User Service] --> [User Repository]
+    [Inventory Service] --> [Inventory Repository]
+}
+database "PostgreSQL" as pg
+database "MongoDB" as mongo
+[Book Repository] --> pg
+[User Repository] --> pg
+[Inventory Repository] --> mongo
+@enduml
