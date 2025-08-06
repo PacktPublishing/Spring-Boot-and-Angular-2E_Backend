@@ -1,5 +1,4 @@
 
-
 # Chapter 2: Getting Started with Microservices using Spring Boot
 
 Welcome to Chapter 2 of the **Spring Boot and Angular** book! This chapter introduces you to building microservices with Spring Boot.
