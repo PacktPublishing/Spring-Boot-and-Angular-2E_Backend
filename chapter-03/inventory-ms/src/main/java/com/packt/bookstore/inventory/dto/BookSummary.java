@@ -1,4 +1,4 @@
-package com.packt.bookstore.inventory.repository.advanced;
+package com.packt.bookstore.inventory.dto;
 
 import java.math.BigDecimal;
 

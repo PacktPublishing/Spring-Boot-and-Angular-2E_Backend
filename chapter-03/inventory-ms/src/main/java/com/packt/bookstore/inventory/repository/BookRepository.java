@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.packt.bookstore.inventory.dto.BookSummary;
 import com.packt.bookstore.inventory.entity.Book;
 
 @Repository
@@ -31,7 +32,10 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
     // Fetching associated entities
     @Query("SELECT b FROM Book b JOIN FETCH b.author")
     List<Book> findAllWithAuthors();
-    
+
     // Pagination support
     Page<Book> findByAuthor_Name(String name, Pageable pageable);
+
+    //projection interface
+    //List<BookSummary> findByAuthor_Name(String authorName);
 }
