@@ -1,0 +1,10 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "cSpell.words": [
+        "assertj",
+        "ILIKE",
+        "JPQL",
+        "packt"
+    ]
+}
