@@ -34,9 +34,9 @@ public class Book extends Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private Author author;
-
     private String genre;
     private String published;
+
     private String description;
     private Integer pageCount;
     private String coverImageUrl;

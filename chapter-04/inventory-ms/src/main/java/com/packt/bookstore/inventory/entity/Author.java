@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,6 +29,7 @@ public class Author extends Auditable {
     private Long id;
     private String name;
     private String nationality;
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    // Use LAZY fetching but handle it properly in service layer
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Book> books;
 }
