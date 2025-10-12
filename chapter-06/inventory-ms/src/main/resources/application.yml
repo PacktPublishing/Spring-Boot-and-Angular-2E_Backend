@@ -27,3 +27,22 @@ logging:
   level:
     "[org.hibernate.SQL]": DEBUG
     "[org.hibernate.type.descriptor.sql]": TRACE
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
+    metadata-map:
+      instanceId: ${spring.application.name}:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always

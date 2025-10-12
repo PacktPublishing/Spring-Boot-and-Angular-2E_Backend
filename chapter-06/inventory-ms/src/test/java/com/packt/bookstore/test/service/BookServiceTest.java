@@ -56,7 +56,7 @@ class BookServiceTest {
     void setUp() {
         author = Author.builder().id(1L).name("Ahmad Gohar").build();
         book = Book.builder().id(1L).title("Spring Boot and Angular 2E").isbn("1234567890").author(author).price(BigDecimal.TEN).build();
-        bookRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.TEN);
+        bookRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.TEN,null,null,null,null,null);
         bookResponse = new BookResponse(
                 1L,
                 "Spring Boot and Angular 2E",
@@ -110,8 +110,8 @@ class BookServiceTest {
 
     @Test
     void create_shouldThrowDomainRuleViolationExceptionForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1));
-        assertThrows(DomainRuleViolationException.class, () -> bookService.create(badRequest));
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
+        DomainRuleViolationException exception = assertThrows(DomainRuleViolationException.class, () -> bookService.create(badRequest));
     }
 
     @Test
@@ -146,14 +146,14 @@ class BookServiceTest {
 
     @Test
     void patch_shouldThrowDomainRuleViolationExceptionForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1));
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         assertThrows(DomainRuleViolationException.class, () -> bookService.patch(1L, badRequest));
     }
 
     @Test
     void patch_shouldThrowDomainRuleViolationExceptionForDuplicateIsbn() {
-        BookRequest newIsbnRequest = new BookRequest("Spring Boot and Angular 2E", "NEWISBN", "Ahmad Gohar", BigDecimal.TEN);
+        BookRequest newIsbnRequest = new BookRequest("Spring Boot and Angular 2E", "NEWISBN", "Ahmad Gohar", BigDecimal.TEN, null, null, null, null, null);
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(bookRepository.existsByIsbnIgnoreCase("NEWISBN")).thenReturn(true);
 
@@ -252,7 +252,7 @@ class BookServiceTest {
 
     @Test
     void validateSemanticsForCreate_shouldThrowForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1));
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
         assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForCreate", BookRequest.class);
@@ -269,7 +269,7 @@ class BookServiceTest {
 
     @Test
     void validateSemanticsForReplace_shouldThrowForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1));
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
         assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForReplace", BookRequest.class);
@@ -286,7 +286,7 @@ class BookServiceTest {
 
     @Test
     void validateSemanticsForPatch_shouldThrowForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1));
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
         assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForPatch", BookRequest.class, Book.class);

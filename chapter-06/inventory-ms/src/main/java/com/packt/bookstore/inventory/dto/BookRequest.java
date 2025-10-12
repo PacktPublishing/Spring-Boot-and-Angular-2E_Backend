@@ -2,6 +2,7 @@ package com.packt.bookstore.inventory.dto;
 
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,5 +22,11 @@ public record BookRequest(
 
         @NotNull(message = "Price is required")
         @PositiveOrZero(message = "Price must be >= 0")
-        BigDecimal price
+        BigDecimal price,
+
+        String genre,
+        LocalDate published,
+        String description,
+        Integer pageCount,
+        String coverImageUrl
 ) {}

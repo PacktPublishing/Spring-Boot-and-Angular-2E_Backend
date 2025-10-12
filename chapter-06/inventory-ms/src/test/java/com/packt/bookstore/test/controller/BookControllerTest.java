@@ -1,6 +1,7 @@
 package com.packt.bookstore.test.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -60,9 +61,8 @@ public class BookControllerTest {
             "Spring Boot and Angular 2E",
             "1234567890",
             "Ahmad Gohar",
-            new BigDecimal("44.99")
+            new BigDecimal("44.99"), null, null, null, null, null
         );
-
         // Create BookResponse using constructor with all required parameters
         bookResponse = new BookResponse(
             1L,
@@ -71,11 +71,12 @@ public class BookControllerTest {
             "Ahmad Gohar",
             new BigDecimal("44.99"),
             "Programming",
-            "2024",
+            LocalDate.of(2024, 1, 1),
             "a full stack guide to modern web development using  Java, Spring and Angular",
             10,
             "2023-09-06T12:00:00"
         );
+      
     }
 
     @Test
@@ -169,7 +170,12 @@ void createBook_withInvalidData_shouldReturnBadRequest() throws Exception {
         "",  // Empty title
         "1234567890",
         "Ahmad Gohar",
-        new BigDecimal("44.99")
+        new BigDecimal("44.99"),
+        "Programming",
+        LocalDate.of(2024, 1, 1),
+        "a full stack guide to modern web development using Java, Spring and Angular",
+        10,
+        "2023-09-06T12:00:00"
     );
 
     // Just test that invalid input is passed to service - don't mock the behavior
