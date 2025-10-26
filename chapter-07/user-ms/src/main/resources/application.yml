@@ -1,0 +1,41 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /user
+
+spring:
+  application:
+    name: user-ms
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: userDB
+      username: bookstore
+      password: bookstore123
+      authentication-database: admin
+
+logging:
+  level:
+    "[org.hibernate.SQL]": DEBUG
+    "[org.hibernate.type.descriptor.sql]": TRACE
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
+    metadata-map:
+      instanceId: ${spring.application.name}:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+

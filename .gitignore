@@ -9,3 +9,11 @@ chapter-06/gateway-server/gateway.log
 /chapter-06/eureka-server/target
 /chapter-06/inventory-ms/.mvn
 /chapter-06/inventory-ms/.mvn
+/chapter-07/.github
+/chapter-07/.vscode
+/chapter-07/inventory-ms/.vscode
+.DS_Store
+/chapter-07/eureka-server/target
+/chapter-07/user-ms/target
+/chapter-07/inventory-ms/target
+/chapter-07/gateway-server/target
