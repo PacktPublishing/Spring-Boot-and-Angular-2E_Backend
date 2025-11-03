@@ -69,8 +69,11 @@ public class GlobalExceptionHandler {
     /** Fallback for unexpected errors → 500 Internal Server Error */
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiError> generic(Exception ex, HttpServletRequest req) {
+        // Log the exception for debugging
+        System.err.println("Exception caught by global handler: " + ex.getMessage());
+        ex.printStackTrace();
         return ResponseEntity.status(500).body(
-                ApiError.internalServerError("An unexpected error occurred", req.getRequestURI()));
+                ApiError.internalServerError("An unexpected error occurred: " + ex.getMessage(), req.getRequestURI()));
     }
     
 }
