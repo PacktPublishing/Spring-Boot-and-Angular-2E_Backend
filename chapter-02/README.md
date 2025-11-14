@@ -1,139 +1,310 @@
+# Chapter 02 — Getting Started With Microservices Using Spring Boot
 
-# Chapter 2: Getting Started with Microservices using Spring Boot
-
-Welcome to Chapter 2 of the **Spring Boot and Angular** book! This chapter introduces you to building microservices with Spring Boot.
-
-## 📋 Chapter Overview
-
-In this chapter, you will learn:
-
-* **Microservices Architecture Fundamentals**: Understanding the core concepts and benefits of microservices
-* **Spring Boot Project Setup**: Creating a basic Spring Boot microservice from scratch
-* **Project Structure**: Organizing your microservice project following best practices
-* **Maven Configuration**: Setting up dependencies and build configuration
-* **Application Bootstrap**: Creating the main application class and basic configuration
-
-## 🏗️ Project Structure
-
-This chapter contains:
-
-```text
-chapter-02/
-├── README.md                 # This guide
-├── base source code/         # Initial project templates
-├── inventory-ms/            # Inventory Microservice Project
-    ├── pom.xml              # Maven configuration
-    ├── src/
-    │   ├── main/java/       # Application source code
-    │   └── test/java/       # Test source code
-    └── target/              # Build artifacts
-```
-
-## 🎯 Learning Objectives
-
-By the end of this chapter, you will be able to:
-
-* Set up a new Spring Boot microservice project
-* Understand the basic structure of a Spring Boot application
-* Configure Maven dependencies for microservices development
-* Run and test a basic Spring Boot application
-* Apply microservices design principles
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-* Java 24 or higher
-* Maven 3.8+
-* IDE (VS Code)
-* Basic understanding of Java and Spring Framework
-
-### Running the Project
-
-1. Navigate to the `inventory-ms` directory
-2. Run the following commands:
-
-```bash
-# Build the project
-./mvnw clean compile
-
-# Run the application
-./mvnw spring-boot:run
-
-# Run tests
-./mvnw test
-```
-
-The application will start on `http://localhost:8080`
+This chapter introduces the fundamental concepts of microservices architecture and walks you through setting up your development environment, understanding essential design patterns, and creating your first Spring Boot microservice.
 
 ---
 
-## **Accelerating Development with GitHub Copilot and VS Code**
+## Table of Contents
 
-### 🚀 Coding Smarter with GenAI Assistance
+1. [Chapter Overview](#chapter-overview)
+2. [Introduction to Microservices](#introduction-to-microservices)
+3. [Microservice Design Patterns](#microservice-design-patterns)
+4. [Microservice Best Practices](#microservice-best-practices)
+5. [Bookstore Architecture Overview](#bookstore-architecture-overview)
+6. [Development Environment Setup](#development-environment-setup)
+7. [Creating Your First Spring Boot Microservice](#creating-your-first-spring-boot-microservice)
+8. [Installation & Setup Steps](#installation--setup-steps)
+9. [Resources & References](#resources--references)
 
-While building backend systems with Spring Boot can feel empowering, there are still moments when we all stare at a blank editor, unsure of syntax, best practices, or even what to name a method. That's where **GitHub Copilot** shines.
+---
 
-In this section, you'll learn how to:
+## Chapter Overview
 
-* Set up GitHub Copilot in VS Code
-* Prompt Copilot to generate the source code covered in this chapter
-* Use GitHub Copilot to accelerate microservice development
-* Apply AI-assisted coding best practices
+This chapter provides a foundation for understanding microservice architecture, essential patterns, and best practices. You'll learn:
 
-### 🧠 What Is GitHub Copilot?
+- Core microservice characteristics and principles
+- Essential design patterns for building scalable systems
+- Best practices for development, operations, and team collaboration
+- The architecture of the Bookstore application
+- How to set up your development environment
+- How to create and structure your first Spring Boot microservice
 
-GitHub Copilot is an AI pair programmer developed by GitHub and OpenAI. It uses natural language context and code surroundings to suggest:
+---
 
-* Method signatures and implementations
-* Spring Boot configurations and annotations
-* Maven dependency management
-* Application properties and YAML configurations
-* Basic microservice structure and boilerplate code
+## Introduction to Microservices
 
-### Using Copilot for Spring Boot Development
+Microservices are small, autonomous services that encapsulate single business capabilities. They communicate through lightweight protocols, typically REST or messaging, and own their data stores.
 
-GitHub Copilot can assist you in:
+### Key Characteristics
 
-* Creating Spring Boot starter projects
-* Generating boilerplate code for controllers, services, and repositories
-* Suggesting appropriate Spring annotations
-* Writing configuration files
-* Creating unit and integration tests
+- **Loose coupling** — Services are independent and can be deployed separately
+- **High cohesion** — Each service focuses on a single business capability
+- **Technology-agnostic** — Teams can choose the best tools for each service
+- **Decentralized governance** — Teams own their services end-to-end
+- **Built-in fault tolerance** — Services handle failures gracefully
 
-### ✅ Summary: Copilot + Spring Boot = Productive Developers
+---
 
-By using **GitHub Copilot**, you:
+## Microservice Design Patterns
 
-* Save time on repetitive boilerplate code
-* Learn idiomatic Spring Boot practices from AI-generated suggestions
-* Stay focused on business logic rather than syntax
-* Accelerate microservice development workflows
+### Decomposition Patterns
 
-## 📚 Key Concepts Covered
+- **Decompose by business capability** — Organize services around business functions
+- **Decompose by subdomain** — Align services with domain-driven design subdomains
 
-### 1. Microservices Architecture
+### Integration Patterns
 
-* Service independence and autonomy
-* Scalability and maintainability benefits
-* Communication patterns between services
+- **API Gateway** — Single entry point for all client requests
+- **Backend for Frontend (BFF)** — Separate backends for different client types
+- **Service Mesh** — Infrastructure layer for service-to-service communication
+- **Message-based communication** — Asynchronous communication via message brokers
 
-### 2. Spring Boot Fundamentals
+### Data Management Patterns
 
-* Auto-configuration capabilities
-* Embedded server deployment
-* Starter dependencies for rapid development
+- **Database per service** — Each service owns its data store
+- **Event sourcing** — Store state changes as sequence of events
+- **CQRS** — Separate read and write models
+- **Saga Pattern** — Manage distributed transactions across services
 
-### 3. Project Organization
+### Reliability Patterns
 
-* Maven project structure
-* Package organization best practices
-* Configuration management
+- **Circuit breaker** — Prevent cascading failures
+- **Retry with backoff** — Retry failed requests with increasing delays
+- **Bulkhead isolation** — Isolate resources to prevent system-wide failures
+- **Timeouts and fallbacks** — Set timeouts and provide fallback responses
 
-## ✅ Chapter Summary
+### Observability Patterns
 
-In this chapter, you've learned the foundational concepts of microservices development with Spring Boot. The `inventory-ms` project serves as a starting point for building more complex microservices in subsequent chapters.
+- **Centralized logging** — Aggregate logs from all services
+- **Distributed tracing** — Track requests across service boundaries
+- **Metrics collection** — Monitor service health and performance
+- **Health checks** — Expose service health status
 
-**Next Steps**: Chapter 3 will build upon this foundation by adding database integration and repositories using Spring Data JPA.
+---
+
+## Microservice Best Practices
+
+### Development Process Best Practices
+
+- Maintain layered architecture (Controller → Service → Repository → DTO/Mapper)
+- Enforce clean architecture boundaries
+- Use DTOs to decouple internal domain models
+- Implement comprehensive testing (unit, integration, contract)
+- Keep services small, cohesive, and domain-aligned
+
+### Operation Excellence & DevOps Best Practices
+
+- Containerize all services using Docker
+- Automate CI/CD pipelines
+- Implement API versioning
+- Use structured JSON logging
+- Enable health and metrics endpoints via Spring Boot Actuator
+
+### Team Collaboration Best Practices
+
+- Organize teams around business domains
+- Establish strong service ownership
+- Document APIs using Swagger/OpenAPI
+- Use developer portals & service catalogs
+- Maintain lightweight governance for consistency
+
+---
+
+## Bookstore Architecture Overview
+
+The Bookstore application is built on modern cloud-native principles using:
+
+- **Spring Boot Microservices** — Inventory + User Management services
+- **Spring Cloud Gateway** — API Gateway for routing and load balancing
+- **Keycloak** — Authentication & JWT validation
+- **PostgreSQL & MongoDB** — Polyglot persistence for different data needs
+- **Prometheus & Grafana** — Observability and monitoring
+- **Angular 20** — Modern frontend framework
+
+Each microservice follows a clean layered architecture with clear separation of concerns.
+
+---
+
+## Development Environment Setup
+
+### Required Tools
+
+| Tool | Version | Purpose |
+|------|---------|----------|
+| Java JDK | 21+ (25) | Compiling & running Spring Boot services |
+| Maven | Latest | Build automation |
+| Git | Any | Version control |
+| VS Code | Latest | IDE for Spring & Angular |
+| Docker | Latest | Containerization |
+
+### Recommended VS Code Extensions
+
+- **Extension Pack for Java** — Comprehensive Java development support
+- **Spring Boot Extension Pack** — Spring Boot development tools
+- **Docker Extension** — Container management
+- **REST Client** — Test REST endpoints
+
+---
+
+## Creating Your First Spring Boot Microservice
+
+### Step 1: Set Up VS Code
+
+Install the required extensions:
+
+```
+Ctrl+Shift+X → Search "Extension Pack for Java"
+Ctrl+Shift+X → Search "Spring Boot Extension Pack"
+```
+
+### Step 2: Generate the Microservice
+
+Use **Spring Initializr** (<https://start.spring.io>) with:
+
+- **Project**: Maven
+- **Language**: Java
+- **Spring Boot**: 3.5.x
+- **Dependencies**: Spring Web, Spring Boot DevTools
+
+Download and extract the generated project.
+
+### Step 3: Run the Application
+
+```bash
+./mvnw spring-boot:run
+```
+
+The application starts on `http://localhost:8080`
+
+### Step 4: Apply Layered Architecture
+
+Organize your code with this recommended structure:
+
+```
+src/main/java/com/bookstore/
+├── controller/     # REST endpoints
+├── service/        # Business logic
+├── repository/     # Data access
+├── dto/            # Data transfer objects
+├── model/          # Domain entities
+└── config/         # Configuration classes
+```
+
+### Example Code Snippets
+
+**Model (Entity)**
+
+```java
+@Entity
+@Table(name = "books")
+public class Book {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    private String title;
+    private String author;
+    private BigDecimal price;
+    
+    // Getters and setters
+}
+```
+
+**Repository**
+
+```java
+@Repository
+public interface BookRepository extends JpaRepository<Book, Long> {
+    List<Book> findByAuthor(String author);
+    List<Book> findByTitleContainingIgnoreCase(String title);
+}
+```
+
+**Service**
+
+```java
+@Service
+public class BookService {
+    @Autowired
+    private BookRepository bookRepository;
+    
+    public List<Book> getAllBooks() {
+        return bookRepository.findAll();
+    }
+    
+    public Book getBookById(Long id) {
+        return bookRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+    }
+}
+```
+
+**Controller**
+
+```java
+@RestController
+@RequestMapping("/api/books")
+public class BookController {
+    @Autowired
+    private BookService bookService;
+    
+    @GetMapping
+    public ResponseEntity<List<Book>> getAllBooks() {
+        return ResponseEntity.ok(bookService.getAllBooks());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
+        return ResponseEntity.ok(bookService.getBookById(id));
+    }
+}
+```
+
+---
+
+## Installation & Setup Steps
+
+### 1. Install Java JDK 24
+
+Download from: <https://www.oracle.com/java/technologies/downloads/>
+
+Verify installation:
+```bash
+java -version
+```
+
+### 2. Install Maven
+
+Download from: <https://maven.apache.org/download.cgi>
+
+Verify installation:
+```bash
+mvn -version
+```
+
+### 3. Install VS Code
+
+Download from: <https://code.visualstudio.com>
+
+### 4. Install Docker
+
+Download from: <https://www.docker.com/products/docker-desktop>
+
+### 5. Clone the Bookstore Repositories
+
+```bash
+git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Backend
+git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend
+```
+
+---
+
+## Resources & References
+
+- **Spring Boot Documentation**: <https://spring.io/projects/spring-boot>
+- **Spring Initializr**: <https://start.spring.io>
+- **Microservices.io**: <https://microservices.io>
+- **Spring Cloud Documentation**: <https://spring.io/projects/spring-cloud>
+- **VS Code Documentation**: <https://code.visualstudio.com/docs>
 
 ---
