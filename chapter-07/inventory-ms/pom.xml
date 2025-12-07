@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.6</version>
+		<version>3.5.7</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.packt.bookstore</groupId>
@@ -92,6 +92,20 @@
 			<version>2.7.0</version>
 		</dependency>
 
+		<!-- Micrometer Tracing with Brave (Zipkin-compatible) -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+		
+		<!-- Zipkin Reporter for sending traces to Zipkin -->
+		<dependency>
+			<groupId>io.zipkin.reporter2</groupId>
+			<artifactId>zipkin-reporter-brave</artifactId>
+		</dependency>
+
+
+		
 	</dependencies>
 
 	<dependencyManagement>

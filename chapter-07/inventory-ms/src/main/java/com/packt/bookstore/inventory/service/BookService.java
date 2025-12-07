@@ -21,14 +21,16 @@ import com.packt.bookstore.inventory.repository.AuthorRepository;
 import com.packt.bookstore.inventory.repository.BookRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class BookService implements IBookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final BookMapper bookMapper;
 
-    public BookService(BookRepository bookRepository, AuthorRepository authorRepository , BookMapper bookMapper) {
+    public BookService(BookRepository bookRepository, AuthorRepository authorRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.bookMapper = bookMapper;
@@ -36,12 +38,12 @@ public class BookService implements IBookService {
 
     @Override
     public List<BookResponse> findAll(int page, int size, String sortSpec) {
-    Sort sortBy = parseSort(sortSpec);
+        Sort sortBy = parseSort(sortSpec);
         PageRequest pageRequest = PageRequest.of(page, size, sortBy);
-        
+
         // This will now fetch books WITH authors due to @EntityGraph
         Page<Book> books = bookRepository.findAll(pageRequest);
-        
+
         return books.getContent()
                 .stream()
                 .map(bookMapper::toResponse)
@@ -50,8 +52,10 @@ public class BookService implements IBookService {
 
     @Override
     public BookResponse findOne(Long id) {
+        log.info("Fetching book with id {}", id);
         var book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book " + id + " not found"));
+        log.debug("Found book: {}", book.getTitle());
         return bookMapper.toResponse(book);
     }
 

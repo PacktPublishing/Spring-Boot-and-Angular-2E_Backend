@@ -24,9 +24,20 @@ spring:
       mode: always
 
 logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  include-application-name: false
   level:
-    "[org.hibernate.SQL]": DEBUG
-    "[org.hibernate.type.descriptor.sql]": TRACE
+    "[org.hibernate.SQL]": DEBUG                        # Log raw SQL queries
+    "[org.hibernate.type.descriptor.sql]": TRACE        # Show parameter bindings
+    "[com.packt.bookstore]": INFO                       # Enable info for our application
+    "[org.springframework.web]": INFO                   # Enable web request logging
+
+  file:
+    name: logs/inventory-service.log
+    max-size: 50MB
+    max-history: 30
+    total-size-cap: 1GB
 
 # Eureka Client Configuration
 eureka:
@@ -39,14 +50,25 @@ eureka:
     metadata-map:
       instanceId: ${spring.application.name}:${server.port}
 
+# Tracing Configuration
 management:
   endpoints:
     web:
       exposure:
-        include: health, info
+        include: health, info, metrics
   endpoint:
     health:
       show-details: always
+  tracing:
+    sampling:
+      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+    baggage:
+      correlation:
+        enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
 
 # SpringDoc OpenAPI Configuration
 springdoc:

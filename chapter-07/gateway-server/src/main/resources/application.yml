@@ -16,22 +16,12 @@ spring:
           discovery:
             locator:
               enabled: false
-          #     enabled: true
-          #     lower-case-service-id: true
-          # routes:
-          #   - id: packt-inventory-service
-          #     uri: lb://inventory-service
-          #     predicates:
-          #       - Path=/packt/inventory/api/**
-          #     filters:
-          #       - RewritePath=/packt/inventory/api/(?<segment>.*), /inventory/api/${segment}
-          #   - id: packt-user-service
-          #     uri: lb://user-ms
-          #     predicates:
-          #       - Path=/packt/user/api/**
-          #     filters:
-          #       - RewritePath=/packt/user/api/(?<segment>.*), /user/api/${segment}
-
+              # lower-case-service-id: true
+      # Routes are configured in GatewayRouteConfig.java
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10s
+  
 # Circuit Breaker Configuration
 resilience4j:
   circuitbreaker:
@@ -48,13 +38,40 @@ resilience4j:
       inventoryCB:
         timeoutDuration: 5s
 
+# Tracing Configuration
 management:
   endpoints:
     web:
       exposure:
-        include: health, info, gateway
+        include: health, info, gateway, metrics
   endpoint:
     health:
       show-details: always
-    gateway:
-      access: read-only
+  tracing:
+    sampling:
+      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+    baggage:
+      correlation:
+        enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  observations:
+    key-values:
+      application: ${spring.application.name}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+
+# Logging Configuration for Gateway
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  include-application-name: false
+  level:
+    "[com.packt.bookstore]": INFO
+    "[org.springframework.cloud.gateway]": DEBUG
+    "[io.micrometer.tracing]": DEBUG
+
+

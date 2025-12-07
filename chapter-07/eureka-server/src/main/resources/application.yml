@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: Eureka Server
+    name: eureka-server
 
 eureka:
   client:
@@ -11,3 +11,33 @@ eureka:
     fetch-registry: false
   server:
     wait-time-in-ms-when-sync-empty: 0
+
+# Tracing Configuration for Eureka Server
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0  # Trace all requests
+    baggage:
+      correlation:
+        enabled: true
+  observations:
+    key-values:
+      application: ${spring.application.name}
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+# Logging Configuration
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  include-application-name: false
+  level:
+    "[com.packt.bookstore]": INFO
