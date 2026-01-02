@@ -17,10 +17,10 @@ spring:
             locator:
               enabled: false
               # lower-case-service-id: true
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 10s
       # Routes are configured in GatewayRouteConfig.java
-      httpclient:
-        connect-timeout: 5000
-        response-timeout: 10s
   
 # Circuit Breaker Configuration
 resilience4j:
