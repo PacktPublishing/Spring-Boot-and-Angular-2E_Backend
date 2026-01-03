@@ -1,0 +1,45 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-UserMsApplication<user-ms>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.packt.bookstore.users.UserMsApplication",
+            "projectName": "user-ms",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=50030 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=user-ms"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-EurekaServerApplication<eureka-server>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.packt.bookstore.eureka_server.EurekaServerApplication",
+            "projectName": "eureka-server",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-InventoryMsApplication<inventory-ms>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.packt.bookstore.inventory.InventoryMsApplication",
+            "projectName": "inventory-ms",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-GatewayServerApplication<gateway-server>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.packt.bookstore.gateway_server.GatewayServerApplication",
+            "projectName": "gateway-server",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
