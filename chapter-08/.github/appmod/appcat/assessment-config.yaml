@@ -1,0 +1,32 @@
+# You can edit this file to configure the application assessment. Please note that any changes saved to this file will be applied the next time you run the assessment.
+# The configurable [AppCAT](https://aka.ms/appcat-java) arguments
+# 
+# - target: target technology or target Azure compute service.
+#   |----------------------|------------------------------------------------------------------------|
+#   | Target               | Description                                                            |
+#   |----------------------|------------------------------------------------------------------------|
+#   | azure-aks            | Best practices for deploying an app to Azure Kubernetes Service.       |
+#   | azure-appservice     | Best practices for deploying an app to Azure App Service.              |
+#   | azure-container-apps | Best practices for deploying an app to Azure Container Apps.           |
+#   | cloud-readiness      | General best practices for making an application Azure ready.          |
+#   | linux                | General best practices for making an application Linux ready.          |
+#   | openjdk11            | General best practices for running a Java 8 application with Java 11.  |
+#   | openjdk17            | General best practices for running a Java 11 application with Java 17. |
+#   | openjdk21            | General best practices for running a Java 17 application with Java 21. |
+#   |----------------------|------------------------------------------------------------------------|
+#
+# - mode: analysis mode.
+#   |-------------|-------------------------------------------|
+#   | Mode        | Description                               |
+#   |-------------|-------------------------------------------|
+#   | source-only | analyze source code only                  |
+#   | full        | analyze source code and list dependencies |
+#   |-------------|-------------------------------------------|
+
+appcat:
+  - target:
+      - azure-aks
+      - azure-appservice
+      - azure-container-apps
+      - cloud-readiness
+    mode: source-only

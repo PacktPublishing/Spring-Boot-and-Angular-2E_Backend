@@ -1,0 +1,9 @@
+{
+  "azure-database-config-mongodb-02000": "managed-identity-azure-sdk-public-cloud/mi-mongodb-azure-sdk-public-cloud",
+  "azure-database-postgresql-02000": "managed-identity-spring/mi-postgresql-spring",
+  "azure-password-01000": "plaintext-credential-to-azure-keyvault",
+  "dockerfile-00000": "containerization-copilot-agent",
+  "hardcoded-urls-00001": "bare/remote-communication/hardcoded-urls",
+  "localhost-00004": "bare/local-resource-access",
+  "unsecure-network-protocol-00000": "bare/remote-communication/secure-protocols"
+}
