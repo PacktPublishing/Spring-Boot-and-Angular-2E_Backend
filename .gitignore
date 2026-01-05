@@ -19,3 +19,13 @@ chapter-06/gateway-server/gateway.log
 /chapter-07/gateway-server/target
 /chapter-07/inventory-ms/logs
 /chapter-07/logs
+/chapter-07/.vscode
+/chapter-07/.github
+/chapter-07/eureka-server/target
+/chapter-07/gateway-server/target
+/chapter-07/inventory-ms/.vscode
+/chapter-07/logs
+/chapter-07/user-ms/target
+/chapter-07/.vscode
+/chapter-07/inventory-ms/logs
+/chapter-07/user-ms/target
