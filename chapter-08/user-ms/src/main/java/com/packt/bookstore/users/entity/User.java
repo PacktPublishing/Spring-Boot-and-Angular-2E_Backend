@@ -1,6 +1,7 @@
 package com.packt.bookstore.users.entity;
 
 import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,14 +18,15 @@ public class User {
     private String id;
 
     @Indexed(unique = true)
+    private String keycloakId;
+
+    @Indexed(unique = true)
     private String email;
 
     @Indexed(unique = true)
     private String username;
 
     private LocalDateTime dateOfBirth;
-
-    private String status; // ACTIVE, INACTIVE, LOCKED
 
     private Profile profile;
 

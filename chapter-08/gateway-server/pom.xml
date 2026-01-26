@@ -83,6 +83,31 @@
 		<version>2.8.1</version>
 	</dependency>
 
+	<!-- Spring Security with WebFlux -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-security</artifactId>
+	</dependency>
+
+	<!-- OAuth2 Resource Server with JWT -->
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-oauth2-resource-server</artifactId>
+	</dependency>
+
+	<!-- JWT support -->
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-oauth2-jose</artifactId>
+	</dependency>
+
+	<!-- Lombok for annotations like @Slf4j -->
+	<dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<optional>true</optional>
+	</dependency>
+
 	<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-devtools</artifactId>

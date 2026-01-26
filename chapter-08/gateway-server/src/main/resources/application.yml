@@ -20,7 +20,31 @@ spring:
           httpclient:
             connect-timeout: 5000
             response-timeout: 10s
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:4200"
+                  - "http://localhost:3000"
+                  - "http://localhost:5173"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+                maxAge: 3600
       # Routes are configured in GatewayRouteConfig.java
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/bookstore
+          jwk-set-uri: http://localhost:8090/realms/bookstore/protocol/openid-connect/certs
   
 # Circuit Breaker Configuration
 resilience4j:
@@ -72,6 +96,7 @@ logging:
   level:
     "[com.packt.bookstore]": INFO
     "[org.springframework.cloud.gateway]": DEBUG
+    "[org.springframework.security]": DEBUG
     "[io.micrometer.tracing]": DEBUG
 
 

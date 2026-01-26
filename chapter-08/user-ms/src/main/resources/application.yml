@@ -63,4 +63,12 @@ management:
   zipkin:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
+# Keycloak configuration for Admin API
+keycloak:
+  auth-server-url: http://localhost:8090
+  realm: bookstore
+  admin-username: admin
+  admin-password: admin
+  admin-realm: master
+  client-id: bookstore-gateway
 
