@@ -119,6 +119,8 @@ public class BookService implements IBookService {
 
     private Author resolveAuthor(String name) {
         return authorRepository.findByNameIgnoreCase(name)
+                .stream()
+                .findFirst() // Handle multiple matches by taking the first one
                 .orElseGet(() -> authorRepository.save(Author.builder().name(name).build()));
     }
 
@@ -134,6 +136,9 @@ public class BookService implements IBookService {
     /* -------- semantic validations (422) -------- */
 
     private void validateSemanticsForCreate(BookRequest req) {
+        if (req.authorName() == null || req.authorName().isBlank()) {
+            throw new DomainRuleViolationException("Author name is required");
+        }
         if (req.price().compareTo(BigDecimal.ZERO) < 0) {
             throw new DomainRuleViolationException("Price cannot be negative");
         }
@@ -144,6 +149,9 @@ public class BookService implements IBookService {
     }
 
     private void validateSemanticsForReplace(BookRequest req) {
+        if (req.authorName() == null || req.authorName().isBlank()) {
+            throw new DomainRuleViolationException("Author name is required");
+        }
         if (req.price().compareTo(BigDecimal.ZERO) < 0) {
 
             throw new DomainRuleViolationException("Price cannot be negative");

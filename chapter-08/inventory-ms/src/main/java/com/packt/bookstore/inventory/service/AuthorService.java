@@ -1,7 +1,6 @@
 package com.packt.bookstore.inventory.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.packt.bookstore.inventory.dto.AuthorRequest;
 import com.packt.bookstore.inventory.dto.AuthorResponse;
 import com.packt.bookstore.inventory.entity.Author;
+import com.packt.bookstore.inventory.exception.DomainRuleViolationException;
 import com.packt.bookstore.inventory.mapper.AuthorMapper;
 import com.packt.bookstore.inventory.repository.AuthorRepository;
 
@@ -33,8 +33,9 @@ public class AuthorService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Page<AuthorResponse> findAllPaginated(int page, int size) {
-        return authorRepository.findAll(PageRequest.of(page, size))
+        return authorRepository.findAllWithBooksPaginated(PageRequest.of(page, size))
                 .map(authorMapper::toResponse);
     }
 @Transactional(readOnly = true)
@@ -51,13 +52,22 @@ public class AuthorService {
         return authorMapper.toResponse(author);
     }
 
+    @Transactional(readOnly = true)
     public AuthorResponse findByNameIgnoreCase(String name) {
-        Optional<Author> authorOpt = authorRepository.findByNameIgnoreCase(name);
-        Author author = authorOpt.orElseThrow(() -> new RuntimeException("Author not found"));
+        Author author = authorRepository.findByNameIgnoreCaseWithBooks(name)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Author not found"));
         return authorMapper.toResponse(author);
     }
 
     public AuthorResponse create(AuthorRequest request) {
+        // Validate that author name is unique (case-insensitive)
+        List<Author> existingAuthors = authorRepository.findByNameIgnoreCase(request.name());
+        if (!existingAuthors.isEmpty()) {
+            throw new DomainRuleViolationException("Author with name '" + request.name() + "' already exists");
+        }
+        
         Author author = authorMapper.toEntity(request);
         Author saved = authorRepository.save(author);
         return authorMapper.toResponse(saved);

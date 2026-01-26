@@ -3,6 +3,8 @@ package com.packt.bookstore.inventory.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +26,17 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     @Query("SELECT a FROM Author a WHERE a.id = :id")
     Optional<Author> findByIdWithBooks(@Param("id") Long id);
     
-    // Regular methods without books (when you don't need them)
-    Optional<Author> findByNameIgnoreCase(String name);
+    // Paginated query with eager loading of books
+    @EntityGraph(attributePaths = {"books"})
+    @Query("SELECT a FROM Author a")
+    Page<Author> findAllWithBooksPaginated(Pageable pageable);
+    
+    // Find author by name (case-insensitive) with eager loading - returns list to handle duplicates
+    @EntityGraph(attributePaths = {"books"})
+    @Query("SELECT a FROM Author a WHERE LOWER(a.name) = LOWER(:name)")
+    List<Author> findByNameIgnoreCaseWithBooks(@Param("name") String name);
+    
+    // Find author by name (case-insensitive) - returns list to handle duplicates
+    // Callers should use .stream().findFirst() to handle multiple matches
+    List<Author> findByNameIgnoreCase(String name);
 }
