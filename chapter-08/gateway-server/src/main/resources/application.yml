@@ -9,7 +9,12 @@ eureka:
 spring:
   application:
     name: gateway-server
+  config:
+    import-check:
+      enabled: false
   cloud:
+    config:
+      enabled: false
     gateway:
       server:
         webflux:
@@ -77,9 +82,9 @@ management:
     baggage:
       correlation:
         enabled: true
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
+  # zipkin:
+  #   tracing:
+  #     endpoint: http://localhost:9411/api/v2/spans
   observations:
     key-values:
       application: ${spring.application.name}
@@ -98,5 +103,3 @@ logging:
     "[org.springframework.cloud.gateway]": DEBUG
     "[org.springframework.security]": DEBUG
     "[io.micrometer.tracing]": DEBUG
-
-
