@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.packt.bookstore.users.dto.RefreshTokenRequest;
 import com.packt.bookstore.users.dto.SignInRequest;
 import com.packt.bookstore.users.dto.SignInResponse;
 import com.packt.bookstore.users.dto.SignUpRequest;
@@ -133,6 +134,83 @@ public class UserController {
                     .body(Map.of(
                         "success", false,
                         "message", e.getMessage()
+                    ));
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(
+            @RequestHeader(value = "X-User-Id", required = false) String keycloakId) {
+
+        if (keycloakId == null || keycloakId.isEmpty()) {
+            log.warn("X-User-Id header missing - request should have been blocked by gateway");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "User ID not found"));
+        }
+
+        try {
+            log.info("Get current user profile for user: {}", keycloakId);
+            UserProfileDTO profile = userService.getProfile(keycloakId);
+            return ResponseEntity.ok(profile);
+
+        } catch (RuntimeException e) {
+            log.error("Get current user failed: {}", e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(
+                        "success", false,
+                        "message", "User profile not found"
+                    ));
+        }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        try {
+            log.info("Refresh token request received");
+            SignInResponse response = userService.refreshToken(request);
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            log.error("Token refresh failed: {}", e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(
+                        "success", false,
+                        "message", "Invalid or expired refresh token"
+                    ));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            @RequestHeader(value = "X-User-Id", required = false) String keycloakId) {
+
+        if (keycloakId == null || keycloakId.isEmpty()) {
+            log.warn("X-User-Id header missing - request should have been blocked by gateway");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "User ID not found"));
+        }
+
+        try {
+            log.info("Logout request for user: {}", keycloakId);
+            userService.logout(keycloakId);
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Logged out successfully"
+            ));
+
+        } catch (RuntimeException e) {
+            log.error("Logout failed: {}", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of(
+                        "success", false,
+                        "message", "Logout failed"
                     ));
         }
     }

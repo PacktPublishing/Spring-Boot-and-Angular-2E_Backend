@@ -20,6 +20,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.packt.bookstore.users.dto.RefreshTokenRequest;
 import com.packt.bookstore.users.dto.SignInRequest;
 import com.packt.bookstore.users.dto.SignInResponse;
 import com.packt.bookstore.users.dto.SignUpRequest;
@@ -241,5 +242,65 @@ updateProfile(String keycloakId, UpdateProfileRequest request) {
 
     return mapToDTO(user);
 }
+
+    public SignInResponse refreshToken(RefreshTokenRequest request) {
+        log.info("Attempting to refresh token");
+
+        String tokenUrl = authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "refresh_token");
+        body.add("client_id", clientId);
+        body.add("refresh_token", request.getRefreshToken());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, entity, Map.class);
+            Map<String, Object> tokenResponse = response.getBody();
+
+            if (tokenResponse == null || tokenResponse.containsKey("error")) {
+                throw new RuntimeException("Failed to refresh token");
+            }
+
+            log.info("Token refreshed successfully");
+
+            // Return new tokens without user profile (client already has it)
+            return SignInResponse.builder()
+                    .accessToken((String) tokenResponse.get("access_token"))
+                    .refreshToken((String) tokenResponse.get("refresh_token"))
+                    .tokenType("Bearer")
+                    .expiresIn(((Number) tokenResponse.get("expires_in")).longValue())
+                    .user(null) // No need to fetch user again
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Token refresh failed: {}", e.getMessage());
+            throw new RuntimeException("Invalid or expired refresh token");
+        }
+    }
+
+    public void logout(String keycloakId) {
+        log.info("Logging out user: {}", keycloakId);
+        // In a real scenario, you would:
+        // 1. Invalidate the refresh token on Keycloak
+        // 2. Log the logout event
+        // 3. Clear any server-side sessions
+        
+        try {
+            RealmResource realmResource = keycloak.realm(realm);
+            UsersResource usersResource = realmResource.users();
+            
+            // Get user resource and logout (invalidate refresh tokens)
+            usersResource.get(keycloakId).logout();
+            log.info("User logged out successfully");
+        } catch (Exception e) {
+            log.warn("Logout cleanup failed: {}", e.getMessage());
+            // Don't throw exception - logout should succeed even if cleanup fails
+        }
+    }
    
 }

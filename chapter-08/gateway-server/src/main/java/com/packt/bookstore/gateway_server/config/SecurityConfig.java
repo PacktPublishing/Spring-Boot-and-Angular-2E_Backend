@@ -58,6 +58,9 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.POST, "/packt/user/api/users/signin")
                     .permitAll()
 
+                .pathMatchers(HttpMethod.POST, "/packt/user/api/users/refresh-token")
+                    .permitAll()
+
                 // All other gateway user routes - require authentication
                 .pathMatchers("/packt/user/api/**")
                     .authenticated()
