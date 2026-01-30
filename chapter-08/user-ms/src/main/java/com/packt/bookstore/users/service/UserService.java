@@ -166,7 +166,8 @@ public class UserService {
     HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
 
     try {
-        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, entity, Map.class);
+        @SuppressWarnings("unchecked")
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate.postForEntity(tokenUrl, entity, Map.class);
         Map<String, Object> tokenResponse = response.getBody();
 
         if (tokenResponse == null) {
@@ -259,7 +260,8 @@ updateProfile(String keycloakId, UpdateProfileRequest request) {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, entity, Map.class);
+            @SuppressWarnings("unchecked")
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate.postForEntity(tokenUrl, entity, Map.class);
             Map<String, Object> tokenResponse = response.getBody();
 
             if (tokenResponse == null || tokenResponse.containsKey("error")) {

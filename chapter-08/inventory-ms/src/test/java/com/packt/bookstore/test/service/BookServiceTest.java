@@ -99,7 +99,7 @@ class BookServiceTest {
 
     @Test
     void create_shouldSaveAndReturnBookResponse() {
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.of(author));
+        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(List.of(author));
         when(bookMapper.toEntity(bookRequest, author)).thenReturn(book);
         when(bookRepository.save(book)).thenReturn(book);
         when(bookMapper.toResponse(book)).thenReturn(bookResponse);
@@ -111,7 +111,7 @@ class BookServiceTest {
     @Test
     void create_shouldThrowDomainRuleViolationExceptionForNegativePrice() {
         BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
-        DomainRuleViolationException exception = assertThrows(DomainRuleViolationException.class, () -> bookService.create(badRequest));
+        assertThrows(DomainRuleViolationException.class, () -> bookService.create(badRequest));
     }
 
     @Test
@@ -123,7 +123,7 @@ class BookServiceTest {
     @Test
     void replace_shouldUpdateAndReturnBookResponse() {
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.of(author));
+        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(List.of(author));
         doNothing().when(bookMapper).overwrite(book, bookRequest, author);
         when(bookRepository.save(book)).thenReturn(book);
         when(bookMapper.toResponse(book)).thenReturn(bookResponse);
@@ -177,7 +177,7 @@ class BookServiceTest {
 
     @Test
     void resolveAuthor_shouldReturnExistingAuthor() throws Exception {
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.of(author));
+        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(List.of(author));
 
         var method = BookService.class.getDeclaredMethod("resolveAuthor", String.class);
         method.setAccessible(true);
@@ -188,7 +188,7 @@ class BookServiceTest {
 
     @Test
     void resolveAuthor_shouldCreateAndReturnNewAuthor() throws Exception {
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.empty());
+        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(List.of());
         Author newAuthor = Author.builder().name("Ahmad Gohar").build();
         when(authorRepository.save(any(Author.class))).thenReturn(newAuthor);
 
