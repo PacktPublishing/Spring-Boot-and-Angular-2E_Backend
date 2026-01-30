@@ -1,0 +1,105 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+spring:
+  application:
+    name: gateway-server
+  config:
+    import-check:
+      enabled: false
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+              # lower-case-service-id: true
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 10s
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:4200"
+                  - "http://localhost:3000"
+                  - "http://localhost:5173"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+                maxAge: 3600
+      # Routes are configured in GatewayRouteConfig.java
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/bookstore
+          jwk-set-uri: http://localhost:8090/realms/bookstore/protocol/openid-connect/certs
+  
+# Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventoryCB:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30000
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  timelimiter:
+    instances:
+      inventoryCB:
+        timeoutDuration: 5s
+
+# Tracing Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, gateway, metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+    baggage:
+      correlation:
+        enabled: true
+  # zipkin:
+  #   tracing:
+  #     endpoint: http://localhost:9411/api/v2/spans
+  observations:
+    key-values:
+      application: ${spring.application.name}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+
+# Logging Configuration for Gateway
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  include-application-name: false
+  level:
+    "[com.packt.bookstore]": INFO
+    "[org.springframework.cloud.gateway]": DEBUG
+    "[org.springframework.security]": DEBUG
+    "[io.micrometer.tracing]": DEBUG
