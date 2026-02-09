@@ -26,12 +26,11 @@ spring:
             connect-timeout: 5000
             response-timeout: 10s
       # Routes are configured in GatewayRouteConfig.java
-  
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8090/realms/bookstore
+          issuer-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8090}/realms/bookstore
   
 # Circuit Breaker Configuration
 resilience4j:
