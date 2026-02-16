@@ -1,0 +1,74 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /user
+
+spring:
+  application:
+    name: user-ms
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: userDB
+      username: bookstore
+      password: bookstore123
+      authentication-database: admin
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  include-application-name: false
+  level:
+    "[org.hibernate.SQL]": DEBUG
+    "[org.hibernate.type.descriptor.sql]": TRACE
+    "[com.packt.bookstore]": INFO
+    "[io.micrometer.tracing]": DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
+    metadata-map:
+      instanceId: ${spring.application.name}:${server.port}
+# Tracing Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, mappings
+  endpoint:
+    health:
+      show-details: always
+  # observations:
+  #   http:
+  #     server:
+  #       requests:
+  #         name: http.server.requests
+  #   key-values:
+  #     application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+    baggage:
+      correlation:
+        enabled: true
+  # metrics:
+  #   distribution:
+  #     percentiles-histogram:
+  #       "[http.server.requests]": true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+# Keycloak configuration for Admin API
+keycloak:
+  auth-server-url: http://localhost:8090
+  realm: bookstore
+  admin-username: admin
+  admin-password: admin
+  admin-realm: master
+  client-id: bookstore-gateway
+
