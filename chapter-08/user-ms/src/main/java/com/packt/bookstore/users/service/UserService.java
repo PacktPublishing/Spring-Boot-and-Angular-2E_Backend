@@ -53,8 +53,7 @@ public class UserService {
     @Value("${keycloak.client-id}")
     private String clientId;
 
-
-     private UserProfileDTO mapToDTO(User user) {
+    private UserProfileDTO mapToDTO(User user) {
         Profile profile = user.getProfile();
         Address address = profile.getAddress();
 
@@ -148,101 +147,100 @@ public class UserService {
         return mapToDTO(savedUser);
     }
 
-
     public SignInResponse signIn(SignInRequest request) {
-    log.info("Processing signin for email: {}", request.getEmail());
+        log.info("Processing signin for email: {}", request.getEmail());
 
-    String tokenUrl = authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+        String tokenUrl = authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-    body.add("grant_type", "password");
-    body.add("client_id", clientId);
-    body.add("username", request.getEmail());
-    body.add("password", request.getPassword());
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "password");
+        body.add("client_id", clientId);
+        body.add("username", request.getEmail());
+        body.add("password", request.getPassword());
 
-    HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
 
-    try {
-        @SuppressWarnings("unchecked")
-        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate.postForEntity(tokenUrl, entity, Map.class);
-        Map<String, Object> tokenResponse = response.getBody();
+        try {
+            @SuppressWarnings("unchecked")
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate
+                    .postForEntity(tokenUrl, entity, Map.class);
+            Map<String, Object> tokenResponse = response.getBody();
 
-        if (tokenResponse == null) {
-            throw new RuntimeException("Failed to obtain tokens from Keycloak");
+            if (tokenResponse == null) {
+                throw new RuntimeException("Failed to obtain tokens from Keycloak");
+            }
+
+            log.info("Tokens obtained from Keycloak");
+
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User profile not found in database"));
+
+            return SignInResponse.builder()
+                    .accessToken((String) tokenResponse.get("access_token"))
+                    .refreshToken((String) tokenResponse.get("refresh_token"))
+                    .tokenType("Bearer")
+                    .expiresIn(((Number) tokenResponse.get("expires_in")).longValue())
+                    .user(mapToDTO(user))
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Signin failed: {}", e.getMessage());
+            throw new RuntimeException("Invalid email or password");
         }
-
-        log.info("Tokens obtained from Keycloak");
-
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User profile not found in database"));
-
-        return SignInResponse.builder()
-                .accessToken((String) tokenResponse.get("access_token"))
-                .refreshToken((String) tokenResponse.get("refresh_token"))
-                .tokenType("Bearer")
-                .expiresIn(((Number) tokenResponse.get("expires_in")).longValue())
-                .user(mapToDTO(user))
-                .build();
-
-    } catch (Exception e) {
-        log.error("Signin failed: {}", e.getMessage());
-        throw new RuntimeException("Invalid email or password");
     }
-}
 
     @Transactional
-public UserProfileDTO 
-updateProfile(String keycloakId, UpdateProfileRequest request) {
-    log.info("Updating profile for keycloakId: {}", keycloakId);
+    public UserProfileDTO updateProfile(String keycloakId, UpdateProfileRequest request) {
+        log.info("Updating profile for keycloakId: {}", keycloakId);
 
-    User user = userRepository.findByKeycloakId(keycloakId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    if (request.getFirstName() != null) {
-        user.getProfile().setFirstName(request.getFirstName());
-    }
-    if (request.getLastName() != null) {
-        user.getProfile().setLastName(request.getLastName());
-    }
-    if (request.getPhone() != null) {
-        user.getProfile().setPhone(request.getPhone());
-    }
-    if (request.getAddress() != null) {
-        user.getProfile().getAddress().setStreet(request.getAddress());
-    }
-    if (request.getCity() != null) {
-        user.getProfile().getAddress().setCity(request.getCity());
-    }
-    if (request.getState() != null) {
-        user.getProfile().getAddress().setState(request.getState());
-    }
-    if (request.getZipCode() != null) {
-        user.getProfile().getAddress().setPostalCode(request.getZipCode());
-    }
-    if (request.getCountry() != null) {
-        user.getProfile().getAddress().setCountry(request.getCountry());
-    }
-    if (request.getProfilePictureUrl() != null) {
-        user.getProfile().setProfilePictureUrl(request.getProfilePictureUrl());
-    }
+        if (request.getFirstName() != null) {
+            user.getProfile().setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.getProfile().setLastName(request.getLastName());
+        }
+        if (request.getPhone() != null) {
+            user.getProfile().setPhone(request.getPhone());
+        }
+        if (request.getAddress() != null) {
+            user.getProfile().getAddress().setStreet(request.getAddress());
+        }
+        if (request.getCity() != null) {
+            user.getProfile().getAddress().setCity(request.getCity());
+        }
+        if (request.getState() != null) {
+            user.getProfile().getAddress().setState(request.getState());
+        }
+        if (request.getZipCode() != null) {
+            user.getProfile().getAddress().setPostalCode(request.getZipCode());
+        }
+        if (request.getCountry() != null) {
+            user.getProfile().getAddress().setCountry(request.getCountry());
+        }
+        if (request.getProfilePictureUrl() != null) {
+            user.getProfile().setProfilePictureUrl(request.getProfilePictureUrl());
+        }
 
-    User updatedUser = userRepository.save(user);
-    log.info("Profile updated successfully");
+        User updatedUser = userRepository.save(user);
+        log.info("Profile updated successfully");
 
-    return mapToDTO(updatedUser);
-}
+        return mapToDTO(updatedUser);
+    }
 
     public UserProfileDTO getProfile(String keycloakId) {
-    log.info("Getting profile for keycloakId: {}", keycloakId);
+        log.info("Getting profile for keycloakId: {}", keycloakId);
 
-    User user = userRepository.findByKeycloakId(keycloakId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    return mapToDTO(user);
-}
+        return mapToDTO(user);
+    }
 
     public SignInResponse refreshToken(RefreshTokenRequest request) {
         log.info("Attempting to refresh token");
@@ -261,7 +259,8 @@ updateProfile(String keycloakId, UpdateProfileRequest request) {
 
         try {
             @SuppressWarnings("unchecked")
-            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate.postForEntity(tokenUrl, entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate
+                    .postForEntity(tokenUrl, entity, Map.class);
             Map<String, Object> tokenResponse = response.getBody();
 
             if (tokenResponse == null || tokenResponse.containsKey("error")) {
@@ -291,11 +290,11 @@ updateProfile(String keycloakId, UpdateProfileRequest request) {
         // 1. Invalidate the refresh token on Keycloak
         // 2. Log the logout event
         // 3. Clear any server-side sessions
-        
+
         try {
             RealmResource realmResource = keycloak.realm(realm);
             UsersResource usersResource = realmResource.users();
-            
+
             // Get user resource and logout (invalidate refresh tokens)
             usersResource.get(keycloakId).logout();
             log.info("User logged out successfully");
@@ -304,5 +303,5 @@ updateProfile(String keycloakId, UpdateProfileRequest request) {
             // Don't throw exception - logout should succeed even if cleanup fails
         }
     }
-   
+
 }
