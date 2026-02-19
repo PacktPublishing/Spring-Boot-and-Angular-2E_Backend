@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SSE Debug Console</title>
+    <style>
+        body { 
+            font-family: 'Courier New', monospace; 
+            padding: 20px; 
+            background: #0d1117; 
+            color: #c9d1d9; 
+        }
+        .log { 
+            background: #161b22; 
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px; 
+            margin: 10px 0; 
+            max-height: 600px; 
+            overflow-y: auto; 
+        }
+        .log-entry { 
+            margin: 5px 0; 
+            padding: 8px;
+            border-left: 3px solid #58a6ff;
+            background: #0d1117;
+        }
+        .success { border-left-color: #3fb950; }
+        .error { border-left-color: #f85149; background: #1c1719; }
+        .event { border-left-color: #ffa657; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #238636;
+            color: white;
+            border: 1px solid #2ea043;
+            border-radius: 6px;
+        }
+        button:hover { background: #2ea043; }
+        .status { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .connected { background: #1a2718; color: #3fb950; border: 1px solid #2ea043; }
+        .disconnected { background: #1c1719; color: #f85149; border: 1px solid #da3633; }
+    </style>
+</head>
+<body>
+    <h1>🔍 SSE Debug Console</h1>
+    <p>This page shows RAW SSE events and helps debug connection issues.</p>
+    
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <button onclick="clearLog()">Clear Log</button>
+    
+    <div id="status" class="status disconnected">❌ Disconnected</div>
+    
+    <h2>Raw Event Log:</h2>
+    <div class="log" id="log"></div>
+
+    <script>
+        let eventSource = null;
+        let eventCount = 0;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + type;
+            const timestamp = new Date().toISOString();
+            entry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logDiv.insertBefore(entry, logDiv.firstChild);
+            console.log(message); // Also log to browser console
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            eventCount = 0;
+            log('📋 Log cleared');
+        }
+
+        function connect() {
+            if (eventSource) {
+                log('⚠️ Already connected!', 'error');
+                return;
+            }
+
+            const url = 'http://localhost:8080/packt/inventory/api/notifications/stream';
+            log(`🔌 Connecting to: ${url}`, 'info');
+            
+            eventSource = new EventSource(url);
+
+            eventSource.onopen = function() {
+                document.getElementById('status').className = 'status connected';
+                document.getElementById('status').textContent = '✅ Connected';
+                log('✅ Connection OPENED successfully!', 'success');
+                log('📡 Listening for events... (use Postman to create/update a book)', 'success');
+            };
+
+            // Listen for ANY message (generic)
+            eventSource.onmessage = function(event) {
+                eventCount++;
+                log(`📨 GENERIC MESSAGE #${eventCount}:`, 'event');
+                log(`   Raw data: <pre>${event.data}</pre>`, 'event');
+                
+                try {
+                    const parsed = JSON.parse(event.data);
+                    log(`   Parsed JSON: <pre>${JSON.stringify(parsed, null, 2)}</pre>`, 'event');
+                } catch (e) {
+                    log(`   ⚠️ Not valid JSON: ${e.message}`, 'error');
+                }
+            };
+
+            // Listen for NEW_BOOK events
+            eventSource.addEventListener('NEW_BOOK', function(event) {
+                eventCount++;
+                log(`📚 NEW_BOOK EVENT #${eventCount}:`, 'event');
+                log(`   Event ID: ${event.lastEventId}`, 'event');
+                log(`   Raw data: <pre>${event.data}</pre>`, 'event');
+                
+                try {
+                    const parsed = JSON.parse(event.data);
+                    log(`   Book: "${parsed.bookTitle}" by ${parsed.eventData?.authorName}`, 'success');
+                    log(`   Price: $${parsed.eventData?.price}`, 'success');
+                } catch (e) {
+                    log(`   Parse error: ${e.message}`, 'error');
+                }
+            });
+
+            // Listen for PRICE_CHANGE events
+            eventSource.addEventListener('PRICE_CHANGE', function(event) {
+                eventCount++;
+                log(`💰 PRICE_CHANGE EVENT #${eventCount}:`, 'event');
+                log(`   Event ID: ${event.lastEventId}`, 'event');
+                log(`   Raw data: <pre>${event.data}</pre>`, 'event');
+                
+                try {
+                    const parsed = JSON.parse(event.data);
+                    log(`   Book: "${parsed.bookTitle}"`, 'success');
+                    log(`   Old: $${parsed.eventData?.oldPrice} → New: $${parsed.eventData?.newPrice}`, 'success');
+                } catch (e) {
+                    log(`   Parse error: ${e.message}`, 'error');
+                }
+            });
+
+            // Listen for errors
+            eventSource.onerror = function(error) {
+                log(`❌ ERROR occurred!`, 'error');
+                log(`   ReadyState: ${eventSource.readyState}`, 'error');
+                log(`   Error details: ${JSON.stringify(error)}`, 'error');
+                
+                if (eventSource.readyState === EventSource.CLOSED) {
+                    log('   Connection CLOSED', 'error');
+                    document.getElementById('status').className = 'status disconnected';
+                    document.getElementById('status').textContent = '❌ Disconnected (Error)';
+                }
+            };
+
+            log('⏳ Waiting for connection to open...', 'info');
+        }
+
+        function disconnect() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                document.getElementById('status').className = 'status disconnected';
+                document.getElementById('status').textContent = '❌ Disconnected';
+                log('🔌 Disconnected manually', 'info');
+            } else {
+                log('⚠️ Not connected', 'error');
+            }
+        }
+
+        // Log when page loads
+        window.onload = function() {
+            log('🚀 Debug console loaded', 'success');
+            log('👉 INSTRUCTIONS:', 'info');
+            log('   1. Click "Connect" button', 'info');
+            log('   2. Open Postman', 'info');
+            log('   3. Send POST /packt/inventory/api/books request', 'info');
+            log('   4. Watch this log for events!', 'info');
+        };
+    </script>
+</body>
+</html>

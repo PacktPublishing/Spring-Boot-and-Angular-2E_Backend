@@ -44,6 +44,9 @@ public class SecurityConfig {
             // Disable CSRF for stateless API (using JWT instead)
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
+            // Enable CORS with the configuration from corsConfigurationSource()
+            .cors(cors -> {})
+
             // Configure authorization for different endpoints
             .authorizeExchange(exchange -> exchange
 
@@ -64,6 +67,10 @@ public class SecurityConfig {
                 // All other gateway user routes - require authentication
                 .pathMatchers("/packt/user/api/**")
                     .authenticated()
+
+                // SSE Notification endpoints - allow public access for real-time updates
+                .pathMatchers("/packt/inventory/api/notifications/**")
+                    .permitAll()
 
                 // All other gateway inventory routes - require authentication
                 .pathMatchers("/packt/inventory/api/**")
@@ -165,14 +172,34 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of(
-            "http://localhost:4200",  // Angular
-            "http://localhost:3000",  // React
-            "http://localhost:5173"   // Vite
+        
+        // Use allowedOriginPatterns to support both specific origins and file:// protocol
+        corsConfig.setAllowedOriginPatterns(List.of(
+            // localhost with any port
+            "http://localhost:*",
+            "https://localhost:*",
+            "http://127.0.0.1:*",
+            "https://127.0.0.1:*",
+            
+            // Common frontend framework development servers
+            "http://localhost:4200",      // Angular default
+            "http://localhost:3000",      // React/Next.js default
+    
+            
+            // HTTPS versions for production-like testing
+            "https://localhost:4200",
+            "https://localhost:3000",
+            "https://localhost:5173",
+            
+            // For local testing with HTML files
+            "file://*",                   // Local file system
+            "null"                        // null origin (browser sends for file://)
         ));
+        
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setAllowCredentials(true);
+        corsConfig.setExposedHeaders(List.of("*")); // Expose all headers for SSE
+        corsConfig.setAllowCredentials(false); // Must be false when allowing null origin
         corsConfig.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
