@@ -253,6 +253,12 @@ public class BookController {
 
 ---
 
+## 🛠️ Troubleshooting & Environment Setup
+
+- [Troubleshooting & Environment Setup Guide](../ENVIRONMENT_SETUP.md)
+
+---
+
 ## Summary
 
 In this chapter, you completed:
@@ -272,6 +278,4 @@ This baseline is used directly in Chapter 03 and then expanded into persistence,
 - [Spring Initializr](https://start.spring.io)
 - [Microservices.io](https://microservices.io)
 - [Spring Cloud](https://spring.io/projects/spring-cloud)
-
----
 

@@ -21,6 +21,12 @@ This repository contains all backend code, resources, and configuration for **Pa
 
 ---
 
+## 🛠️ Troubleshooting & Environment Setup
+
+- [Troubleshooting & Environment Setup Guide](ENVIRONMENT_SETUP.md)
+
+---
+
 ## 📂 Structure
 
 - `/chapter-02/` – Getting started with microservices ([chapter-02/README.md](chapter-02/README.md))
@@ -48,5 +54,3 @@ This repository contains all backend code, resources, and configuration for **Pa
 - [Chapter 08 README](chapter-08/README.md)
 - [Chapter 09 README](chapter-09/README.md)
 - [Chapter 10 README](chapter-10/README.md)
-
----
