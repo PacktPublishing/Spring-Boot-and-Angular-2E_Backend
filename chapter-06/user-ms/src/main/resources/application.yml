@@ -6,14 +6,8 @@ server:
 spring:
   application:
     name: user-ms
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-      database: userDB
-      username: bookstore
-      password: bookstore123
-      authentication-database: admin
+  mongodb:
+    uri: mongodb://bookstore:bookstore123@localhost:27017/userDB?authSource=admin
 
 logging:
   level:

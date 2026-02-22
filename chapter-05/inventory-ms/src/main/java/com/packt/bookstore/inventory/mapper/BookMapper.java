@@ -1,6 +1,5 @@
 package com.packt.bookstore.inventory.mapper;
 
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.packt.bookstore.inventory.dto.BookRequest;
@@ -43,15 +42,14 @@ public class BookMapper {
         target.setPrice(req.price());
     }
 
-    public void patch(Book target, BookRequest req, @Nullable Author resolvedAuthor) {
+    public void patch(Book target, BookRequest req, Author resolvedAuthor) {
         if (req.title() != null)
             target.setTitle(req.title());
         if (req.isbn() != null)
             target.setIsbn(req.isbn());
         if (resolvedAuthor != null)
             target.setAuthor(resolvedAuthor);
-        if (req.price() != null)
-            target.setPrice(req.price());
+        target.setPrice(req.price());
     }
 
 

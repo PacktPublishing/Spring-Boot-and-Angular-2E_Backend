@@ -1,8 +1,80 @@
 # 📘 Chapter 07 — Documenting APIs & Enabling Application Observability Using Spring Boot
 
 ## Chapter Overview
-This chapter builds on the resilient communication layer introduced in Chapter 06 by making our microservices **understandable** and **observable**.  
+
+This chapter builds on the resilient communication layer introduced in Chapter 06 by making our microservices **understandable** and **observable**.
 You will document REST APIs using **OpenAPI (Swagger)** and enable **logging, metrics, and distributed tracing** so that every request in the Bookstore system can be understood, monitored, and debugged with confidence.
+
+---
+
+## ✅ Before You Run This Chapter
+
+
+Please confirm the required runtime dependencies before running this chapter:
+
+- Confirm the database is started (PostgreSQL and MongoDB for this chapter).
+- Confirm any infrastructure dependencies are running (for example Docker services, if used).
+- Confirm any dependencies from previous chapters are running as needed for your flow.
+
+### Sequence for Running Databases and Microservices
+
+1. **Start Databases First**
+   - Start PostgreSQL (Inventory DB):
+     ```bash
+     docker run -d \
+       --name bookstore-postgres \
+       -e POSTGRES_USER=bookstore \
+       -e POSTGRES_PASSWORD=bookstore123 \
+       -e POSTGRES_DB=inventory \
+       -p 5432:5432 \
+       postgres:17
+     ```
+   - Start MongoDB (User DB):
+     ```bash
+     docker run -d \
+       --name bookstore-mongo \
+       -e MONGO_INITDB_ROOT_USERNAME=bookstore \
+       -e MONGO_INITDB_ROOT_PASSWORD=bookstore123 \
+       -e MONGO_INITDB_DATABASE=userDB \
+       -p 27017:27017 \
+       mongo:8
+     ```
+   - Confirm both databases are running:
+     ```bash
+     docker ps | grep bookstore-postgres
+     docker ps | grep bookstore-mongo
+     ```
+
+2. **Start Eureka Discovery Server**
+   ```bash
+   cd eureka-server
+   ./mvnw spring-boot:run
+   ```
+   - Verify at: http://localhost:8761
+
+3. **Start Inventory Microservice**
+   ```bash
+   cd inventory-ms
+   ./mvnw spring-boot:run
+   ```
+
+4. **Start User Microservice**
+   ```bash
+   cd user-ms
+   ./mvnw spring-boot:run
+   ```
+
+5. **Start Gateway Microservice**
+   ```bash
+   cd gateway-server
+   ./mvnw spring-boot:run
+   ```
+
+## 📦 Chapter Source Code Availability
+
+The final source code for this chapter is already uploaded in this directory.
+
+Use this folder as the reference implementation for the completed chapter state.
 
 ---
 
@@ -48,7 +120,7 @@ It defines:
 | Errors | Failure scenarios |
 | Security | Authentication methods |
 
-In Spring Boot 3+, the recommended tool is **springdoc-openapi**.
+In Spring Boot 4.0.3, the recommended tool is **springdoc-openapi**.
 
 ---
 
@@ -186,17 +258,26 @@ management:
   zipkin:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: dev
+  java:
+    version: 25
 ```
 
-## Run Zipkin
+## Start Zipkin for Distributed Tracing
+
+To enable distributed tracing and view trace data, start the Zipkin server:
+
 ```bash
 docker run -d -p 9411:9411 openzipkin/zipkin
 ```
 
-UI:
-```
+Once running, access the Zipkin UI at:
 http://localhost:9411
-```
 
 ---
 
@@ -247,3 +328,5 @@ In the next chapter, we will secure these APIs and observability endpoints using
 - [Swagger Editor](https://editor.swagger.io/) — Interactive OpenAPI editor
 - [Zipkin](https://zipkin.io/) — Distributed tracing system
 - [Spring Boot Actuator Endpoints](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html) — Complete endpoint reference
+
+---

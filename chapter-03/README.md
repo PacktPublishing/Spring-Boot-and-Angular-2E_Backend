@@ -35,6 +35,24 @@ This chapter introduces the modern GenAI toolset that supports you while buildin
 
 ---
 
+## ✅ Before You Run This Chapter
+
+Please confirm the required runtime dependencies before running this chapter:
+
+- Confirm the database is started (if this chapter uses one).
+- Confirm any infrastructure dependencies are running (for example Docker services, if used).
+- Confirm any dependencies from previous chapters are running as needed for your flow.
+
+---
+
+## 📦 Chapter Source Code Availability
+
+The final source code for this chapter is already uploaded in this directory.
+
+Use this folder as the reference implementation for the completed chapter state.
+
+---
+
 ## The Rise of AI Development Assistants
 
 AI coding tools have transformed development from simple autocomplete to full contextual assistance.

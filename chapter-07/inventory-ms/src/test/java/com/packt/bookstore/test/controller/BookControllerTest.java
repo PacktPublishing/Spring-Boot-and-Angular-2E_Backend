@@ -10,15 +10,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,41 +25,29 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.packt.bookstore.inventory.InventoryMsApplication;
 import com.packt.bookstore.inventory.controller.BookController;
 import com.packt.bookstore.inventory.dto.BookRequest;
 import com.packt.bookstore.inventory.dto.BookResponse;
 import com.packt.bookstore.inventory.service.BookService;
 
-@WebMvcTest(controllers = BookController.class)
-@ContextConfiguration(classes = {InventoryMsApplication.class, ValidationAutoConfiguration.class})
 public class BookControllerTest {
-
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
-
-   @MockitoBean
+    @Mock
     private BookService bookService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @InjectMocks
+    private BookController bookController;
 
-    private BookRequest bookRequest;
     private BookResponse bookResponse;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setUp() {
-        bookRequest = new BookRequest(
-            "Spring Boot and Angular 2E",
-            "1234567890",
-            "Ahmad Gohar",
-            new BigDecimal("44.99"), null, null, null, null, null
-        );
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(bookController).build();
         // Create BookResponse using constructor with all required parameters
         bookResponse = new BookResponse(
             1L,
@@ -116,7 +101,7 @@ public class BookControllerTest {
 
         mockMvc.perform(post("/api/books")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(bookRequest)))
+            .content(validBookJson()))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("Spring Boot and Angular 2E"))
@@ -131,7 +116,7 @@ public class BookControllerTest {
 
         mockMvc.perform(put("/api/books/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(bookRequest)))
+            .content(validBookJson()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("Spring Boot and Angular 2E"))
@@ -146,7 +131,7 @@ public class BookControllerTest {
 
         mockMvc.perform(patch("/api/books/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(bookRequest)))
+            .content(validBookJson()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("Spring Boot and Angular 2E"))
@@ -166,26 +151,19 @@ public class BookControllerTest {
 @Test
 void createBook_withInvalidData_shouldReturnBadRequest() throws Exception {
     // Create an invalid book request
-    BookRequest invalidRequest = new BookRequest(
-        "",  // Empty title
-        "1234567890",
-        "Ahmad Gohar",
-        new BigDecimal("44.99"),
-        "Programming",
-        LocalDate.of(2024, 1, 1),
-        "a full stack guide to modern web development using Java, Spring and Angular",
-        10,
-        "2023-09-06T12:00:00"
-    );
-
-    // Just test that invalid input is passed to service - don't mock the behavior
-    // This approach relies on your Controller having proper @Valid annotations
-    
     mockMvc.perform(post("/api/books")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(invalidRequest)))
+            .content(invalidBookJson()))
         .andDo(print())
         .andExpect(status().isBadRequest());
+}
+
+private String validBookJson() {
+    return "{\"title\":\"Spring Boot and Angular 2E\",\"isbn\":\"1234567890\",\"authorName\":\"Ahmad Gohar\",\"price\":44.99}";
+}
+
+private String invalidBookJson() {
+    return "{\"title\":\"\",\"isbn\":\"1234567890\",\"authorName\":\"Ahmad Gohar\",\"price\":44.99}";
 }
 
 }

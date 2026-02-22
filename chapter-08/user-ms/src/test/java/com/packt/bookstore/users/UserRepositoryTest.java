@@ -8,13 +8,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.packt.bookstore.users.entity.Preferences;
 import com.packt.bookstore.users.entity.Profile;
 import com.packt.bookstore.users.entity.User;
 import com.packt.bookstore.users.repository.UserRepository;
 
-@SpringBootTest
+@SpringBootTest(classes = UserMsApplication.class)
+@ActiveProfiles("test")
 class UserRepositoryTest {
 
     @Autowired
@@ -23,6 +25,7 @@ class UserRepositoryTest {
     private User user;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setUp() {
         userRepository.deleteAll();
         user = User.builder()
