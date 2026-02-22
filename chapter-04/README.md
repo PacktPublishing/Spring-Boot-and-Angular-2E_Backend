@@ -25,16 +25,54 @@ This chapter focuses on building the persistence layer for the Bookstore applica
 
 This chapter provides comprehensive coverage of database persistence strategies for microservices. You'll learn:
 
-- How to choose between relational and NoSQL databases
-- Setting up PostgreSQL and MongoDB using Docker
-- Creating JPA entities with proper relationships
-- Designing MongoDB documents with embedded structures
-- Implementing repository patterns for both data stores
-- Writing custom queries and derived query methods
-- Testing repository layers using Spring Boot test slices
-- Best practices for polyglot persistence in microservices
 
----
+
+## ✅ Before You Run This Chapter
+
+Please confirm the required runtime dependencies before running this chapter:
+
+- Confirm the database is started (PostgreSQL and MongoDB for this chapter).
+- Confirm any infrastructure dependencies are running (for example Docker services, if used).
+- Confirm any dependencies from previous chapters are running as needed for your flow.
+
+### Check if Databases Are Running
+
+#### PostgreSQL
+```bash
+docker ps | grep bookstore-postgres
+```
+#### MongoDB
+```bash
+docker ps | grep bookstore-mongo
+```
+
+### Start PostgreSQL Container (Inventory DB)
+```bash
+docker run -d \
+  --name bookstore-postgres \
+  -e POSTGRES_USER=bookstore \
+  -e POSTGRES_PASSWORD=bookstore123 \
+  -e POSTGRES_DB=inventory \
+  -p 5432:5432 \
+  postgres:17
+```
+
+### Start MongoDB Container (User DB)
+```bash
+docker run -d \
+  --name bookstore-mongo \
+  -e MONGO_INITDB_ROOT_USERNAME=bookstore \
+  -e MONGO_INITDB_ROOT_PASSWORD=bookstore123 \
+  -e MONGO_INITDB_DATABASE=userDB \
+  -p 27017:27017 \
+  mongo:8
+```
+
+## 📦 Chapter Source Code Availability
+
+The final source code for this chapter is already uploaded in this directory.
+
+Use this folder as the reference implementation for the completed chapter state.
 
 ## Understanding Database Types
 
@@ -111,6 +149,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/inventory
     username: bookstore
     password: bookstore123
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -119,6 +158,18 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  main:
+    allow-bean-definition-overriding: true
+
+  profiles:
+    active: dev
+
+  java:
+    version: 25
+
+server:
+  port: 8081
 ```
 
 ---
@@ -276,6 +327,15 @@ spring:
       username: bookstore
       password: bookstore123
       authentication-database: admin
+
+  main:
+    allow-bean-definition-overriding: true
+
+  profiles:
+    active: dev
+
+  java:
+    version: 25
 
 server:
   port: 8082

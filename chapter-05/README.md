@@ -23,17 +23,54 @@ This chapter focuses on building the **service layer** and exposing your busines
 
 This chapter brings your microservices to life by implementing the business logic and API layers. You'll learn:
 
-- Spring's component model and dependency injection patterns
-- Designing clean, testable service layers
-- Building exception-aware business workflows
-- Creating RESTful APIs following best practices
-- Implementing DTOs with comprehensive validation
-- Handling errors gracefully with global exception handlers
-- Versioning APIs for long-term evolution
-- Testing services and controllers thoroughly
-- Mapping between domain entities and DTOs
 
----
+
+## ✅ Before You Run This Chapter
+
+Please confirm the required runtime dependencies before running this chapter:
+
+- Confirm the database is started (PostgreSQL and MongoDB for this chapter).
+- Confirm any infrastructure dependencies are running (for example Docker services, if used).
+- Confirm any dependencies from previous chapters are running as needed for your flow.
+
+### Check if Databases Are Running
+
+#### PostgreSQL
+```bash
+docker ps | grep bookstore-postgres
+```
+#### MongoDB
+```bash
+docker ps | grep bookstore-mongo
+```
+
+### Start PostgreSQL Container (Inventory DB)
+```bash
+docker run -d \
+    --name bookstore-postgres \
+    -e POSTGRES_USER=bookstore \
+    -e POSTGRES_PASSWORD=bookstore123 \
+    -e POSTGRES_DB=inventory \
+    -p 5432:5432 \
+    postgres:17
+```
+
+### Start MongoDB Container (User DB)
+```bash
+docker run -d \
+    --name bookstore-mongo \
+    -e MONGO_INITDB_ROOT_USERNAME=bookstore \
+    -e MONGO_INITDB_ROOT_PASSWORD=bookstore123 \
+    -e MONGO_INITDB_DATABASE=userDB \
+    -p 27017:27017 \
+    mongo:8
+```
+
+## 📦 Chapter Source Code Availability
+
+The final source code for this chapter is already uploaded in this directory.
+
+Use this folder as the reference implementation for the completed chapter state.
 
 ## Spring Boot Dependency Injection & Component Scanning
 
@@ -816,20 +853,30 @@ Add to `pom.xml`:
 
 ### 2. Configure Application Properties
 
+spring:
 ```yaml
 server:
-  port: 8081
-  servlet:
-    context-path: /inventory
+    port: 8081
+    servlet:
+        context-path: /inventory
 
 spring:
-  application:
-    name: inventory-service
-    
+    application:
+        name: inventory-service
+
+    main:
+        allow-bean-definition-overriding: true
+
+    profiles:
+        active: dev
+
+    java:
+        version: 25
+
 logging:
-  level:
-    com.bookstore: DEBUG
-    org.springframework.web: DEBUG
+    level:
+        com.bookstore: DEBUG
+        org.springframework.web: DEBUG
 ```
 
 ### 3. Run the Application

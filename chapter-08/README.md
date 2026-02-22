@@ -1,8 +1,85 @@
 # 📘 Chapter 08 — Securing Microservices Using Spring Security & OAuth2
 
 ## Chapter Overview
-This chapter builds upon the observable microservices from Chapter 07 by implementing **enterprise-grade security** using **OAuth2**, **JWT tokens**, and **Keycloak** as the identity provider.  
+
+This chapter builds upon the observable microservices from Chapter 07 by implementing **enterprise-grade security** using **OAuth2**, **JWT tokens**, and **Keycloak** as the identity provider.
 You will secure the API Gateway and microservices with **role-based access control (RBAC)**, implement **user authentication and authorization**, and ensure that every request in the Bookstore system is authenticated, authorized, and traceable.
+
+---
+
+## ✅ Before You Run This Chapter
+
+Please confirm the required runtime dependencies before running this chapter:
+
+- Confirm the database is started (PostgreSQL and MongoDB for this chapter).
+- Confirm any infrastructure dependencies are running (for example Docker services, if used).
+- Confirm any dependencies from previous chapters are running as needed for your flow.
+
+### Sequence for Running Databases and Microservices
+
+1. **Start Databases First**
+  - Start PostgreSQL (Inventory DB):
+    ```bash
+    docker run -d \
+     --name bookstore-postgres \
+     -e POSTGRES_USER=bookstore \
+     -e POSTGRES_PASSWORD=bookstore123 \
+     -e POSTGRES_DB=inventory \
+     -p 5432:5432 \
+     postgres:17
+    ```
+  - Start MongoDB (User DB):
+    ```bash
+    docker run -d \
+     --name bookstore-mongo \
+     -e MONGO_INITDB_ROOT_USERNAME=bookstore \
+     -e MONGO_INITDB_ROOT_PASSWORD=bookstore123 \
+     -e MONGO_INITDB_DATABASE=userDB \
+     -p 27017:27017 \
+     mongo:8
+    ```
+  - Confirm both databases are running:
+    ```bash
+    docker ps | grep bookstore-postgres
+    docker ps | grep bookstore-mongo
+    ```
+
+2. **Start Zipkin for Distributed Tracing**
+  ```bash
+  docker run -d -p 9411:9411 openzipkin/zipkin
+  ```
+  - Access Zipkin UI at: http://localhost:9411
+
+3. **Start Eureka Discovery Server**
+  ```bash
+  cd eureka-server
+  ./mvnw spring-boot:run
+  ```
+  - Verify at: http://localhost:8761
+
+4. **Start Inventory Microservice**
+  ```bash
+  cd inventory-ms
+  ./mvnw spring-boot:run
+  ```
+
+5. **Start User Microservice**
+  ```bash
+  cd user-ms
+  ./mvnw spring-boot:run
+  ```
+
+6. **Start Gateway Microservice**
+  ```bash
+  cd gateway-server
+  ./mvnw spring-boot:run
+  ```
+
+## 📦 Chapter Source Code Availability
+
+The final source code for this chapter is already uploaded in this directory.
+
+Use this folder as the reference implementation for the completed chapter state.
 
 ---
 
@@ -65,9 +142,19 @@ Keycloak is an open-source Identity and Access Management solution that provides
 | **Admin API** | Programmatic user and realm management |
 
 ## Running Keycloak with Docker
+
+### Running Keycloak with Docker (Standalone)
+To start Keycloak for this chapter, use the following command:
+
 ```bash
-cd Keycloak
-docker-compose up -d
+docker run -d \
+  --name bookstore-keycloak \
+  -e KEYCLOAK_ADMIN=admin \
+  -e KEYCLOAK_ADMIN_PASSWORD=admin \
+  -e KC_HTTP_PORT=8090 \
+  -p 8090:8090 \
+  quay.io/keycloak/keycloak:26.0.0 \
+  start-dev
 ```
 
 Access Keycloak Admin Console:
@@ -153,6 +240,13 @@ spring:
         jwt:
           issuer-uri: http://localhost:8090/realms/bookstore
           jwk-set-uri: http://localhost:8090/realms/bookstore/protocol/openid-connect/certs
+
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: dev
+  java:
+    version: 25
 ```
 
 ## Step 3 — Create Security Configuration
@@ -651,3 +745,6 @@ In the next chapter, we will containerize the entire stack and deploy it to prod
 - 📖 [Securing the Microservices](./docs/securing-the-microservices.md) — Detailed security implementation guide
 - 📖 [API Documentation](./docs/API_DOCUMENTATION.md) — Complete API reference
 - 📖 [User API Examples](./docs/USER_API_EXAMPLES.md) — curl examples for all endpoints
+
+---
+

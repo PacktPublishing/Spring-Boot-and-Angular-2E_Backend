@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,7 @@ class BookServiceTest {
     private BookResponse bookResponse;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setUp() {
         author = Author.builder().id(1L).name("Ahmad Gohar").build();
         book = Book.builder().id(1L).title("Spring Boot and Angular 2E").isbn("1234567890").author(author).price(BigDecimal.TEN).build();
@@ -94,7 +96,8 @@ class BookServiceTest {
     @Test
     void findOne_shouldThrowResourceNotFoundException() {
         when(bookRepository.findById(2L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> bookService.findOne(2L));
+        var thrown = assertThrows(ResourceNotFoundException.class, () -> bookService.findOne(2L));
+        assertNotNull(thrown);
     }
 
     @Test
@@ -111,13 +114,15 @@ class BookServiceTest {
     @Test
     void create_shouldThrowDomainRuleViolationExceptionForNegativePrice() {
         BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
-        assertThrows(DomainRuleViolationException.class, () -> bookService.create(badRequest));
+        var thrown = assertThrows(DomainRuleViolationException.class, () -> bookService.create(badRequest));
+        assertNotNull(thrown);
     }
 
     @Test
     void create_shouldThrowDomainRuleViolationExceptionForDuplicateIsbn() {
         when(bookRepository.existsByIsbnIgnoreCase("1234567890")).thenReturn(true);
-        assertThrows(DomainRuleViolationException.class, () -> bookService.create(bookRequest));
+        var thrown = assertThrows(DomainRuleViolationException.class, () -> bookService.create(bookRequest));
+        assertNotNull(thrown);
     }
 
     @Test
@@ -135,20 +140,23 @@ class BookServiceTest {
     @Test
     void replace_shouldThrowResourceNotFoundException() {
         when(bookRepository.findById(2L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> bookService.replace(2L, bookRequest));
+        var thrown = assertThrows(ResourceNotFoundException.class, () -> bookService.replace(2L, bookRequest));
+        assertNotNull(thrown);
     }
 
     @Test
     void patch_shouldThrowResourceNotFoundException() {
         when(bookRepository.findById(2L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> bookService.patch(2L, bookRequest));
+        var thrown = assertThrows(ResourceNotFoundException.class, () -> bookService.patch(2L, bookRequest));
+        assertNotNull(thrown);
     }
 
     @Test
     void patch_shouldThrowDomainRuleViolationExceptionForNegativePrice() {
         BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
-        assertThrows(DomainRuleViolationException.class, () -> bookService.patch(1L, badRequest));
+        var thrown = assertThrows(DomainRuleViolationException.class, () -> bookService.patch(1L, badRequest));
+        assertNotNull(thrown);
     }
 
     @Test
@@ -157,7 +165,8 @@ class BookServiceTest {
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(bookRepository.existsByIsbnIgnoreCase("NEWISBN")).thenReturn(true);
 
-        assertThrows(DomainRuleViolationException.class, () -> bookService.patch(1L, newIsbnRequest));
+        var thrown = assertThrows(DomainRuleViolationException.class, () -> bookService.patch(1L, newIsbnRequest));
+        assertNotNull(thrown);
     }
 
     @Test
@@ -172,7 +181,8 @@ class BookServiceTest {
     @Test
     void delete_shouldThrowResourceNotFoundException() {
         when(bookRepository.existsById(2L)).thenReturn(false);
-        assertThrows(ResourceNotFoundException.class, () -> bookService.delete(2L));
+        var thrown = assertThrows(ResourceNotFoundException.class, () -> bookService.delete(2L));
+        assertNotNull(thrown);
     }
 
     @Test
@@ -217,7 +227,8 @@ class BookServiceTest {
         var method = BookService.class.getDeclaredMethod("trySave", Book.class);
         method.setAccessible(true);
         
-        assertThrows(java.lang.reflect.InvocationTargetException.class, () -> method.invoke(bookService, book));
+        var thrown = assertThrows(java.lang.reflect.InvocationTargetException.class, () -> method.invoke(bookService, book));
+        assertNotNull(thrown);
     }
 
     @Test
@@ -253,51 +264,54 @@ class BookServiceTest {
     @Test
     void validateSemanticsForCreate_shouldThrowForNegativePrice() {
         BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
-        assertThrows(DomainRuleViolationException.class, () -> {
+        var thrown = assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForCreate", BookRequest.class);
                 method.setAccessible(true);
                 method.invoke(bookService, badRequest);
-            } catch (Exception e) {
-                if (e.getCause() instanceof DomainRuleViolationException) {
-                    throw (DomainRuleViolationException) e.getCause();
+            } catch (ReflectiveOperationException e) {
+                if (e.getCause() instanceof DomainRuleViolationException domainRuleViolationException) {
+                    throw domainRuleViolationException;
                 }
                 throw new RuntimeException(e);
             }
         });
+        assertNotNull(thrown);
     }
 
     @Test
     void validateSemanticsForReplace_shouldThrowForNegativePrice() {
         BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
-        assertThrows(DomainRuleViolationException.class, () -> {
+        var thrown = assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForReplace", BookRequest.class);
                 method.setAccessible(true);
                 method.invoke(bookService, badRequest);
-            } catch (Exception e) {
-                if (e.getCause() instanceof DomainRuleViolationException) {
-                    throw (DomainRuleViolationException) e.getCause();
+            } catch (ReflectiveOperationException e) {
+                if (e.getCause() instanceof DomainRuleViolationException domainRuleViolationException) {
+                    throw domainRuleViolationException;
                 }
                 throw new RuntimeException(e);
             }
         });
+        assertNotNull(thrown);
     }
 
     @Test
     void validateSemanticsForPatch_shouldThrowForNegativePrice() {
         BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
-        assertThrows(DomainRuleViolationException.class, () -> {
+        var thrown = assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForPatch", BookRequest.class, Book.class);
                 method.setAccessible(true);
                 method.invoke(bookService, badRequest, book);
-            } catch (Exception e) {
-                if (e.getCause() instanceof DomainRuleViolationException) {
-                    throw (DomainRuleViolationException) e.getCause();
+            } catch (ReflectiveOperationException e) {
+                if (e.getCause() instanceof DomainRuleViolationException domainRuleViolationException) {
+                    throw domainRuleViolationException;
                 }
                 throw new RuntimeException(e);
             }
         });
+        assertNotNull(thrown);
     }
 }
