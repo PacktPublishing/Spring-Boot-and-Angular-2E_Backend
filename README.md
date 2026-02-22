@@ -23,7 +23,6 @@ This repository contains all backend code, resources, and configuration for **Pa
 
 ## 📂 Structure
 
-- `/chapter-01/` – Big picture, environment setup ([chapter-01/README.md](chapter-01/README.md))
 - `/chapter-02/` – Getting started with microservices ([chapter-02/README.md](chapter-02/README.md))
 - `/chapter-03/` – Setting up your development AI Assistant ([chapter-03/README.md](chapter-03/README.md))
 - `/chapter-04/` – Database and repository configuration ([chapter-04/README.md](chapter-04/README.md))
@@ -40,7 +39,6 @@ This repository contains all backend code, resources, and configuration for **Pa
 
 - [Parent README (Spring Boot and Angular 2E Main Repo)](https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E)
 - [Frontend (Angular) README (Spring Boot and Angular 2E Frontend Repo)](https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend)
-- [Chapter 01 README](chapter-01/README.md)
 - [Chapter 02 README](chapter-02/README.md)
 - [Chapter 03 README](chapter-03/README.md)
 - [Chapter 04 README](chapter-04/README.md)
