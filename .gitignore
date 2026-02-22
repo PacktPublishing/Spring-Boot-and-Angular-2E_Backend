@@ -41,3 +41,4 @@ chapter-06/gateway-server/gateway.log
 /chapter-09/gateway-server/target
 /chapter-09/user-ms/target
 /chapter-10/eureka-server/target
+/chapter-09/inventory-ms/logs
