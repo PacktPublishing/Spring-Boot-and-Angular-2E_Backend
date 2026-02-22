@@ -24,7 +24,7 @@ spring:
               # lower-case-service-id: true
           httpclient:
             connect-timeout: 5000
-            response-timeout: 10s
+            response-timeout: 3600s  # 1 hour for SSE connections
       # Routes are configured in GatewayRouteConfig.java
   security:
     oauth2:

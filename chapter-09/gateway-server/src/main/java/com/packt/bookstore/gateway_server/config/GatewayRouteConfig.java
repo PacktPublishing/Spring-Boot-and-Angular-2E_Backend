@@ -1,9 +1,12 @@
 package com.packt.bookstore.gateway_server.config;
 
+import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.cloud.gateway.support.RouteMetadataUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,6 +19,21 @@ public class GatewayRouteConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         log.info("Configuring Gateway Routes with Tracing Support");
         return builder.routes()
+
+                // SSE Route for Inventory Notifications (Server-Sent Events)
+                // MUST come BEFORE general inventory route to avoid circuit breaker interference
+                .route("packt-inventory-notifications", r -> r
+                        .path("/packt/inventory/api/notifications/**")
+                        .filters(f -> f
+                                .rewritePath("/packt/inventory/api/notifications/(?<segment>.*)", 
+                                            "/inventory/api/notifications/${segment}")
+                                .addResponseHeader("X-Processed-By", "Spring-Gateway")
+                                .addRequestHeader("X-Gateway-Trace", "notification-route")
+                        )
+                        // Set 1-hour timeout for SSE connections
+                        .metadata(RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR, Duration.ofHours(1).toMillis())
+                        .uri("lb://inventory-service")
+                )
 
                 // PredicateEvaluator + PreFilter + URI Resolution
                 .route("packt-inventory-service", r -> r
