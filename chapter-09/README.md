@@ -1,4 +1,4 @@
-# 📘 Chapter 09 — Real-Time Updates with Server-Sent Events (SSE)
+# 📘 Chapter 09 — Real-Time Updates with Reactive programming using Spring WebFlux and Server-Sent Events (SSE)
 
 ## Chapter Overview
 This chapter extends the Bookstore microservices by adding **real-time event streaming** using **Server-Sent Events (SSE)**. You will learn how to push inventory updates instantly to clients, integrate SSE endpoints, and test event delivery using browser, Postman, and command-line tools. The chapter builds on the secure, observable, and documented microservices from previous chapters.

@@ -19,7 +19,8 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 /**
- * Security configuration for the API Gateway with WebFlux and OAuth2/JWT support.
+ * Security configuration for the API Gateway with WebFlux and OAuth2/JWT
+ * support.
  * 
  * This configuration:
  * - Enables WebFlux Security for reactive endpoints
@@ -41,100 +42,106 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-            // Disable CSRF for stateless API (using JWT instead)
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                // Disable CSRF for stateless API (using JWT instead)
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
-            // Enable CORS with the configuration from corsConfigurationSource()
-            .cors(cors -> {})
+                // Enable CORS with the configuration from corsConfigurationSource()
+                .cors(cors -> {
+                })
 
-            // Configure authorization for different endpoints
-            .authorizeExchange(exchange -> exchange
+                // Configure authorization for different endpoints
+                .authorizeExchange(exchange -> exchange
 
-                // Health and info endpoints - publicly accessible
-                .pathMatchers("/actuator/health", "/actuator/info")
-                    .permitAll()
+                        // Health and info endpoints - publicly accessible
+                        .pathMatchers("/actuator/health", "/actuator/info")
+                        .permitAll()
 
-                // Gateway routes for user service - public endpoints
-                .pathMatchers(HttpMethod.POST, "/packt/user/api/users/signup")
-                    .permitAll()
+                        // Gateway routes for user service - public endpoints
+                        .pathMatchers(HttpMethod.POST, "/packt/user/api/users/signup")
+                        .permitAll()
 
-                .pathMatchers(HttpMethod.POST, "/packt/user/api/users/signin")
-                    .permitAll()
+                        .pathMatchers(HttpMethod.POST, "/packt/user/api/users/signin")
+                        .permitAll()
 
-                .pathMatchers(HttpMethod.POST, "/packt/user/api/users/refresh-token")
-                    .permitAll()
+                        .pathMatchers(HttpMethod.POST, "/packt/user/api/users/refresh-token")
+                        .permitAll()
 
-                // All other gateway user routes - require authentication
-                .pathMatchers("/packt/user/api/**")
-                    .authenticated()
+                        // All other gateway user routes - require authentication
+                        .pathMatchers("/packt/user/api/**")
+                        .authenticated()
 
-                // SSE Notification endpoints - allow public access for real-time updates
-                .pathMatchers("/packt/inventory/api/notifications/**")
-                    .permitAll()
+                        // SSE Notification endpoints - allow public access for real-time updates
+                        .pathMatchers("/packt/inventory/api/notifications/**")
+                        .permitAll()
 
-                // All other gateway inventory routes - require authentication
-                .pathMatchers("/packt/inventory/api/**")
-                    .authenticated()
+                        // All other gateway inventory routes - require authentication
+                        .pathMatchers("/packt/inventory/api/**")
+                        .authenticated()
 
-                // Direct API routes - public endpoints
-                .pathMatchers(HttpMethod.POST, "/api/users/signup")
-                    .permitAll()
+                        // Direct API routes - public endpoints
+                        .pathMatchers(HttpMethod.POST, "/api/users/signup")
+                        .permitAll()
 
-                // User signin endpoint - public (no authentication required)
-                .pathMatchers(HttpMethod.POST, "/api/users/signin")
-                    .permitAll()
+                        // User signin endpoint - public (no authentication required)
+                        .pathMatchers(HttpMethod.POST, "/api/users/signin")
+                        .permitAll()
 
-                // Get user profile - authentication required
-                .pathMatchers(HttpMethod.GET, "/api/users/profile")
-                    .authenticated()
+                        // Get user profile - authentication required
+                        .pathMatchers(HttpMethod.GET, "/api/users/profile")
+                        .authenticated()
 
-                // Update user profile - authentication required
-                .pathMatchers(HttpMethod.PUT, "/api/users/profile")
-                    .authenticated()
+                        // Update user profile - authentication required
+                        .pathMatchers(HttpMethod.PUT, "/api/users/profile")
+                        .authenticated()
 
-                // Get inventory - requires USER, AUTHOR or ADMIN role
-                .pathMatchers(HttpMethod.GET, "/api/inventory/**")
-                    .hasAnyRole("USER", "AUTHOR", "ADMIN")
+                        // Get inventory - requires USER, AUTHOR or ADMIN role
+                        // Make GET /api/inventory/books public
+                        .pathMatchers(HttpMethod.GET, "/api/inventory/books")
+                        .permitAll()
 
-                // Create inventory - requires AUTHOR or ADMIN role
-                .pathMatchers(HttpMethod.POST, "/api/inventory/**")
-                    .hasAnyRole("AUTHOR", "ADMIN")
+                        // Other GET inventory endpoints require USER, AUTHOR or ADMIN role
+                        .pathMatchers(HttpMethod.GET, "/api/inventory/**")
+                        .hasAnyRole("USER", "AUTHOR", "ADMIN")
 
-                // Update inventory - requires AUTHOR or ADMIN role
-                .pathMatchers(HttpMethod.PUT, "/api/inventory/**")
-                    .hasAnyRole("AUTHOR", "ADMIN")
+                        // Create inventory - requires AUTHOR or ADMIN role
+                        .pathMatchers(HttpMethod.POST, "/api/inventory/**")
+                        .hasAnyRole("AUTHOR", "ADMIN")
 
-                // Delete inventory - requires ADMIN role only
-                .pathMatchers(HttpMethod.DELETE, "/api/inventory/**")
-                    .hasRole("ADMIN")
+                        // Update inventory - requires AUTHOR or ADMIN role
+                        .pathMatchers(HttpMethod.PUT, "/api/inventory/**")
+                        .hasAnyRole("AUTHOR", "ADMIN")
 
-                // All other /api/** endpoints require authentication
-                .pathMatchers("/api/**")
-                    .authenticated()
+                        // Delete inventory - requires ADMIN role only
+                        .pathMatchers(HttpMethod.DELETE, "/api/inventory/**")
+                        .hasRole("ADMIN")
 
-                // All other endpoints are publicly accessible
-                .anyExchange()
-                    .permitAll()
-            )
+                        // All other /api/** endpoints require authentication
+                        .pathMatchers("/api/**")
+                        .authenticated()
 
-            // Configure OAuth2 Resource Server with JWT authentication
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt
-                    .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                )
-            )
+                        // All other endpoints are publicly accessible
+                        .anyExchange()
+                        .permitAll())
 
-            .build();
+                // Configure OAuth2 Resource Server with JWT authentication
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
+
+                .build();
     }
 
     /**
-     * Creates a JWT Authentication Converter that extracts roles from Keycloak JWT tokens.
+     * Creates a JWT Authentication Converter that extracts roles from Keycloak JWT
+     * tokens.
      * 
      * Keycloak stores roles in the token under: "realm_access" -> "roles" (array)
-     * This converter converts those roles to Spring Security GrantedAuthority objects
+     * This converter converts those roles to Spring Security GrantedAuthority
+     * objects
      * with the "ROLE_" prefix required by Spring Security.
      * 
-     * @return ReactiveJwtAuthenticationConverterAdapter configured for Keycloak tokens
+     * @return ReactiveJwtAuthenticationConverterAdapter configured for Keycloak
+     *         tokens
      */
     private ReactiveJwtAuthenticationConverterAdapter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
@@ -154,8 +161,8 @@ public class SecurityConfig {
 
             // Convert role strings to SimpleGrantedAuthority with ROLE_ prefix
             return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
-                .collect(Collectors.toList());
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+                    .collect(Collectors.toList());
         });
 
         // Wrap the converter in a ReactiveJwtAuthenticationConverterAdapter for WebFlux
@@ -164,7 +171,8 @@ public class SecurityConfig {
 
     /**
      * CORS configuration bean.
-     * Note: CORS is also configured in application.yml under spring.cloud.gateway.globalcors
+     * Note: CORS is also configured in application.yml under
+     * spring.cloud.gateway.globalcors
      * This bean provides additional programmatic CORS configuration if needed.
      * 
      * @return CorsConfigurationSource with CORS settings
@@ -172,30 +180,30 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        
-        // Use allowedOriginPatterns to support both specific origins and file:// protocol
+
+        // Use allowedOriginPatterns to support both specific origins and file://
+        // protocol
         corsConfig.setAllowedOriginPatterns(List.of(
-            // localhost with any port
-            "http://localhost:*",
-            "https://localhost:*",
-            "http://127.0.0.1:*",
-            "https://127.0.0.1:*",
-            
-            // Common frontend framework development servers
-            "http://localhost:4200",      // Angular default
-            "http://localhost:3000",      // React/Next.js default
-    
-            
-            // HTTPS versions for production-like testing
-            "https://localhost:4200",
-            "https://localhost:3000",
-            "https://localhost:5173",
-            
-            // For local testing with HTML files
-            "file://*",                   // Local file system
-            "null"                        // null origin (browser sends for file://)
+                // localhost with any port
+                "http://localhost:*",
+                "https://localhost:*",
+                "http://127.0.0.1:*",
+                "https://127.0.0.1:*",
+
+                // Common frontend framework development servers
+                "http://localhost:4200", // Angular default
+                "http://localhost:3000", // React/Next.js default
+
+                // HTTPS versions for production-like testing
+                "https://localhost:4200",
+                "https://localhost:3000",
+                "https://localhost:5173",
+
+                // For local testing with HTML files
+                "file://*", // Local file system
+                "null" // null origin (browser sends for file://)
         ));
-        
+
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setExposedHeaders(List.of("*")); // Expose all headers for SSE
