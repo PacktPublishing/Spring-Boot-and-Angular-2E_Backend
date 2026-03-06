@@ -2,6 +2,7 @@ package com.packt.bookstore.inventory.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.packt.bookstore.inventory.dto.AuthorResponse;
 import com.packt.bookstore.inventory.dto.BookRequest;
 import com.packt.bookstore.inventory.dto.BookResponse;
 import com.packt.bookstore.inventory.entity.Author;
@@ -25,18 +26,26 @@ public class BookMapper {
     }
 
     public BookResponse toResponse(Book b) {
-        var authorName = (b.getAuthor() != null) ? b.getAuthor().getName() : null;
+        AuthorResponse authorResponse = null;
+        if (b.getAuthor() != null) {
+            authorResponse = new AuthorResponse(
+                b.getAuthor().getId(),
+                b.getAuthor().getName(),
+                b.getAuthor().getNationality(),
+                null // books list omitted for brevity
+            );
+        }
         return new BookResponse(
-                 b.getId(),
-                b.getTitle(),
-                b.getIsbn(),
-                authorName,
-                b.getPrice(),
-                b.getGenre(),
-                b.getPublished(),
-                b.getDescription(),
-                b.getPageCount(),
-                b.getCoverImageUrl()
+            b.getId(),
+            b.getTitle(),
+            b.getIsbn(),
+            authorResponse,
+            b.getPrice(),
+            b.getGenre(),
+            b.getPublished(),
+            b.getDescription(),
+            b.getPageCount(),
+            b.getCoverImageUrl()
         );
     }
 
