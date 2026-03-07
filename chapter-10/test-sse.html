@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Inventory SSE - Real-time Notifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-connect {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-disconnect {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-clear {
+            background: #6b7280;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #10b981;
+        }
+
+        .status-indicator.disconnected {
+            background: #ef4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        .events-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .event-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .event-item.NEW_BOOK {
+            background: #f0fdf4;
+            border-left-color: #10b981;
+        }
+
+        .event-item.PRICE_CHANGE {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+        }
+
+        .event-item.BOOK_UPDATED {
+            background: #eff6ff;
+            border-left-color: #3b82f6;
+        }
+
+        .event-item.BOOK_DELETED {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .event-type {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 12px;
+        }
+
+        .event-time {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .event-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .event-details {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .price-change {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .price-old {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .price-new {
+            color: #10b981;
+        }
+
+        .price-diff {
+            color: #f59e0b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .config-section {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .config-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .config-item label {
+            font-weight: 600;
+            color: #374151;
+            min-width: 120px;
+        }
+
+        .config-item input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Book Inventory Real-time Notifications</h1>
+            <p class="subtitle">Server-Sent Events (SSE) with Spring WebFlux</p>
+
+            <div class="config-section">
+                <div class="config-item">
+                    <label>Gateway URL:</label>
+                    <input type="text" id="gatewayUrl" value="http://localhost:8080" />
+                </div>
+                <div class="config-item">
+                    <label>Event Filter:</label>
+                    <select id="eventFilter" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        <option value="all">All Events</option>
+                        <option value="NEW_BOOK">New Books Only</option>
+                        <option value="PRICE_CHANGE">Price Changes Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="connectBtn" class="btn-connect" onclick="connectSSE()">
+                    🔌 Connect to SSE Stream
+                </button>
+                <button id="disconnectBtn" class="btn-disconnect" onclick="disconnectSSE()" disabled>
+                    ⛔ Disconnect
+                </button>
+                <button class="btn-clear" onclick="clearEvents()">
+                    🗑️ Clear Events
+                </button>
+            </div>
+
+            <div class="status">
+                <div id="statusIndicator" class="status-indicator disconnected"></div>
+                <span id="statusText">Disconnected - Click Connect to start receiving events</span>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalEvents">0</div>
+                    <div class="stat-label">Total Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="newBooks">0</div>
+                    <div class="stat-label">New Books</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="priceChanges">0</div>
+                    <div class="stat-label">Price Changes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="connectionTime">--:--</div>
+                    <div class="stat-label">Connected Time</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="events-container">
+            <h2 style="margin-bottom: 20px; color: #333;">📡 Live Event Stream</h2>
+            
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-filter="all" onclick="filterEvents('all')">
+                    All Events
+                </div>
+                <div class="filter-tab" data-filter="NEW_BOOK" onclick="filterEvents('NEW_BOOK')">
+                    🆕 New Books
+                </div>
+                <div class="filter-tab" data-filter="PRICE_CHANGE" onclick="filterEvents('PRICE_CHANGE')">
+                    💰 Price Changes
+                </div>
+            </div>
+
+            <div id="eventList" class="event-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>No events yet</h3>
+                    <p>Connect to the SSE stream and perform actions to see real-time notifications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let events = [];
+        let connectionStartTime = null;
+        let connectionTimer = null;
+        let currentFilter = 'all';
+
+        const stats = {
+            total: 0,
+            newBooks: 0,
+            priceChanges: 0
+        };
+
+        function connectSSE() {
+            const gatewayUrl = document.getElementById('gatewayUrl').value.replace(/\/+$/, ''); // Remove trailing slashes
+            const eventFilter = document.getElementById('eventFilter').value;
+            
+            let url = `${gatewayUrl}/packt/inventory/api/notifications/stream`;
+            if (eventFilter !== 'all') {
+                url += `/filtered?eventType=${eventFilter}`;
+            }
+
+            try {
+                eventSource = new EventSource(url);
+                connectionStartTime = new Date();
+                startConnectionTimer();
+
+                eventSource.onopen = () => {
+                    updateStatus(true, 'Connected - Listening for events...');
+                    document.getElementById('connectBtn').disabled = true;
+                    document.getElementById('disconnectBtn').disabled = false;
+                };
+
+                eventSource.onmessage = (event) => {
+                    try {
+                        const bookEvent = JSON.parse(event.data);
+                        handleEvent(bookEvent);
+                    } catch (error) {
+                        console.error('Error parsing event:', error);
+                    }
+                };
+
+                eventSource.addEventListener('NEW_BOOK', (event) => {
+                    try {
+                        const bookEvent = JSON.parse(event.data);
+                        handleEvent(bookEvent);
+                    } catch (error) {
+                        console.error('Error parsing NEW_BOOK event:', error);
+                    }
+                });
+
+                eventSource.addEventListener('PRICE_CHANGE', (event) => {
+                    try {
+                        const bookEvent = JSON.parse(event.data);
+                        handleEvent(bookEvent);
+                    } catch (error) {
+                        console.error('Error parsing PRICE_CHANGE event:', error);
+                    }
+                });
+
+                eventSource.onerror = (error) => {
+                    console.error('SSE Error:', error);
+                    updateStatus(false, 'Connection error - Check if services are running');
+                    disconnectSSE();
+                };
+            } catch (error) {
+                console.error('Failed to connect:', error);
+                updateStatus(false, 'Failed to connect - ' + error.message);
+            }
+        }
+
+        function disconnectSSE() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            stopConnectionTimer();
+            updateStatus(false, 'Disconnected');
+            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('disconnectBtn').disabled = true;
+        }
+
+        function handleEvent(bookEvent) {
+            events.unshift(bookEvent);
+            stats.total++;
+            
+            if (bookEvent.eventType === 'NEW_BOOK') {
+                stats.newBooks++;
+            } else if (bookEvent.eventType === 'PRICE_CHANGE') {
+                stats.priceChanges++;
+            }
+            
+            updateStats();
+            renderEvents();
+            
+            // Play notification sound (optional)
+            // new Audio('notification.mp3').play();
+        }
+
+        function renderEvents() {
+            const eventList = document.getElementById('eventList');
+            const filteredEvents = currentFilter === 'all' 
+                ? events 
+                : events.filter(e => e.eventType === currentFilter);
+            
+            if (filteredEvents.length === 0) {
+                eventList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No ${currentFilter === 'all' ? '' : currentFilter} events yet</h3>
+                        <p>Waiting for notifications...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            eventList.innerHTML = filteredEvents.map(event => {
+                const timestamp = new Date(event.timestamp).toLocaleString();
+                let content = '';
+
+                if (event.eventType === 'NEW_BOOK') {
+                    const data = event.eventData;
+                    content = `
+                        <div class="event-item NEW_BOOK">
+                            <div class="event-header">
+                                <span class="badge badge-success">NEW BOOK</span>
+                                <span class="event-time">${timestamp}</span>
+                            </div>
+                            <div class="event-title">📖 ${event.bookTitle}</div>
+                            <div class="event-details">
+                                <strong>Author:</strong> ${data.authorName}<br>
+                                <strong>Genre:</strong> ${data.genre}<br>
+                                <strong>Price:</strong> $${data.price}<br>
+                                <strong>ISBN:</strong> ${event.isbn}<br>
+                                <strong>In Stock:</strong> ${data.quantity} copies
+                            </div>
+                        </div>
+                    `;
+                } else if (event.eventType === 'PRICE_CHANGE') {
+                    const data = event.eventData;
+                    const percentChange = data.percentageChange >= 0 ? '+' : '';
+                    content = `
+                        <div class="event-item PRICE_CHANGE">
+                            <div class="event-header">
+                                <span class="badge badge-warning">PRICE CHANGE</span>
+                                <span class="event-time">${timestamp}</span>
+                            </div>
+                            <div class="event-title">💰 ${event.bookTitle}</div>
+                            <div class="event-details">
+                                <strong>ISBN:</strong> ${event.isbn}
+                                <div class="price-change">
+                                    <span class="price-old">Was: $${data.oldPrice}</span>
+                                    <span class="price-new">Now: $${data.newPrice}</span>
+                                    <span class="price-diff">(${percentChange}${data.percentageChange.toFixed(1)}%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return content;
+            }).join('');
+        }
+
+        function filterEvents(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.filter === filter);
+            });
+            renderEvents();
+        }
+
+        function clearEvents() {
+            events = [];
+            stats.total = 0;
+            stats.newBooks = 0;
+            stats.priceChanges = 0;
+            updateStats();
+            renderEvents();
+        }
+
+        function updateStatus(connected, message) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            indicator.className = `status-indicator ${connected ? 'connected' : 'disconnected'}`;
+            statusText.textContent = message;
+        }
+
+        function updateStats() {
+            document.getElementById('totalEvents').textContent = stats.total;
+            document.getElementById('newBooks').textContent = stats.newBooks;
+            document.getElementById('priceChanges').textContent = stats.priceChanges;
+        }
+
+        function startConnectionTimer() {
+            connectionTimer = setInterval(() => {
+                if (connectionStartTime) {
+                    const elapsed = Math.floor((new Date() - connectionStartTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('connectionTime').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        function stopConnectionTimer() {
+            if (connectionTimer) {
+                clearInterval(connectionTimer);
+                connectionTimer = null;
+            }
+            document.getElementById('connectionTime').textContent = '--:--';
+            connectionStartTime = null;
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            disconnectSSE();
+        });
+    </script>
+</body>
+</html>

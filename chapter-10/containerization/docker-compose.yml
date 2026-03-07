@@ -1,0 +1,189 @@
+services:
+  # Database Services
+  postgres:
+    image: postgres:17
+    container_name: bookstore-postgres
+    environment:
+      POSTGRES_USER: bookstore
+      POSTGRES_PASSWORD: bookstore123
+      POSTGRES_DB: inventory
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookstore"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookstore-network
+
+  mongodb:
+    image: mongo:8
+    container_name: bookstore-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: bookstore
+      MONGO_INITDB_ROOT_PASSWORD: bookstore123
+      MONGO_INITDB_DATABASE: userDB
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookstore-network
+
+  # Observability Services
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: bookstore-zipkin
+    ports:
+      - "9411:9411"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9411/zipkin/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookstore-network
+
+  # Eureka Service Registry (must start before microservices)
+  eureka-server:
+    image: ansgohar/eureka-server:${IMAGE_TAG:-latest}
+    container_name: bookstore-eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_APPLICATION_NAME: eureka-server
+      EUREKA_CLIENT_REGISTERWITEUREKA: "false"
+      EUREKA_CLIENT_FETCHREGISTRY: "false"
+      # Zipkin configuration
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      ZIPKIN_BASEURL: "http://zipkin:9411"
+    depends_on:
+      zipkin:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761/eureka/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookstore-network
+
+  # Microservices (depend on Eureka and their specific databases)
+  inventory-service:
+    image: ansgohar/inventory-service:${IMAGE_TAG:-latest}
+    container_name: bookstore-inventory-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_APPLICATION_NAME: inventory-service
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/inventory"
+      SPRING_DATASOURCE_USERNAME: bookstore
+      SPRING_DATASOURCE_PASSWORD: bookstore123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.postgresql.Driver"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      EUREKA_INSTANCE_HOSTNAME: "inventory-service"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      # Zipkin configuration
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      ZIPKIN_BASEURL: "http://zipkin:9411"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      zipkin:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/inventory/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookstore-network
+
+  user-service:
+    image: ansgohar/user-service:${IMAGE_TAG:-latest}
+    container_name: bookstore-user-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_APPLICATION_NAME: user-ms
+      SERVER_PORT: 8082
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: userDB
+      SPRING_DATA_MONGODB_USERNAME: bookstore
+      SPRING_DATA_MONGODB_PASSWORD: bookstore123
+      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      EUREKA_INSTANCE_HOSTNAME: "user-service"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      # Zipkin configuration
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      ZIPKIN_BASEURL: "http://zipkin:9411"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      zipkin:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/user/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookstore-network
+
+  # API Gateway (depends on all microservices and Eureka)
+  gateway-server:
+    image: ansgohar/gateway-server:${IMAGE_TAG:-latest}
+    container_name: bookstore-gateway-server
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_NAME: gateway-server
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      EUREKA_INSTANCE_HOSTNAME: "gateway-server"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      # Zipkin configuration
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      ZIPKIN_BASEURL: "http://zipkin:9411"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      zipkin:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookstore-network
+
+volumes:
+  postgres_data:
+    driver: local
+  mongo_data:
+    driver: local
+
+networks:
+  bookstore-network:
+    driver: bridge
