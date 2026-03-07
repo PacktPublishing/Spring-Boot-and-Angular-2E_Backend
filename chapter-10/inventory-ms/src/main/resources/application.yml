@@ -1,0 +1,89 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /inventory
+
+spring:
+  application:
+    name: inventory-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/inventory
+    username: bookstore
+    password: bookstore123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
+  sql:
+    init:
+      mode: always
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  include-application-name: false
+  level:
+    "[org.hibernate.SQL]": DEBUG                        # Log raw SQL queries
+    "[org.hibernate.type.descriptor.sql]": TRACE        # Show parameter bindings
+    "[com.packt.bookstore]": INFO                       # Enable info for our application
+    "[org.springframework.web]": INFO                   # Enable web request logging
+
+  file:
+    name: logs/inventory-service.log
+    max-size: 50MB
+    max-history: 30
+    total-size-cap: 1GB
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
+    metadata-map:
+      instanceId: ${spring.application.name}:${server.port}
+
+# Tracing Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+    baggage:
+      correlation:
+        enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    try-it-out-enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+  packages-to-scan: com.packt.bookstore.inventory.controller
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
