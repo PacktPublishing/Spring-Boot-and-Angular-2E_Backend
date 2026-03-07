@@ -1,6 +1,7 @@
 package com.packt.bookstore.test.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.packt.bookstore.inventory.controller.BookController;
+import com.packt.bookstore.inventory.dto.AuthorResponse;
 import com.packt.bookstore.inventory.dto.BookRequest;
 import com.packt.bookstore.inventory.dto.BookResponse;
 import com.packt.bookstore.inventory.service.BookService;
@@ -41,21 +43,27 @@ public class BookControllerTest {
     private BookController bookController;
 
     private BookResponse bookResponse;
+    private AuthorResponse authorResponse;
 
     @BeforeEach
-    public void setUp() {
+    @SuppressWarnings("unused")
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(bookController).build();
-
-        // Create BookResponse using constructor with all required parameters
+        authorResponse = new AuthorResponse(
+            1L,
+            "Ahmad Gohar",
+            null,
+            null
+        );
         bookResponse = new BookResponse(
             1L,
             "Spring Boot and Angular 2E",
             "1234567890",
-            "Ahmad Gohar",
+            authorResponse,
             new BigDecimal("44.99"),
             "Programming",
-            "2024",
+            LocalDate.of(2024, 1, 1),
             "a full stack guide to modern web development using  Java, Spring and Angular",
             10,
             "2023-09-06T12:00:00"
@@ -75,7 +83,7 @@ public class BookControllerTest {
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$[0].title").value("Spring Boot and Angular 2E"))
             .andExpect(jsonPath("$[0].isbn").value("1234567890"))
-            .andExpect(jsonPath("$[0].authorName").value("Ahmad Gohar"));
+            .andExpect(jsonPath("$[0].author.name").value("Ahmad Gohar"));
     }
 
   
@@ -89,7 +97,7 @@ public class BookControllerTest {
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("Spring Boot and Angular 2E"))
             .andExpect(jsonPath("$.isbn").value("1234567890"))
-            .andExpect(jsonPath("$.authorName").value("Ahmad Gohar"))
+            .andExpect(jsonPath("$.author.name").value("Ahmad Gohar"))
             .andExpect(jsonPath("$.price").value(44.99));
     }
 
@@ -104,7 +112,7 @@ public class BookControllerTest {
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("Spring Boot and Angular 2E"))
             .andExpect(jsonPath("$.isbn").value("1234567890"))
-            .andExpect(jsonPath("$.authorName").value("Ahmad Gohar"))
+            .andExpect(jsonPath("$.author.name").value("Ahmad Gohar"))
             .andExpect(jsonPath("$.price").value(44.99));
     }
 
@@ -119,7 +127,7 @@ public class BookControllerTest {
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("Spring Boot and Angular 2E"))
             .andExpect(jsonPath("$.isbn").value("1234567890"))
-            .andExpect(jsonPath("$.authorName").value("Ahmad Gohar"))
+            .andExpect(jsonPath("$.author.name").value("Ahmad Gohar"))
             .andExpect(jsonPath("$.price").value(44.99));
     }
 
@@ -134,7 +142,7 @@ public class BookControllerTest {
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("Spring Boot and Angular 2E"))
             .andExpect(jsonPath("$.isbn").value("1234567890"))
-            .andExpect(jsonPath("$.authorName").value("Ahmad Gohar"))
+            .andExpect(jsonPath("$.author.name").value("Ahmad Gohar"))
             .andExpect(jsonPath("$.price").value(44.99));
     }
 
@@ -157,11 +165,11 @@ void createBook_withInvalidData_shouldReturnBadRequest() throws Exception {
 }
 
 private String validBookJson() {
-    return "{\"title\":\"Spring Boot and Angular 2E\",\"isbn\":\"1234567890\",\"authorName\":\"Ahmad Gohar\",\"price\":44.99}";
+    return "{\"title\":\"Spring Boot and Angular 2E\",\"isbn\":\"1234567890\",\"authorId\":1,\"price\":44.99}";
 }
 
 private String invalidBookJson() {
-    return "{\"title\":\"\",\"isbn\":\"1234567890\",\"authorName\":\"Ahmad Gohar\",\"price\":44.99}";
+    return "{\"title\":\"\",\"isbn\":\"1234567890\",\"authorId\":1,\"price\":44.99}";
 }
 
 }

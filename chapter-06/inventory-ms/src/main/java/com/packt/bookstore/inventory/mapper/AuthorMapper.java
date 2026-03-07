@@ -19,6 +19,7 @@ public class AuthorMapper {
 
   public AuthorResponse toResponse(Author author) {
     return new AuthorResponse(
+        author.getId(),
         author.getName(),
         author.getNationality(),
         author.getBooks() != null

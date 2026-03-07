@@ -17,28 +17,39 @@ public class GatewayRouteConfig {
         log.info("Configuring Gateway Routes with Tracing Support");
         return builder.routes()
 
+                // SSE Route for Inventory Notifications (Server-Sent Events)
+                // MUST come BEFORE general inventory route to avoid circuit breaker interference
+                .route("packt-inventory-notifications", r -> r
+                    .path("/packt/inventory/api/notifications/**")
+                    .filters(f -> f
+                        .rewritePath("/packt/inventory/api/notifications/(?<segment>.*)", "/inventory/api/notifications/${segment}")
+                        .addResponseHeader("X-Processed-By", "Spring-Gateway")
+                        .addRequestHeader("X-Gateway-Trace", "notification-route")
+                    )
+                    .uri("lb://inventory-service")
+                )
+
                 // PredicateEvaluator + PreFilter + URI Resolution
                 .route("packt-inventory-service", r -> r
-                        .path("/packt/inventory/api/**") // PredicateEvaluator
-                        .filters(f -> f
-                                .rewritePath("/packt/inventory/api/(?<segment>.*)", "/inventory/api/${segment}") // PreFilter
-                                .addResponseHeader("X-Processed-By", "Spring-Gateway") // PostFilter
-                                .addRequestHeader("X-Gateway-Trace", "inventory-route") // Tracing support
-                                .filter((exchange, chain) -> {
-                                    // Log tracing information
-                                    String traceId = exchange.getRequest().getHeaders().getFirst("X-Trace-Id");
-                                    if (traceId != null) {
-                                        log.debug("Processing request with trace ID: {}", traceId);
-                                    }
-                                    return chain.filter(exchange);
-                                })
-                                .circuitBreaker(config -> config
-                                        .setName("inventoryCB")
-                                        .setFallbackUri("forward:/fallback/inventory")
-                                        .setRouteId("packt-inventory-service")
-                                        )
+                    .path("/packt/inventory/api/**")
+                    .filters(f -> f
+                        .rewritePath("/packt/inventory/api/(?<segment>.*)", "/inventory/api/${segment}")
+                        .addResponseHeader("X-Processed-By", "Spring-Gateway")
+                        .addRequestHeader("X-Gateway-Trace", "inventory-route")
+                        .filter((exchange, chain) -> {
+                            String traceId = exchange.getRequest().getHeaders().getFirst("X-Trace-Id");
+                            if (traceId != null) {
+                            log.debug("Processing request with trace ID: {}", traceId);
+                            }
+                            return chain.filter(exchange);
+                        })
+                        .circuitBreaker(config -> config
+                            .setName("inventoryCB")
+                            .setFallbackUri("forward:/fallback/inventory")
+                            .setRouteId("packt-inventory-service")
                         )
-                        .uri("lb://inventory-service") // HandlerMapping - service discovery
+                    )
+                    .uri("lb://inventory-service")
                 )
 
                 .route("packt-user-service", r -> r

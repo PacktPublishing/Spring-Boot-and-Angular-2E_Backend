@@ -1,6 +1,7 @@
 package com.packt.bookstore.inventory.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,8 +36,7 @@ public class Book extends Auditable {
     @JoinColumn(name = "author_id")
     private Author author;
     private String genre;
-    private String published;
-
+    private LocalDate published;
     private String description;
     private Integer pageCount;
     private String coverImageUrl;

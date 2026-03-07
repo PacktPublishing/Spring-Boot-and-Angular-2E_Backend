@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import com.packt.bookstore.inventory.dto.AuthorResponse;
 import com.packt.bookstore.inventory.dto.BookRequest;
 import com.packt.bookstore.inventory.dto.BookResponse;
 import com.packt.bookstore.inventory.entity.Author;
@@ -52,18 +53,20 @@ class BookServiceTest {
     private Book book;
     private BookRequest bookRequest;
     private BookResponse bookResponse;
+    private AuthorResponse authorResponse;
 
     @BeforeEach
     @SuppressWarnings("unused")
     void setUp() {
         author = Author.builder().id(1L).name("Ahmad Gohar").build();
+        authorResponse = new AuthorResponse(1L, "Ahmad Gohar", null, null);
         book = Book.builder().id(1L).title("Spring Boot and Angular 2E").isbn("1234567890").author(author).price(BigDecimal.TEN).build();
-        bookRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.TEN,null,null,null,null,null);
+        bookRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", 1L, BigDecimal.TEN, null, null, null, null, null);
         bookResponse = new BookResponse(
                 1L,
                 "Spring Boot and Angular 2E",
                 "1234567890",
-                "Ahmad Gohar",
+                authorResponse,
                 BigDecimal.TEN,
                 null,
                 null,
@@ -102,7 +105,7 @@ class BookServiceTest {
 
     @Test
     void create_shouldSaveAndReturnBookResponse() {
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.of(author));
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
         when(bookMapper.toEntity(bookRequest, author)).thenReturn(book);
         when(bookRepository.save(book)).thenReturn(book);
         when(bookMapper.toResponse(book)).thenReturn(bookResponse);
@@ -113,7 +116,7 @@ class BookServiceTest {
 
     @Test
     void create_shouldThrowDomainRuleViolationExceptionForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", 1L, BigDecimal.valueOf(-1), null, null, null, null, null);
         var thrown = assertThrows(DomainRuleViolationException.class, () -> bookService.create(badRequest));
         assertNotNull(thrown);
     }
@@ -128,7 +131,7 @@ class BookServiceTest {
     @Test
     void replace_shouldUpdateAndReturnBookResponse() {
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.of(author));
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
         doNothing().when(bookMapper).overwrite(book, bookRequest, author);
         when(bookRepository.save(book)).thenReturn(book);
         when(bookMapper.toResponse(book)).thenReturn(bookResponse);
@@ -153,7 +156,7 @@ class BookServiceTest {
 
     @Test
     void patch_shouldThrowDomainRuleViolationExceptionForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", 1L, BigDecimal.valueOf(-1), null, null, null, null, null);
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         var thrown = assertThrows(DomainRuleViolationException.class, () -> bookService.patch(1L, badRequest));
         assertNotNull(thrown);
@@ -161,7 +164,7 @@ class BookServiceTest {
 
     @Test
     void patch_shouldThrowDomainRuleViolationExceptionForDuplicateIsbn() {
-        BookRequest newIsbnRequest = new BookRequest("Spring Boot and Angular 2E", "NEWISBN", "Ahmad Gohar", BigDecimal.TEN, null, null, null, null, null);
+        BookRequest newIsbnRequest = new BookRequest("Spring Boot and Angular 2E", "NEWISBN", 1L, BigDecimal.TEN, null, null, null, null, null);
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(bookRepository.existsByIsbnIgnoreCase("NEWISBN")).thenReturn(true);
 
@@ -185,29 +188,7 @@ class BookServiceTest {
         assertNotNull(thrown);
     }
 
-    @Test
-    void resolveAuthor_shouldReturnExistingAuthor() throws Exception {
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.of(author));
-
-        var method = BookService.class.getDeclaredMethod("resolveAuthor", String.class);
-        method.setAccessible(true);
-        Author result = (Author) method.invoke(bookService, "Ahmad Gohar");
-
-        assertEquals(author, result);
-    }
-
-    @Test
-    void resolveAuthor_shouldCreateAndReturnNewAuthor() throws Exception {
-        when(authorRepository.findByNameIgnoreCase("Ahmad Gohar")).thenReturn(Optional.empty());
-        Author newAuthor = Author.builder().name("Ahmad Gohar").build();
-        when(authorRepository.save(any(Author.class))).thenReturn(newAuthor);
-
-        var method = BookService.class.getDeclaredMethod("resolveAuthor", String.class);
-        method.setAccessible(true);
-        Author result = (Author) method.invoke(bookService, "Ahmad Gohar");
-        
-        assertEquals(newAuthor, result);
-    }
+    // resolveAuthor tests removed: method no longer exists (replaced by resolveAuthorById)
 
     @Test
     void trySave_shouldReturnSavedBook() throws Exception {
@@ -263,7 +244,7 @@ class BookServiceTest {
 
     @Test
     void validateSemanticsForCreate_shouldThrowForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", 1L, BigDecimal.valueOf(-1), null, null, null, null, null);
         var thrown = assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForCreate", BookRequest.class);
@@ -281,7 +262,7 @@ class BookServiceTest {
 
     @Test
     void validateSemanticsForReplace_shouldThrowForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", 1L, BigDecimal.valueOf(-1), null, null, null, null, null);
         var thrown = assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForReplace", BookRequest.class);
@@ -299,7 +280,7 @@ class BookServiceTest {
 
     @Test
     void validateSemanticsForPatch_shouldThrowForNegativePrice() {
-        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", "Ahmad Gohar", BigDecimal.valueOf(-1), null, null, null, null, null);
+        BookRequest badRequest = new BookRequest("Spring Boot and Angular 2E", "1234567890", 1L, BigDecimal.valueOf(-1), null, null, null, null, null);
         var thrown = assertThrows(DomainRuleViolationException.class, () -> {
             try {
                 var method = BookService.class.getDeclaredMethod("validateSemanticsForPatch", BookRequest.class, Book.class);

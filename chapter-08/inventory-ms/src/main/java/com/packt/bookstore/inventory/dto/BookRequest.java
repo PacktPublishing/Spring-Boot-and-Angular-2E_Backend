@@ -17,7 +17,8 @@ public record BookRequest(
         @Pattern(regexp = "^[0-9-]{10,17}$", message = "ISBN must be 10-17 chars/dashes")
         String isbn,
 
-        String authorName,
+        @NotNull(message = "Author ID is required")
+        Long authorId,
 
         @NotNull(message = "Price is required")
         @PositiveOrZero(message = "Price must be >= 0")

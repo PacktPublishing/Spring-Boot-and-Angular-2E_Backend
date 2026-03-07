@@ -21,14 +21,16 @@ import com.packt.bookstore.inventory.repository.AuthorRepository;
 import com.packt.bookstore.inventory.repository.BookRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class BookService implements IBookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final BookMapper bookMapper;
 
-    public BookService(BookRepository bookRepository, AuthorRepository authorRepository , BookMapper bookMapper) {
+    public BookService(BookRepository bookRepository, AuthorRepository authorRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.bookMapper = bookMapper;
@@ -36,12 +38,12 @@ public class BookService implements IBookService {
 
     @Override
     public List<BookResponse> findAll(int page, int size, String sortSpec) {
-    Sort sortBy = parseSort(sortSpec);
+        Sort sortBy = parseSort(sortSpec);
         PageRequest pageRequest = PageRequest.of(page, size, sortBy);
-        
+
         // This will now fetch books WITH authors due to @EntityGraph
         Page<Book> books = bookRepository.findAll(pageRequest);
-        
+
         return books.getContent()
                 .stream()
                 .map(bookMapper::toResponse)
@@ -50,8 +52,10 @@ public class BookService implements IBookService {
 
     @Override
     public BookResponse findOne(Long id) {
+        log.info("Fetching book with id {}", id);
         var book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book " + id + " not found"));
+        log.debug("Found book: {}", book.getTitle());
         return bookMapper.toResponse(book);
     }
 
@@ -59,9 +63,9 @@ public class BookService implements IBookService {
     @Transactional
     public BookResponse create(BookRequest req) {
         validateSemanticsForCreate(req); // 422 on rule violation
-        var author = resolveAuthor(req.authorName());
+        var author = resolveAuthorById(req.authorId());
         var toSave = bookMapper.toEntity(req, author);
-        var saved = trySave(toSave); // may raise DataIntegrityViolationException → 409
+        var saved = trySave(toSave); // may raise DataIntegrityViolationException → 409;
         return bookMapper.toResponse(saved);
     }
 
@@ -71,7 +75,7 @@ public class BookService implements IBookService {
         validateSemanticsForReplace(req); // 422 on rule violation
         var existing = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book " + id + " not found"));
-        var author = resolveAuthor(req.authorName());
+        var author = resolveAuthorById(req.authorId());
         bookMapper.overwrite(existing, req, author);
         var saved = trySave(existing);
         return bookMapper.toResponse(saved);
@@ -85,13 +89,17 @@ public class BookService implements IBookService {
 
         validateSemanticsForPatch(req, existing); // 422 only on provided fields
 
+        // Check if price is changing
+        BigDecimal oldPrice = existing.getPrice();
+        boolean priceChanged = req.price() != null && req.price().compareTo(oldPrice) != 0;
+
         Author author = null;
-        if (req.authorName() != null)
-            author = resolveAuthor(req.authorName());
+        if (req.authorId() != null)
+            author = resolveAuthorById(req.authorId());
         bookMapper.patch(existing, req, author);
 
         var saved = trySave(existing);
-        return bookMapper.toResponse(saved);
+               return bookMapper.toResponse(saved);
     }
 
     @Override
@@ -113,9 +121,11 @@ public class BookService implements IBookService {
         return "desc".equals(dir) ? Sort.by(field).descending() : Sort.by(field).ascending();
     }
 
-    private Author resolveAuthor(String name) {
-        return authorRepository.findByNameIgnoreCase(name)
-                .orElseGet(() -> authorRepository.save(Author.builder().name(name).build()));
+
+    private Author resolveAuthorById(Long id) {
+        if (id == null) throw new DomainRuleViolationException("Author ID is required");
+        return authorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Author " + id + " not found"));
     }
 
     private Book trySave(Book entity) {
@@ -130,6 +140,9 @@ public class BookService implements IBookService {
     /* -------- semantic validations (422) -------- */
 
     private void validateSemanticsForCreate(BookRequest req) {
+        if (req.authorId() == null) {
+            throw new DomainRuleViolationException("Author ID is required");
+        }
         if (req.price().compareTo(BigDecimal.ZERO) < 0) {
             throw new DomainRuleViolationException("Price cannot be negative");
         }
@@ -140,16 +153,17 @@ public class BookService implements IBookService {
     }
 
     private void validateSemanticsForReplace(BookRequest req) {
+        if (req.authorId() == null) {
+            throw new DomainRuleViolationException("Author ID is required");
+        }
         if (req.price().compareTo(BigDecimal.ZERO) < 0) {
-
             throw new DomainRuleViolationException("Price cannot be negative");
         }
         // If needed, pre-check ISBN uniqueness here (same idea as create)
     }
 
     private void validateSemanticsForPatch(BookRequest req, Book existing) {
-        if (req.price().compareTo(BigDecimal.ZERO) < 0) {
-
+        if (req.price() != null && req.price().compareTo(BigDecimal.ZERO) < 0) {
             throw new DomainRuleViolationException("Price cannot be negative");
         }
         // Only check uniqueness if ISBN is changing

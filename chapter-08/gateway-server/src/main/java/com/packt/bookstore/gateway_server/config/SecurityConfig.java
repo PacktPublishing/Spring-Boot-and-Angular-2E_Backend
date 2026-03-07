@@ -75,6 +75,10 @@ public class SecurityConfig {
                         .pathMatchers("/packt/user/api/**")
                         .authenticated()
 
+                        // Make GET /packt/inventory/api/books public (gateway-exposed path)
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
+                        .permitAll()
+
                         // All other gateway inventory routes - require authentication
                         .pathMatchers("/packt/inventory/api/**")
                         .authenticated()

@@ -70,8 +70,13 @@ public class SecurityConfig {
                         .pathMatchers("/packt/user/api/**")
                         .authenticated()
 
+
                         // SSE Notification endpoints - allow public access for real-time updates
                         .pathMatchers("/packt/inventory/api/notifications/**")
+                        .permitAll()
+
+                        // Make GET /packt/inventory/api/books public (gateway-exposed path)
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
                         .permitAll()
 
                         // All other gateway inventory routes - require authentication
@@ -94,8 +99,12 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.PUT, "/api/users/profile")
                         .authenticated()
 
-                        // Get inventory - requires USER, AUTHOR or ADMIN role
-                        // Make GET /api/inventory/books public
+
+                        // Make GET /packt/inventory/api/books public (gateway-exposed path)
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
+                        .permitAll()
+
+                        // Get inventory - requires USER, AUTHOR or ADMIN role (direct API path)
                         .pathMatchers(HttpMethod.GET, "/api/inventory/books")
                         .permitAll()
 

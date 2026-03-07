@@ -30,7 +30,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8090}/realms/bookstore
+          issuer-uri: http://localhost:8090/realms/bookstore
   
 # Circuit Breaker Configuration
 resilience4j:

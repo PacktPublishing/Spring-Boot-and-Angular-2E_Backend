@@ -7,7 +7,7 @@ public record BookResponse(
                 Long id,
                 String title,
                 String isbn,
-                String authorName,
+                AuthorResponse author,
                 BigDecimal price,
                 String genre,
                 LocalDate published,
