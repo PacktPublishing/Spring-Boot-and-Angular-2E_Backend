@@ -13,6 +13,6 @@ public class FallbackController {
     @GetMapping("/inventory")
     public ResponseEntity<String> inventoryFallback() {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-            .body("Inventory Service is temporarily unavailable. Please try again later.");
+                .body("Inventory Service is temporarily unavailable. Please try again later.");
     }
 }

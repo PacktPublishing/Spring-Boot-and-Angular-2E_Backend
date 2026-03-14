@@ -3,7 +3,7 @@
 This guide helps resolve common environment issues when running the
 Spring Boot microservices and Angular frontend from Chapter 02.
 
-------------------------------------------------------------------------
+---
 
 ## Quick Global Verification Checklist
 
@@ -15,7 +15,7 @@ Run:
 Ensure: - Java 21 or higher - Maven uses the same Java version -
 JAVA_HOME is correctly set - VS Code restarted after changes
 
-------------------------------------------------------------------------
+---
 
 ## VS Code Core Java Settings
 
@@ -36,7 +36,7 @@ Optional multiple runtimes:
 
 Restart VS Code after updating settings.
 
-------------------------------------------------------------------------
+---
 
 # macOS
 
@@ -53,7 +53,7 @@ Reload:
 
     source ~/.zshrc
 
-------------------------------------------------------------------------
+---
 
 # Linux
 
@@ -70,7 +70,7 @@ Reload:
 
     source ~/.bashrc
 
-------------------------------------------------------------------------
+---
 
 # Windows
 
@@ -89,7 +89,7 @@ Ensure PATH includes:
 
 Restart terminal after changes.
 
-------------------------------------------------------------------------
+---
 
 ## Common Problems
 

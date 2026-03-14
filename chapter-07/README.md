@@ -9,7 +9,6 @@ You will document REST APIs using **OpenAPI (Swagger)** and enable **logging, me
 
 ## ✅ Before You Run This Chapter
 
-
 Please confirm the required runtime dependencies before running this chapter:
 
 - Confirm the database is started (PostgreSQL and MongoDB for this chapter).
@@ -46,19 +45,23 @@ Please confirm the required runtime dependencies before running this chapter:
      ```
 
 2. **Start Eureka Discovery Server**
+
    ```bash
    cd eureka-server
    ./mvnw spring-boot:run
    ```
+
    - Verify at: http://localhost:8761
 
 3. **Start Inventory Microservice**
+
    ```bash
    cd inventory-ms
    ./mvnw spring-boot:run
    ```
 
 4. **Start User Microservice**
+
    ```bash
    cd user-ms
    ./mvnw spring-boot:run
@@ -79,16 +82,38 @@ Use this folder as the reference implementation for the completed chapter state.
 ---
 
 ## Table of Contents
-- [Understanding Documentation & Observability](#understanding-documentation--observability)
+
+- [📘 Chapter 07 — Documenting APIs \& Enabling Application Observability Using Spring Boot](#-chapter-07--documenting-apis--enabling-application-observability-using-spring-boot)
+  - [Chapter Overview](#chapter-overview)
+  - [✅ Before You Run This Chapter](#-before-you-run-this-chapter)
+    - [Sequence for Running Databases and Microservices](#sequence-for-running-databases-and-microservices)
+  - [📦 Chapter Source Code Availability](#-chapter-source-code-availability)
+  - [Table of Contents](#table-of-contents)
+- [Understanding Documentation \& Observability](#understanding-documentation--observability)
 - [Documenting APIs with OpenAPI](#documenting-apis-with-openapi)
 - [Implementing OpenAPI with Springdoc](#implementing-openapi-with-springdoc)
+  - [Step 1 — Add Dependency](#step-1--add-dependency)
+  - [Step 2 — Access Documentation](#step-2--access-documentation)
 - [OpenAPI Annotations in Practice](#openapi-annotations-in-practice)
+  - [@Operation](#operation)
+  - [@ApiResponses](#apiresponses)
+  - [@Parameter](#parameter)
+  - [@Tag](#tag)
 - [API Documentation Best Practices](#api-documentation-best-practices)
 - [Observability Fundamentals](#observability-fundamentals)
-- [Logging with SLF4J & Logback](#logging-with-slf4j--logback)
-- [Distributed Tracing with Micrometer & Zipkin](#distributed-tracing-with-micrometer--zipkin)
-- [Observability Best Practices & Pitfalls](#observability-best-practices--pitfalls)
-- [Summary](#summary)  
+- [Logging with SLF4J \& Logback](#logging-with-slf4j--logback)
+  - [Correlated Logging](#correlated-logging)
+- [Distributed Tracing with Micrometer \& Zipkin](#distributed-tracing-with-micrometer--zipkin)
+  - [Dependencies](#dependencies)
+  - [Configuration](#configuration)
+  - [Start Zipkin for Distributed Tracing](#start-zipkin-for-distributed-tracing)
+- [Observability Best Practices \& Pitfalls](#observability-best-practices--pitfalls)
+  - [Common Pitfalls](#common-pitfalls)
+  - [Best Practices](#best-practices)
+- [Summary](#summary)
+- [Resources \& References](#resources--references)
+  - [Official Documentation](#official-documentation)
+  - [Useful Tools \& Services](#useful-tools--services)
 
 ---
 
@@ -96,6 +121,7 @@ Use this folder as the reference implementation for the completed chapter state.
 
 In microservices architectures, **working APIs are not enough**.  
 They must be:
+
 - Discoverable and easy to consume (documentation)
 - Transparent and traceable in production (observability)
 
@@ -127,6 +153,7 @@ In Spring Boot 4.0.3, the recommended tool is **springdoc-openapi**.
 # Implementing OpenAPI with Springdoc
 
 ## Step 1 — Add Dependency
+
 ```xml
 <dependency>
   <groupId>org.springdoc</groupId>
@@ -136,12 +163,14 @@ In Spring Boot 4.0.3, the recommended tool is **springdoc-openapi**.
 ```
 
 ## Step 2 — Access Documentation
+
 ```
 /v3/api-docs
 /swagger-ui.html
 ```
 
 Example:
+
 ```
 http://localhost:8081/inventory/swagger-ui.html
 ```
@@ -151,6 +180,7 @@ http://localhost:8081/inventory/swagger-ui.html
 # OpenAPI Annotations in Practice
 
 ## @Operation
+
 ```java
 @Operation(
   summary = "Retrieve all books",
@@ -159,6 +189,7 @@ http://localhost:8081/inventory/swagger-ui.html
 ```
 
 ## @ApiResponses
+
 ```java
 @ApiResponses({
   @ApiResponse(responseCode = "200", description = "Success"),
@@ -168,6 +199,7 @@ http://localhost:8081/inventory/swagger-ui.html
 ```
 
 ## @Parameter
+
 ```java
 @Parameter(
   name = "page",
@@ -177,6 +209,7 @@ http://localhost:8081/inventory/swagger-ui.html
 ```
 
 ## @Tag
+
 ```java
 @Tag(
   name = "Book Inventory",
@@ -190,13 +223,13 @@ These annotations make APIs **self-describing**, **interactive**, and **tool-fri
 
 # API Documentation Best Practices
 
-| Practice | Benefit |
-|--------|---------|
-| Use @Operation & @ApiResponse | Clear intent |
-| Document error responses | Safer clients |
-| Version endpoints | Backward compatibility |
-| Group endpoints with @Tag | Better UX |
-| Keep docs near code | Prevent drift |
+| Practice                      | Benefit                |
+| ----------------------------- | ---------------------- |
+| Use @Operation & @ApiResponse | Clear intent           |
+| Document error responses      | Safer clients          |
+| Version endpoints             | Backward compatibility |
+| Group endpoints with @Tag     | Better UX              |
+| Keep docs near code           | Prevent drift          |
 
 ---
 
@@ -207,11 +240,11 @@ Observability answers the question:
 
 It consists of three pillars:
 
-| Pillar | Purpose |
-|-------|---------|
-| Logs | Discrete events |
+| Pillar  | Purpose                 |
+| ------- | ----------------------- |
+| Logs    | Discrete events         |
 | Metrics | Aggregated measurements |
-| Traces | End-to-end request flow |
+| Traces  | End-to-end request flow |
 
 ---
 
@@ -224,6 +257,7 @@ log.info("Fetching book with id {}", id);
 ```
 
 ## Correlated Logging
+
 ```yaml
 logging:
   pattern:
@@ -237,6 +271,7 @@ This enriches every log entry with trace context.
 # Distributed Tracing with Micrometer & Zipkin
 
 ## Dependencies
+
 ```xml
 <dependency>
   <groupId>io.micrometer</groupId>
@@ -250,6 +285,7 @@ This enriches every log entry with trace context.
 ```
 
 ## Configuration
+
 ```yaml
 management:
   tracing:
@@ -284,19 +320,21 @@ http://localhost:9411
 # Observability Best Practices & Pitfalls
 
 ## Common Pitfalls
-| Issue | Impact |
-|-----|--------|
-| Over-logging | Noise & performance hit |
-| Missing trace IDs | Hard debugging |
-| Logging secrets | Security risk |
-| Only infra metrics | No business insight |
+
+| Issue              | Impact                  |
+| ------------------ | ----------------------- |
+| Over-logging       | Noise & performance hit |
+| Missing trace IDs  | Hard debugging          |
+| Logging secrets    | Security risk           |
+| Only infra metrics | No business insight     |
 
 ## Best Practices
-| Area | Recommendation |
-|-----|----------------|
-| Logs | Consistent log levels |
-| Traces | Always propagate traceId |
-| Metrics | Track domain KPIs |
+
+| Area     | Recommendation               |
+| -------- | ---------------------------- |
+| Logs     | Consistent log levels        |
+| Traces   | Always propagate traceId     |
+| Metrics  | Track domain KPIs            |
 | Security | Lock down actuator & Swagger |
 
 ---
@@ -309,7 +347,7 @@ In this chapter, you implemented:
 ✔ Interactive Swagger UI for all services  
 ✔ Structured, correlated logging  
 ✔ Distributed tracing with Micrometer & Zipkin  
-✔ Production-grade observability foundations  
+✔ Production-grade observability foundations
 
 Your Bookstore microservices are now **documented, observable, and diagnosable**.  
 In the next chapter, we will secure these APIs and observability endpoints using **Spring Security and Keycloak**.
@@ -319,12 +357,14 @@ In the next chapter, we will secure these APIs and observability endpoints using
 # Resources & References
 
 ## Official Documentation
+
 - [OpenAPI Specification](https://spec.openapis.org/oas/v3.1.0) — Complete OpenAPI 3.1.0 specification
 - [Springdoc OpenAPI](https://springdoc.org/) — Official Springdoc documentation
 - [Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/) — Production-ready features guide
 - [Micrometer Tracing](https://micrometer.io/docs/tracing) — Micrometer distributed tracing documentation
 
 ## Useful Tools & Services
+
 - [Swagger Editor](https://editor.swagger.io/) — Interactive OpenAPI editor
 - [Zipkin](https://zipkin.io/) — Distributed tracing system
 - [Spring Boot Actuator Endpoints](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html) — Complete endpoint reference

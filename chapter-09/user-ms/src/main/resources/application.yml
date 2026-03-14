@@ -46,7 +46,7 @@ management:
   #     application: ${spring.application.name}
   tracing:
     sampling:
-      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+      probability: 1.0 # Trace all requests (use 0.1 for 10% in production)
     baggage:
       correlation:
         enabled: true
@@ -65,4 +65,3 @@ keycloak:
   admin-password: admin
   admin-realm: master
   client-id: bookstore-gateway
-

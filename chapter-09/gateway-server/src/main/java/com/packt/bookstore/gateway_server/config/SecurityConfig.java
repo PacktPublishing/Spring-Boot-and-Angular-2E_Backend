@@ -70,7 +70,6 @@ public class SecurityConfig {
                         .pathMatchers("/packt/user/api/**")
                         .authenticated()
 
-
                         // SSE Notification endpoints - allow public access for real-time updates
                         .pathMatchers("/packt/inventory/api/notifications/**")
                         .permitAll()
@@ -98,7 +97,6 @@ public class SecurityConfig {
                         // Update user profile - authentication required
                         .pathMatchers(HttpMethod.PUT, "/api/users/profile")
                         .authenticated()
-
 
                         // Make GET /packt/inventory/api/books public (gateway-exposed path)
                         .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")

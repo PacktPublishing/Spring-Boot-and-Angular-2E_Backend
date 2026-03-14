@@ -34,8 +34,7 @@ public class BookController {
     public ResponseEntity<List<BookResponse>> getAllBooks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String sort
-    ) {
+            @RequestParam(required = false) String sort) {
         List<BookResponse> books = bookService.findAll(page, size, sort);
         return ResponseEntity.ok(books);
     }
@@ -67,6 +66,6 @@ public class BookController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.delete(id);
-         return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();
     }
 }

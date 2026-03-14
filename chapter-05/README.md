@@ -23,8 +23,6 @@ This chapter focuses on building the **service layer** and exposing your busines
 
 This chapter brings your microservices to life by implementing the business logic and API layers. You'll learn:
 
-
-
 ## ✅ Before You Run This Chapter
 
 Please confirm the required runtime dependencies before running this chapter:
@@ -36,15 +34,19 @@ Please confirm the required runtime dependencies before running this chapter:
 ### Check if Databases Are Running
 
 #### PostgreSQL
+
 ```bash
 docker ps | grep bookstore-postgres
 ```
+
 #### MongoDB
+
 ```bash
 docker ps | grep bookstore-mongo
 ```
 
 ### Start PostgreSQL Container (Inventory DB)
+
 ```bash
 docker run -d \
     --name bookstore-postgres \
@@ -56,6 +58,7 @@ docker run -d \
 ```
 
 ### Start MongoDB Container (User DB)
+
 ```bash
 docker run -d \
     --name bookstore-mongo \
@@ -78,13 +81,13 @@ Spring Boot uses stereotype annotations to define components and manage dependen
 
 ### Core Spring Stereotypes
 
-| Annotation | Purpose | Layer |
-|------------|---------|-------|
-| **@Component** | Generic Spring bean | Any |
-| **@Service** | Business logic | Service layer |
-| **@Repository** | Data access | Persistence layer |
-| **@RestController** | REST API endpoints | Controller layer |
-| **@Configuration** | Configuration class | Configuration |
+| Annotation          | Purpose             | Layer             |
+| ------------------- | ------------------- | ----------------- |
+| **@Component**      | Generic Spring bean | Any               |
+| **@Service**        | Business logic      | Service layer     |
+| **@Repository**     | Data access         | Persistence layer |
+| **@RestController** | REST API endpoints  | Controller layer  |
+| **@Configuration**  | Configuration class | Configuration     |
 
 ### Component Scanning
 
@@ -104,7 +107,7 @@ public class InventoryServiceApplication {
 ```java
 @Component
 public class BookMapper {
-    
+
     public Book toEntity(BookRequest req, Author author) {
         Book book = new Book();
         book.setTitle(req.title());
@@ -114,7 +117,7 @@ public class BookMapper {
         book.setQuantity(req.quantity());
         return book;
     }
-    
+
     public BookResponse toResponse(Book book) {
         return new BookResponse(
             book.getId(),
@@ -135,13 +138,13 @@ public class BookMapper {
 ```java
 @Service
 public class BookService {
-    
+
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final BookMapper mapper;
-    
+
     // Constructor injection - mandatory dependencies
-    public BookService(BookRepository bookRepository, 
+    public BookService(BookRepository bookRepository,
                       AuthorRepository authorRepository,
                       BookMapper mapper) {
         this.bookRepository = bookRepository;
@@ -191,8 +194,8 @@ public class BookService implements IBookService {
     private final AuthorRepository authors;
     private final BookMapper mapper;
 
-    public BookService(BookRepository books, 
-                      AuthorRepository authors, 
+    public BookService(BookRepository books,
+                      AuthorRepository authors,
                       BookMapper mapper) {
         this.books = books;
         this.authors = authors;
@@ -231,16 +234,16 @@ public class BookService implements IBookService {
     public BookResponse replace(Long id, BookRequest req) {
         Book existing = books.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Book", id));
-        
+
         validateSemanticsForUpdate(req, existing);
         Author author = resolveAuthor(req.authorName());
-        
+
         existing.setTitle(req.title());
         existing.setIsbn(req.isbn());
         existing.setAuthor(author);
         existing.setPrice(req.price());
         existing.setQuantity(req.quantity());
-        
+
         Book saved = books.save(existing);
         return mapper.toResponse(saved);
     }
@@ -250,7 +253,7 @@ public class BookService implements IBookService {
     public BookResponse patch(Long id, BookRequest req) {
         Book existing = books.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Book", id));
-        
+
         if (req.title() != null) {
             existing.setTitle(req.title());
         }
@@ -260,7 +263,7 @@ public class BookService implements IBookService {
         if (req.quantity() != null) {
             existing.setQuantity(req.quantity());
         }
-        
+
         Book saved = books.save(existing);
         return mapper.toResponse(saved);
     }
@@ -288,13 +291,13 @@ public class BookService implements IBookService {
         if (sortSpec == null || sortSpec.isEmpty()) {
             return Sort.by("id").ascending();
         }
-        
+
         String[] parts = sortSpec.split(",");
         String property = parts[0];
-        Sort.Direction direction = parts.length > 1 && 
-            parts[1].equalsIgnoreCase("desc") ? 
+        Sort.Direction direction = parts.length > 1 &&
+            parts[1].equalsIgnoreCase("desc") ?
             Sort.Direction.DESC : Sort.Direction.ASC;
-        
+
         return Sort.by(direction, property);
     }
 
@@ -390,7 +393,7 @@ public class BookController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sort) {
-        
+
         List<BookResponse> books = bookService.findAll(page, size, sort);
         return ResponseEntity.ok(books);
     }
@@ -404,7 +407,7 @@ public class BookController {
     @PostMapping
     public ResponseEntity<BookResponse> createBook(
             @Valid @RequestBody BookRequest request) {
-        
+
         BookResponse created = bookService.create(request);
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -415,7 +418,7 @@ public class BookController {
     public ResponseEntity<BookResponse> replaceBook(
             @PathVariable Long id,
             @Valid @RequestBody BookRequest request) {
-        
+
         BookResponse updated = bookService.replace(id, request);
         return ResponseEntity.ok(updated);
     }
@@ -424,7 +427,7 @@ public class BookController {
     public ResponseEntity<BookResponse> patchBook(
             @PathVariable Long id,
             @RequestBody BookRequest request) {
-        
+
         BookResponse updated = bookService.patch(id, request);
         return ResponseEntity.ok(updated);
     }
@@ -439,15 +442,15 @@ public class BookController {
 
 ### HTTP Status Codes
 
-| Status Code | Usage | Example |
-|-------------|-------|---------|
-| 200 OK | Successful GET, PUT, PATCH | Retrieving or updating a book |
-| 201 Created | Successful POST | Creating a new book |
-| 204 No Content | Successful DELETE | Deleting a book |
-| 400 Bad Request | Validation failure | Invalid ISBN format |
-| 404 Not Found | Resource not found | Book ID doesn't exist |
-| 409 Conflict | Business rule violation | Duplicate ISBN |
-| 500 Internal Error | Unexpected server error | Database connection failure |
+| Status Code        | Usage                      | Example                       |
+| ------------------ | -------------------------- | ----------------------------- |
+| 200 OK             | Successful GET, PUT, PATCH | Retrieving or updating a book |
+| 201 Created        | Successful POST            | Creating a new book           |
+| 204 No Content     | Successful DELETE          | Deleting a book               |
+| 400 Bad Request    | Validation failure         | Invalid ISBN format           |
+| 404 Not Found      | Resource not found         | Book ID doesn't exist         |
+| 409 Conflict       | Business rule violation    | Duplicate ISBN                |
+| 500 Internal Error | Unexpected server error    | Database connection failure   |
 
 ---
 
@@ -459,18 +462,18 @@ public class BookController {
 public record BookRequest(
     @NotBlank(message = "Title is required")
     String title,
-    
+
     @NotBlank(message = "ISBN is required")
     @Pattern(regexp = "^[0-9-]{10,17}$", message = "Invalid ISBN format")
     String isbn,
-    
+
     @NotBlank(message = "Author name is required")
     String authorName,
-    
+
     @NotNull(message = "Price is required")
     @PositiveOrZero(message = "Price must be zero or positive")
     BigDecimal price,
-    
+
     @NotNull(message = "Quantity is required")
     @Min(value = 0, message = "Quantity must be zero or positive")
     Integer quantity
@@ -500,9 +503,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleResourceNotFound(
-            ResourceNotFoundException ex, 
+            ResourceNotFoundException ex,
             WebRequest request) {
-        
+
         ApiError error = new ApiError(
             HttpStatus.NOT_FOUND.value(),
             ex.getMessage(),
@@ -515,12 +518,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleValidationException(
             MethodArgumentNotValidException ex,
             WebRequest request) {
-        
+
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
             errors.put(error.getField(), error.getDefaultMessage())
         );
-        
+
         ApiError error = new ApiError(
             HttpStatus.BAD_REQUEST.value(),
             "Validation failed",
@@ -533,7 +536,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleDomainRuleViolation(
             DomainRuleViolationException ex,
             WebRequest request) {
-        
+
         ApiError error = new ApiError(
             HttpStatus.CONFLICT.value(),
             ex.getMessage(),
@@ -546,7 +549,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleGlobalException(
             Exception ex,
             WebRequest request) {
-        
+
         ApiError error = new ApiError(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
             "An unexpected error occurred",
@@ -583,12 +586,12 @@ public class ApiError {
 
 ### Comparison of Versioning Strategies
 
-| Strategy | Implementation | Pros | Cons | Best For |
-|---------|----------------|------|------|----------|
-| **URI Versioning** | `/api/v1/books` | Simple, visible, easy to test | URL churn, routing complexity | Public APIs, mobile apps |
-| **Header Versioning** | `X-API-Version: 1` | Clean URLs, flexible | Harder to debug, test | Internal APIs, B2B |
-| **Content Negotiation** | `Accept: application/vnd.api+json;version=1` | RESTful, standard | Client complexity | Enterprise systems |
-| **Query Parameter** | `/api/books?version=1` | Simple | Not RESTful | Legacy support |
+| Strategy                | Implementation                               | Pros                          | Cons                          | Best For                 |
+| ----------------------- | -------------------------------------------- | ----------------------------- | ----------------------------- | ------------------------ |
+| **URI Versioning**      | `/api/v1/books`                              | Simple, visible, easy to test | URL churn, routing complexity | Public APIs, mobile apps |
+| **Header Versioning**   | `X-API-Version: 1`                           | Clean URLs, flexible          | Harder to debug, test         | Internal APIs, B2B       |
+| **Content Negotiation** | `Accept: application/vnd.api+json;version=1` | RESTful, standard             | Client complexity             | Enterprise systems       |
+| **Query Parameter**     | `/api/books?version=1`                       | Simple                        | Not RESTful                   | Legacy support           |
 
 ### URI Versioning Example
 
@@ -653,7 +656,7 @@ class BookServiceTest {
         Long id = 1L;
         Book book = new Book();
         book.setId(id);
-        BookResponse response = new BookResponse(id, "Test", "123", "Author", 
+        BookResponse response = new BookResponse(id, "Test", "123", "Author",
                                                  BigDecimal.TEN, 5, null, null);
 
         when(bookRepository.findById(id)).thenReturn(Optional.of(book));
@@ -675,14 +678,14 @@ class BookServiceTest {
         when(bookRepository.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(ResourceNotFoundException.class, 
+        assertThrows(ResourceNotFoundException.class,
                     () -> bookService.findOne(id));
     }
 
     @Test
     void create_shouldSaveBook_whenValid() {
         // Given
-        BookRequest request = new BookRequest("Test Book", "1234567890", 
+        BookRequest request = new BookRequest("Test Book", "1234567890",
                                               "John Doe", BigDecimal.TEN, 5);
         Author author = new Author();
         author.setName("John Doe");
@@ -739,7 +742,7 @@ class BookControllerTest {
     void getAllBooks_shouldReturn200() throws Exception {
         // Given
         List<BookResponse> books = List.of(
-            new BookResponse(1L, "Book 1", "123", "Author 1", 
+            new BookResponse(1L, "Book 1", "123", "Author 1",
                            BigDecimal.TEN, 5, null, null)
         );
         when(bookService.findAll(0, 10, null)).thenReturn(books);
@@ -854,29 +857,30 @@ Add to `pom.xml`:
 ### 2. Configure Application Properties
 
 spring:
+
 ```yaml
 server:
-    port: 8081
-    servlet:
-        context-path: /inventory
+  port: 8081
+  servlet:
+    context-path: /inventory
 
 spring:
-    application:
-        name: inventory-service
+  application:
+    name: inventory-service
 
-    main:
-        allow-bean-definition-overriding: true
+  main:
+    allow-bean-definition-overriding: true
 
-    profiles:
-        active: dev
+  profiles:
+    active: dev
 
-    java:
-        version: 25
+  java:
+    version: 25
 
 logging:
-    level:
-        com.bookstore: DEBUG
-        org.springframework.web: DEBUG
+  level:
+    com.bookstore: DEBUG
+    org.springframework.web: DEBUG
 ```
 
 ### 3. Run the Application

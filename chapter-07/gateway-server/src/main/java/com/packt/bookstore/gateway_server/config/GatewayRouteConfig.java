@@ -35,9 +35,7 @@ public class GatewayRouteConfig {
                                 .circuitBreaker(config -> config
                                         .setName("inventoryCB")
                                         .setFallbackUri("forward:/fallback/inventory")
-                                        .setRouteId("packt-inventory-service")
-                                        )
-                        )
+                                        .setRouteId("packt-inventory-service")))
                         .uri("lb://inventory-service") // HandlerMapping - service discovery
                 )
 

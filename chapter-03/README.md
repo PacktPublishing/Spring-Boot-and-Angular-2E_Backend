@@ -1,4 +1,5 @@
 # Chapter 03 — Setting Up Your AI Development Assistant
+
 AI assistants have become an essential part of the modern development workflow. In this chapter, we explore how tools like GitHub Copilot, Cursor, and Claude enhance your productivity by generating code, refactoring safely, helping with debugging, and accelerating both Java Spring Boot and Angular development.
 
 This README provides a structured reference for everything covered in the chapter, including comparisons of the tools, configuration steps, code examples, and best practices.
@@ -7,17 +8,37 @@ This README provides a structured reference for everything covered in the chapte
 
 ## Table of Contents
 
-1. [Chapter Overview](#chapter-overview)
-2. [The Rise of AI Development Assistants](#the-rise-of-ai-development-assistants)
-3. [Comparing Leading Tools: Cursor, Claude & GitHub Copilot](#comparing-leading-tools-cursor-claude--github-copilot)
-4. [Why GitHub Copilot Works Best with VS Code](#why-github-copilot-works-best-with-vs-code)
-5. [Installing & Configuring GitHub Copilot in VS Code](#installing--configuring-github-copilot-in-vs-code)
-6. [Using GitHub Copilot in Spring Boot & Angular Projects](#using-github-copilot-in-spring-boot--angular-projects)
-7. [Prompt Engineering for Developers](#prompt-engineering-for-developers)
-8. [Best Practices for AI Pair Programming](#best-practices-for-ai-pair-programming)
-9. [Limitations & Future Directions of GenAI](#limitations--future-directions-of-genai)
-10. [Installation & Setup Steps](#installation--setup-steps)
-11. [Resources & References](#resources--references)
+- [Chapter 03 — Setting Up Your AI Development Assistant](#chapter-03--setting-up-your-ai-development-assistant)
+  - [Table of Contents](#table-of-contents)
+  - [Chapter Overview](#chapter-overview)
+  - [✅ Before You Run This Chapter](#-before-you-run-this-chapter)
+  - [📦 Chapter Source Code Availability](#-chapter-source-code-availability)
+  - [The Rise of AI Development Assistants](#the-rise-of-ai-development-assistants)
+    - [How AI Accelerates Development](#how-ai-accelerates-development)
+  - [Comparing Leading Tools: Cursor, Claude \& GitHub Copilot](#comparing-leading-tools-cursor-claude--github-copilot)
+    - [Quick Comparison Table](#quick-comparison-table)
+  - [Why GitHub Copilot Works Best with VS Code](#why-github-copilot-works-best-with-vs-code)
+  - [Installing \& Configuring GitHub Copilot in VS Code](#installing--configuring-github-copilot-in-vs-code)
+    - [1. Install Copilot Extensions](#1-install-copilot-extensions)
+    - [2. Authenticate](#2-authenticate)
+    - [3. Enable Key Features](#3-enable-key-features)
+  - [Using GitHub Copilot in Spring Boot \& Angular Projects](#using-github-copilot-in-spring-boot--angular-projects)
+    - [Example: Generate a full REST Endpoint](#example-generate-a-full-rest-endpoint)
+    - [Example: Create Repository Methods](#example-create-repository-methods)
+    - [Example: Generate Angular Service](#example-generate-angular-service)
+  - [Prompt Engineering for Developers](#prompt-engineering-for-developers)
+    - [Example Prompt Patterns](#example-prompt-patterns)
+  - [Best Practices for AI Pair Programming](#best-practices-for-ai-pair-programming)
+    - [✔ DO](#-do)
+    - [❌ AVOID](#-avoid)
+  - [Limitations \& Future Directions of GenAI](#limitations--future-directions-of-genai)
+  - [Installation \& Setup Steps](#installation--setup-steps)
+    - [1. Install VS Code](#1-install-vs-code)
+    - [2. Install GitHub Copilot](#2-install-github-copilot)
+    - [3. Install Java Extensions](#3-install-java-extensions)
+    - [4. Install Angular Tools](#4-install-angular-tools)
+    - [5. Clone the Bookstore Repositories](#5-clone-the-bookstore-repositories)
+  - [Resources \& References](#resources--references)
 
 ---
 
@@ -72,13 +93,13 @@ AI coding tools have transformed development from simple autocomplete to full co
 
 ### Quick Comparison Table
 
-| Feature / Use Case | Cursor IDE | Claude | GitHub Copilot |
-|--------------------|------------|--------|----------------|
-| Project-wide context | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Inline code generation | ⭐⭐⭐⭐⭐ | Not supported | ⭐⭐⭐⭐⭐ |
-| Refactoring support | Strong | Insightful | Suggestive |
-| Architecture reasoning | Good | Excellent | Moderate |
-| IDE Integration | Cursor | Standalone app | VS Code, IntelliJ |
+| Feature / Use Case     | Cursor IDE | Claude         | GitHub Copilot    |
+| ---------------------- | ---------- | -------------- | ----------------- |
+| Project-wide context   | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐     | ⭐⭐⭐            |
+| Inline code generation | ⭐⭐⭐⭐⭐ | Not supported  | ⭐⭐⭐⭐⭐        |
+| Refactoring support    | Strong     | Insightful     | Suggestive        |
+| Architecture reasoning | Good       | Excellent      | Moderate          |
+| IDE Integration        | Cursor     | Standalone app | VS Code, IntelliJ |
 
 ---
 
@@ -248,4 +269,5 @@ git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend
 - **VS Code Documentation**: <https://code.visualstudio.com/docs>
 - **Cursor IDE**: <https://cursor.com>
 - **Claude AI**: <https://claude.ai>
+
 ---

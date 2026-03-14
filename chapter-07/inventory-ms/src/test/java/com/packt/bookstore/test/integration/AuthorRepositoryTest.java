@@ -12,7 +12,7 @@ import com.packt.bookstore.inventory.InventoryMsApplication;
 import com.packt.bookstore.inventory.entity.Author;
 import com.packt.bookstore.inventory.repository.AuthorRepository;
 
-@SpringBootTest(classes = InventoryMsApplication.class)  // Explicitly specify the configuration class
+@SpringBootTest(classes = InventoryMsApplication.class) // Explicitly specify the configuration class
 class AuthorRepositoryTest {
 
     @Autowired

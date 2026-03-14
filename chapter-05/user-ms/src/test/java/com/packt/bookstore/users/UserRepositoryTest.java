@@ -1,19 +1,20 @@
 package com.packt.bookstore.users;
-import com.packt.bookstore.users.entity.User;
-import com.packt.bookstore.users.repository.UserRepository;
-import com.packt.bookstore.users.entity.Profile;
-import com.packt.bookstore.users.entity.Preferences;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import com.packt.bookstore.users.entity.Preferences;
+import com.packt.bookstore.users.entity.Profile;
+import com.packt.bookstore.users.entity.User;
+import com.packt.bookstore.users.repository.UserRepository;
 
 @SpringBootTest(classes = UserMsApplication.class)
 @ActiveProfiles("test")
@@ -54,10 +55,11 @@ class UserRepositoryTest {
         assertThat(users).isNotEmpty();
         assertThat(users.get(0).getEmail()).isEqualTo("agohar@packt.com");
     }
+
     @Test
     void testFindByLanguagePreference() {
         List<User> users = userRepository.findByLanguagePreference("en");
         assertThat(users).isNotEmpty();
         assertThat(users.get(0).getPreferences().getLanguage()).isEqualTo("en");
-    }   
+    }
 }

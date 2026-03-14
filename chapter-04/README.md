@@ -25,8 +25,6 @@ This chapter focuses on building the persistence layer for the Bookstore applica
 
 This chapter provides comprehensive coverage of database persistence strategies for microservices. You'll learn:
 
-
-
 ## ✅ Before You Run This Chapter
 
 Please confirm the required runtime dependencies before running this chapter:
@@ -38,15 +36,19 @@ Please confirm the required runtime dependencies before running this chapter:
 ### Check if Databases Are Running
 
 #### PostgreSQL
+
 ```bash
 docker ps | grep bookstore-postgres
 ```
+
 #### MongoDB
+
 ```bash
 docker ps | grep bookstore-mongo
 ```
 
 ### Start PostgreSQL Container (Inventory DB)
+
 ```bash
 docker run -d \
   --name bookstore-postgres \
@@ -58,6 +60,7 @@ docker run -d \
 ```
 
 ### Start MongoDB Container (User DB)
+
 ```bash
 docker run -d \
   --name bookstore-mongo \
@@ -92,14 +95,14 @@ Microservices benefit from **polyglot persistence**, choosing the right database
 
 ### Database Comparison
 
-| Feature | PostgreSQL | MongoDB |
-|--------|------------|---------|
-| Data Model | Tables | Documents |
-| Schema | Strict | Flexible |
-| Query Language | SQL | BSON |
-| Transactions | Full ACID | ACID (with sessions) |
-| Best For | Structured, relational data | Dynamic profile-like data |
-| Scalability | Vertical + Horizontal | Horizontal |
+| Feature        | PostgreSQL                  | MongoDB                   |
+| -------------- | --------------------------- | ------------------------- |
+| Data Model     | Tables                      | Documents                 |
+| Schema         | Strict                      | Flexible                  |
+| Query Language | SQL                         | BSON                      |
+| Transactions   | Full ACID                   | ACID (with sessions)      |
+| Best For       | Structured, relational data | Dynamic profile-like data |
+| Scalability    | Vertical + Horizontal       | Horizontal                |
 
 ---
 
@@ -267,7 +270,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findLowStockBooks(@Param("threshold") int threshold);
 
     // Native SQL query
-    @Query(value = "SELECT * FROM books WHERE price > :minPrice ORDER BY price DESC", 
+    @Query(value = "SELECT * FROM books WHERE price > :minPrice ORDER BY price DESC",
            nativeQuery = true)
     List<Book> findExpensiveBooks(@Param("minPrice") BigDecimal minPrice);
 }
@@ -454,15 +457,15 @@ public interface UserRepository extends MongoRepository<User, String> {
 
 ### Comparison Table
 
-| Practice | JPA | MongoDB |
-|---------|-----|----------|
-| Single Result | Optional<Book> | Optional<User> |
-| Nested Fields | author.name | profile.address.city |
-| Custom Queries | @Query JPQL | @Query JSON |
-| Pagination | Pageable | Pageable |
-| Indexing | DB indexes | @Indexed |
-| Lazy Loading | @ManyToOne(LAZY) | N/A (embedded) |
-| Transactions | @Transactional | @Transactional |
+| Practice       | JPA              | MongoDB              |
+| -------------- | ---------------- | -------------------- |
+| Single Result  | Optional<Book>   | Optional<User>       |
+| Nested Fields  | author.name      | profile.address.city |
+| Custom Queries | @Query JPQL      | @Query JSON          |
+| Pagination     | Pageable         | Pageable             |
+| Indexing       | DB indexes       | @Indexed             |
+| Lazy Loading   | @ManyToOne(LAZY) | N/A (embedded)       |
+| Transactions   | @Transactional   | @Transactional       |
 
 ### Best Practices
 

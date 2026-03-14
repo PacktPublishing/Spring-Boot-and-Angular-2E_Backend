@@ -23,7 +23,7 @@ management:
       show-details: always
   tracing:
     sampling:
-      probability: 1.0  # Trace all requests
+      probability: 1.0 # Trace all requests
     baggage:
       correlation:
         enabled: true

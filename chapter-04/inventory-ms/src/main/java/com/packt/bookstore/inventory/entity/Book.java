@@ -40,5 +40,4 @@ public class Book extends Auditable {
     private String description;
     private Integer pageCount;
     private String coverImageUrl;
-
 }

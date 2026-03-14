@@ -111,13 +111,13 @@ They communicate through lightweight protocols, typically REST or messaging, and
 
 This chapter introduces patterns that continue in later chapters:
 
-| Pattern | Why it matters |
-| ------- | -------------- |
-| API Gateway | Single client entry point |
-| Database per Service | Strong service ownership |
-| Circuit Breaker | Failure isolation |
-| Centralized Observability | Faster debugging |
-| Service Discovery | Dynamic routing in distributed systems |
+| Pattern                   | Why it matters                         |
+| ------------------------- | -------------------------------------- |
+| API Gateway               | Single client entry point              |
+| Database per Service      | Strong service ownership               |
+| Circuit Breaker           | Failure isolation                      |
+| Centralized Observability | Faster debugging                       |
+| Service Discovery         | Dynamic routing in distributed systems |
 
 ---
 
@@ -278,4 +278,3 @@ This baseline is used directly in Chapter 03 and then expanded into persistence,
 - [Spring Initializr](https://start.spring.io)
 - [Microservices.io](https://microservices.io)
 - [Spring Cloud](https://spring.io/projects/spring-cloud)
-

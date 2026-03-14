@@ -38,7 +38,8 @@ public class AuthorService {
         return authorRepository.findAllWithBooksPaginated(PageRequest.of(page, size))
                 .map(authorMapper::toResponse);
     }
-@Transactional(readOnly = true)
+
+    @Transactional(readOnly = true)
     public AuthorResponse findById(Long id) {
         Author author = authorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Author not found"));
@@ -67,27 +68,27 @@ public class AuthorService {
         if (!existingAuthors.isEmpty()) {
             throw new DomainRuleViolationException("Author with name '" + request.name() + "' already exists");
         }
-        
+
         Author author = authorMapper.toEntity(request);
         Author saved = authorRepository.save(author);
         return authorMapper.toResponse(saved);
     }
 
     public AuthorResponse update(Long id, AuthorRequest request) {
-    Author existing = authorRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Author not found"));
-    
-    // Create new author with updated fields
-    Author updated = Author.builder()
-            .id(existing.getId())
-            .name(request.name())
-            .nationality(request.nationality())
-            .books(existing.getBooks())
-            .build();
-    
-    Author saved = authorRepository.save(updated);
-    return authorMapper.toResponse(saved);
-}
+        Author existing = authorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Author not found"));
+
+        // Create new author with updated fields
+        Author updated = Author.builder()
+                .id(existing.getId())
+                .name(request.name())
+                .nationality(request.nationality())
+                .books(existing.getBooks())
+                .build();
+
+        Author saved = authorRepository.save(updated);
+        return authorMapper.toResponse(saved);
+    }
 
     public void delete(Long id) {
         if (!authorRepository.existsById(id)) {

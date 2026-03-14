@@ -26,4 +26,3 @@ public class UserProfileDTO {
     private String role;
     private Boolean enabled;
 }
-

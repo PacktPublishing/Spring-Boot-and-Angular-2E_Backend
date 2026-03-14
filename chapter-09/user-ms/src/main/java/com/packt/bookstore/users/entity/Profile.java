@@ -21,5 +21,4 @@ public class Profile {
 
     private String profilePictureUrl;
 
-
 }

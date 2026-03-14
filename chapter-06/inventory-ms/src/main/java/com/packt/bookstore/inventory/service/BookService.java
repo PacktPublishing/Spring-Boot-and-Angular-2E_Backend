@@ -99,7 +99,7 @@ public class BookService implements IBookService {
         bookMapper.patch(existing, req, author);
 
         var saved = trySave(existing);
-               return bookMapper.toResponse(saved);
+        return bookMapper.toResponse(saved);
     }
 
     @Override
@@ -121,9 +121,9 @@ public class BookService implements IBookService {
         return "desc".equals(dir) ? Sort.by(field).descending() : Sort.by(field).ascending();
     }
 
-
     private Author resolveAuthorById(Long id) {
-        if (id == null) throw new DomainRuleViolationException("Author ID is required");
+        if (id == null)
+            throw new DomainRuleViolationException("Author ID is required");
         return authorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Author " + id + " not found"));
     }

@@ -15,15 +15,15 @@ import com.packt.bookstore.inventory.entity.Author;
 public interface AuthorRepository extends JpaRepository<Author, Long> {
     Author findByName(String name);
 
-     // Fetch authors with books in a single query
-    @EntityGraph(attributePaths = {"books"})
+    // Fetch authors with books in a single query
+    @EntityGraph(attributePaths = { "books" })
     @Query("SELECT a FROM Author a")
     List<Author> findAllWithBooks();
-    
-    @EntityGraph(attributePaths = {"books"})
+
+    @EntityGraph(attributePaths = { "books" })
     @Query("SELECT a FROM Author a WHERE a.id = :id")
     Optional<Author> findByIdWithBooks(@Param("id") Long id);
-    
+
     // Regular methods without books (when you don't need them)
     Optional<Author> findByNameIgnoreCase(String name);
 }

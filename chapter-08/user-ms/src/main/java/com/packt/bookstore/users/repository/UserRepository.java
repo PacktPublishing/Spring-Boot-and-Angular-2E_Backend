@@ -20,5 +20,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     List<User> findByLanguagePreference(String language);
 
     Optional<User> findByKeycloakId(String keycloakId);
+
     boolean existsByEmail(String email);
 }

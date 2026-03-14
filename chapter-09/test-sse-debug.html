@@ -1,187 +1,522 @@
-<!DOCTYPE html>
-<html>
-<head>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SSE Debug Console</title>
     <style>
-        body { 
-            font-family: 'Courier New', monospace; 
-            padding: 20px; 
-            background: #0d1117; 
-            color: #c9d1d9; 
+      :root {
+        color-scheme: dark;
+        --page: #0f172a;
+        --panel: #111c34;
+        --panel-border: #24324d;
+        --muted: #95a3bf;
+        --text: #e5edf9;
+        --accent: #7dd3fc;
+        --success: #34d399;
+        --warning: #fbbf24;
+        --danger: #f87171;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+        background:
+          radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 30%),
+          linear-gradient(180deg, #0b1220 0%, var(--page) 100%);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .panel {
+        background: rgba(17, 28, 52, 0.92);
+        border: 1px solid var(--panel-border);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 18px 40px rgba(3, 10, 25, 0.35);
+      }
+
+      .header {
+        margin-bottom: 18px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      .subtitle {
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .stack {
+        display: grid;
+        gap: 16px;
+      }
+
+      .controls,
+      .config {
+        display: grid;
+        gap: 12px;
+      }
+
+      .config-row {
+        display: grid;
+        gap: 6px;
+      }
+
+      label {
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      input,
+      select,
+      button {
+        border-radius: 10px;
+        border: 1px solid var(--panel-border);
+        font: inherit;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        background: #0b1327;
+        color: var(--text);
+      }
+
+      button {
+        padding: 12px 14px;
+        background: #13203a;
+        color: var(--text);
+        cursor: pointer;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        border-color: var(--accent);
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .primary {
+        background: linear-gradient(135deg, #0f766e, #0ea5a5);
+        border-color: transparent;
+      }
+
+      .danger {
+        background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+        border-color: transparent;
+      }
+
+      .status {
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid var(--panel-border);
+        background: #0b1327;
+      }
+
+      .status.connected {
+        border-color: rgba(52, 211, 153, 0.55);
+        color: var(--success);
+      }
+
+      .status.reconnecting {
+        border-color: rgba(251, 191, 36, 0.55);
+        color: var(--warning);
+      }
+
+      .status.disconnected {
+        border-color: rgba(248, 113, 113, 0.55);
+        color: var(--danger);
+      }
+
+      .metric {
+        padding: 14px;
+        border-radius: 12px;
+        background: #0b1327;
+        border: 1px solid var(--panel-border);
+      }
+
+      .metric-label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .metric-value {
+        margin-top: 8px;
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .metric-text {
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .help {
+        color: var(--muted);
+        line-height: 1.7;
+        padding-left: 18px;
+      }
+
+      .log {
+        margin-top: 16px;
+        max-height: 620px;
+        overflow-y: auto;
+        display: grid;
+        gap: 10px;
+      }
+
+      .log-entry {
+        padding: 12px 14px;
+        border-left: 4px solid var(--accent);
+        border-radius: 10px;
+        background: #0b1327;
+        line-height: 1.6;
+      }
+
+      .log-entry.success {
+        border-left-color: var(--success);
+      }
+
+      .log-entry.error {
+        border-left-color: var(--danger);
+      }
+
+      .log-entry.event {
+        border-left-color: var(--warning);
+      }
+
+      .log-entry.info {
+        border-left-color: var(--accent);
+      }
+
+      pre {
+        margin: 8px 0 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      @media (max-width: 900px) {
+        body {
+          padding: 16px;
         }
-        .log { 
-            background: #161b22; 
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 15px; 
-            margin: 10px 0; 
-            max-height: 600px; 
-            overflow-y: auto; 
+
+        .grid {
+          grid-template-columns: 1fr;
         }
-        .log-entry { 
-            margin: 5px 0; 
-            padding: 8px;
-            border-left: 3px solid #58a6ff;
-            background: #0d1117;
-        }
-        .success { border-left-color: #3fb950; }
-        .error { border-left-color: #f85149; background: #1c1719; }
-        .event { border-left-color: #ffa657; }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            background: #238636;
-            color: white;
-            border: 1px solid #2ea043;
-            border-radius: 6px;
-        }
-        button:hover { background: #2ea043; }
-        .status { 
-            padding: 10px; 
-            margin: 10px 0; 
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        .connected { background: #1a2718; color: #3fb950; border: 1px solid #2ea043; }
-        .disconnected { background: #1c1719; color: #f85149; border: 1px solid #da3633; }
+      }
     </style>
-</head>
-<body>
-    <h1>🔍 SSE Debug Console</h1>
-    <p>This page shows RAW SSE events and helps debug connection issues.</p>
-    
-    <button onclick="connect()">Connect</button>
-    <button onclick="disconnect()">Disconnect</button>
-    <button onclick="clearLog()">Clear Log</button>
-    
-    <div id="status" class="status disconnected">❌ Disconnected</div>
-    
-    <h2>Raw Event Log:</h2>
-    <div class="log" id="log"></div>
+  </head>
+  <body>
+    <div class="container">
+      <div class="panel header">
+        <h1>SSE Debug Console</h1>
+        <p class="subtitle">
+          Use this page to inspect raw SSE frames, verify subscriber counts, and
+          confirm that authenticated book writes emit the expected events.
+        </p>
+      </div>
+
+      <div class="grid">
+        <div class="panel stack">
+          <div class="config">
+            <div class="config-row">
+              <label for="gatewayUrl">Gateway URL</label>
+              <input id="gatewayUrl" type="text" value="http://localhost:8080" />
+            </div>
+            <div class="config-row">
+              <label for="eventFilter">Stream Filter</label>
+              <select id="eventFilter">
+                <option value="all">All events</option>
+                <option value="NEW_BOOK">NEW_BOOK only</option>
+                <option value="PRICE_CHANGE">PRICE_CHANGE only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button id="connectButton" class="primary" onclick="connect()">
+              Connect
+            </button>
+            <button id="disconnectButton" class="danger" onclick="disconnect()" disabled>
+              Disconnect
+            </button>
+            <button onclick="checkStatus()">Check Service Status</button>
+            <button onclick="clearLog()">Clear Log</button>
+          </div>
+
+          <div id="connectionStatus" class="status disconnected">
+            Disconnected
+          </div>
+        </div>
+
+        <div class="panel stack">
+          <div class="metric">
+            <div class="metric-label">Service Status</div>
+            <div id="serviceStatus" class="metric-value">Unknown</div>
+            <div id="serviceMessage" class="metric-text">Run a status check to confirm the notification endpoint is reachable.</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Active Subscribers</div>
+            <div id="activeSubscribers" class="metric-value">--</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Events Seen</div>
+            <div id="eventCount" class="metric-value">0</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Validation Flow</div>
+            <ol class="help">
+              <li>Connect to the stream.</li>
+              <li>Sign in at /packt/user/api/users/signin.</li>
+              <li>Fetch or create an author to get a valid authorId.</li>
+              <li>Create a book, then patch its price.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Raw Event Log</h2>
+        <div id="log" class="log"></div>
+      </div>
+    </div>
 
     <script>
-        let eventSource = null;
-        let eventCount = 0;
+      let eventSource = null;
+      let eventCount = 0;
 
-        function log(message, type = 'info') {
-            const logDiv = document.getElementById('log');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry ' + type;
-            const timestamp = new Date().toISOString();
-            entry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
-            logDiv.insertBefore(entry, logDiv.firstChild);
-            console.log(message); // Also log to browser console
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (character) => {
+          const entities = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          };
+          return entities[character];
+        });
+      }
+
+      function gatewayUrl() {
+        return document.getElementById("gatewayUrl").value.trim().replace(/\/+$/, "");
+      }
+
+      function streamUrl() {
+        const filter = document.getElementById("eventFilter").value;
+        const base = `${gatewayUrl()}/packt/inventory/api/notifications/stream`;
+        return filter === "all" ? base : `${base}/filtered?eventType=${filter}`;
+      }
+
+      function statusUrl() {
+        return `${gatewayUrl()}/packt/inventory/api/notifications/status`;
+      }
+
+      function setConnectionStatus(kind, text) {
+        const status = document.getElementById("connectionStatus");
+        status.className = `status ${kind}`;
+        status.textContent = text;
+      }
+
+      function appendLog(message, type = "info") {
+        const log = document.getElementById("log");
+        const entry = document.createElement("div");
+        const timestamp = new Date().toISOString();
+        entry.className = `log-entry ${type}`;
+        entry.innerHTML = `<strong>[${escapeHtml(timestamp)}]</strong> ${message}`;
+        log.prepend(entry);
+      }
+
+      function appendJson(label, value, type = "event") {
+        appendLog(
+          `${escapeHtml(label)}<pre>${escapeHtml(JSON.stringify(value, null, 2))}</pre>`,
+          type,
+        );
+      }
+
+      function setButtons(connected) {
+        document.getElementById("connectButton").disabled = connected;
+        document.getElementById("disconnectButton").disabled = !connected;
+      }
+
+      function clearLog() {
+        document.getElementById("log").innerHTML = "";
+        eventCount = 0;
+        document.getElementById("eventCount").textContent = "0";
+        appendLog("Log cleared.", "info");
+      }
+
+      async function checkStatus() {
+        try {
+          const response = await fetch(statusUrl());
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          document.getElementById("serviceStatus").textContent = data.status;
+          document.getElementById("activeSubscribers").textContent =
+            data.activeSubscribers;
+          document.getElementById("serviceMessage").textContent = data.message;
+          appendJson("Service status", data, "success");
+        } catch (error) {
+          document.getElementById("serviceStatus").textContent = "Unavailable";
+          document.getElementById("activeSubscribers").textContent = "--";
+          document.getElementById("serviceMessage").textContent =
+            "The status endpoint did not respond.";
+          appendLog(
+            `Status check failed for ${escapeHtml(statusUrl())}: ${escapeHtml(error.message)}`,
+            "error",
+          );
+        }
+      }
+
+      function handleNamedEvent(name, event) {
+        eventCount += 1;
+        document.getElementById("eventCount").textContent = String(eventCount);
+
+        appendLog(
+          `${escapeHtml(name)} event received${
+            event.lastEventId ? ` (id: ${escapeHtml(event.lastEventId)})` : ""
+          }.`,
+          "event",
+        );
+
+        try {
+          const parsed = JSON.parse(event.data);
+          appendJson(`${name} payload`, parsed, "event");
+        } catch (error) {
+          appendLog(
+            `Failed to parse ${escapeHtml(name)} payload: ${escapeHtml(error.message)}`,
+            "error",
+          );
+          appendLog(`<pre>${escapeHtml(event.data)}</pre>`, "error");
+        }
+      }
+
+      function connect() {
+        if (eventSource) {
+          appendLog("An SSE connection is already open.", "error");
+          return;
         }
 
-        function clearLog() {
-            document.getElementById('log').innerHTML = '';
-            eventCount = 0;
-            log('📋 Log cleared');
-        }
+        const url = streamUrl();
+        appendLog(`Connecting to ${escapeHtml(url)}`, "info");
+        setConnectionStatus("reconnecting", "Connecting...");
 
-        function connect() {
-            if (eventSource) {
-                log('⚠️ Already connected!', 'error');
-                return;
-            }
+        eventSource = new EventSource(url);
 
-            const url = 'http://localhost:8080/packt/inventory/api/notifications/stream';
-            log(`🔌 Connecting to: ${url}`, 'info');
-            
-            eventSource = new EventSource(url);
-
-            eventSource.onopen = function() {
-                document.getElementById('status').className = 'status connected';
-                document.getElementById('status').textContent = '✅ Connected';
-                log('✅ Connection OPENED successfully!', 'success');
-                log('📡 Listening for events... (use Postman to create/update a book)', 'success');
-            };
-
-            // Listen for ANY message (generic)
-            eventSource.onmessage = function(event) {
-                eventCount++;
-                log(`📨 GENERIC MESSAGE #${eventCount}:`, 'event');
-                log(`   Raw data: <pre>${event.data}</pre>`, 'event');
-                
-                try {
-                    const parsed = JSON.parse(event.data);
-                    log(`   Parsed JSON: <pre>${JSON.stringify(parsed, null, 2)}</pre>`, 'event');
-                } catch (e) {
-                    log(`   ⚠️ Not valid JSON: ${e.message}`, 'error');
-                }
-            };
-
-            // Listen for NEW_BOOK events
-            eventSource.addEventListener('NEW_BOOK', function(event) {
-                eventCount++;
-                log(`📚 NEW_BOOK EVENT #${eventCount}:`, 'event');
-                log(`   Event ID: ${event.lastEventId}`, 'event');
-                log(`   Raw data: <pre>${event.data}</pre>`, 'event');
-                
-                try {
-                    const parsed = JSON.parse(event.data);
-                    log(`   Book: "${parsed.bookTitle}" by ${parsed.eventData?.authorName}`, 'success');
-                    log(`   Price: $${parsed.eventData?.price}`, 'success');
-                } catch (e) {
-                    log(`   Parse error: ${e.message}`, 'error');
-                }
-            });
-
-            // Listen for PRICE_CHANGE events
-            eventSource.addEventListener('PRICE_CHANGE', function(event) {
-                eventCount++;
-                log(`💰 PRICE_CHANGE EVENT #${eventCount}:`, 'event');
-                log(`   Event ID: ${event.lastEventId}`, 'event');
-                log(`   Raw data: <pre>${event.data}</pre>`, 'event');
-                
-                try {
-                    const parsed = JSON.parse(event.data);
-                    log(`   Book: "${parsed.bookTitle}"`, 'success');
-                    log(`   Old: $${parsed.eventData?.oldPrice} → New: $${parsed.eventData?.newPrice}`, 'success');
-                } catch (e) {
-                    log(`   Parse error: ${e.message}`, 'error');
-                }
-            });
-
-            // Listen for errors
-            eventSource.onerror = function(error) {
-                log(`❌ ERROR occurred!`, 'error');
-                log(`   ReadyState: ${eventSource.readyState}`, 'error');
-                log(`   Error details: ${JSON.stringify(error)}`, 'error');
-                
-                if (eventSource.readyState === EventSource.CLOSED) {
-                    log('   Connection CLOSED', 'error');
-                    document.getElementById('status').className = 'status disconnected';
-                    document.getElementById('status').textContent = '❌ Disconnected (Error)';
-                }
-            };
-
-            log('⏳ Waiting for connection to open...', 'info');
-        }
-
-        function disconnect() {
-            if (eventSource) {
-                eventSource.close();
-                eventSource = null;
-                document.getElementById('status').className = 'status disconnected';
-                document.getElementById('status').textContent = '❌ Disconnected';
-                log('🔌 Disconnected manually', 'info');
-            } else {
-                log('⚠️ Not connected', 'error');
-            }
-        }
-
-        // Log when page loads
-        window.onload = function() {
-            log('🚀 Debug console loaded', 'success');
-            log('👉 INSTRUCTIONS:', 'info');
-            log('   1. Click "Connect" button', 'info');
-            log('   2. Open Postman', 'info');
-            log('   3. Send POST /packt/inventory/api/books request', 'info');
-            log('   4. Watch this log for events!', 'info');
+        eventSource.onopen = () => {
+          setConnectionStatus("connected", "Connected and listening for events.");
+          setButtons(true);
+          appendLog("Connection opened.", "success");
+          checkStatus();
         };
+
+        eventSource.onmessage = (event) => {
+          appendLog(
+            `Generic message frame received.${
+              event.lastEventId ? ` Frame id: ${escapeHtml(event.lastEventId)}` : ""
+            }`,
+            "event",
+          );
+
+          try {
+            appendJson("Generic message payload", JSON.parse(event.data), "event");
+          } catch {
+            appendLog(`<pre>${escapeHtml(event.data)}</pre>`, "event");
+          }
+        };
+
+        eventSource.addEventListener("NEW_BOOK", (event) => {
+          handleNamedEvent("NEW_BOOK", event);
+        });
+
+        eventSource.addEventListener("PRICE_CHANGE", (event) => {
+          handleNamedEvent("PRICE_CHANGE", event);
+        });
+
+        eventSource.onerror = () => {
+          if (!eventSource) {
+            return;
+          }
+
+          if (eventSource.readyState === EventSource.CONNECTING) {
+            setConnectionStatus("reconnecting", "Connection interrupted. Waiting for automatic reconnect...");
+            appendLog("Connection interrupted. Browser is retrying automatically.", "error");
+            return;
+          }
+
+          setConnectionStatus("disconnected", "Connection closed.");
+          appendLog("EventSource closed the connection.", "error");
+          disconnect(false);
+        };
+      }
+
+      function disconnect(manual = true) {
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+
+        setButtons(false);
+        setConnectionStatus("disconnected", manual ? "Disconnected." : "Disconnected after stream error.");
+
+        if (manual) {
+          appendLog("Disconnected by user.", "info");
+        }
+      }
+
+      window.addEventListener("load", () => {
+        appendLog("Debug console ready.", "success");
+        appendLog(
+          "Connect first, then sign in, fetch or create an author, and trigger POST/PATCH book requests with a Bearer token.",
+          "info",
+        );
+        checkStatus();
+      });
+
+      window.addEventListener("beforeunload", () => {
+        disconnect(false);
+      });
     </script>
-</body>
+  </body>
 </html>

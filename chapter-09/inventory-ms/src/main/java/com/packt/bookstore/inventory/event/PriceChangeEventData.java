@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PriceChangeEventData {
-    
+
     private BigDecimal oldPrice;
     private BigDecimal newPrice;
     private BigDecimal priceChange;

@@ -6,6 +6,5 @@ public record AuthorResponse(
         Long id,
         String name,
         String nationality,
-        List<String> books
-) {
+        List<String> books) {
 }

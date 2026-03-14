@@ -1,435 +1,611 @@
-# 📘 Chapter 09 — Real-Time Updates with Reactive programming using Spring WebFlux and Server-Sent Events (SSE)
+# Chapter 09 - Real-Time Updates with Reactive Programming Using Spring WebFlux and Server-Sent Events
 
 ## Chapter Overview
-This chapter extends the Bookstore microservices by adding **real-time event streaming** using **Server-Sent Events (SSE)**. You will learn how to push inventory updates instantly to clients, integrate SSE endpoints, and test event delivery using browser, Postman, and command-line tools. The chapter builds on the secure, observable, and documented microservices from previous chapters.
 
----
+This chapter extends the Bookstore microservices with real-time inventory notifications delivered through Server-Sent Events (SSE). The inventory service publishes domain events when books are created or repriced, the gateway exposes those events through a long-lived HTTP stream, and browser or CLI clients consume them without polling.
+
+The implementation builds directly on the secured gateway from Chapter 08:
+
+- SSE reads are public so dashboards and monitoring pages can subscribe easily.
+- Book writes remain authenticated through the gateway and Keycloak-backed JWT validation.
+- Observability remains intact because the gateway and services still emit trace and log data for the request path that produced each event.
 
 ## Table of Contents
+
 - [What Are Server-Sent Events?](#what-are-server-sent-events)
 - [SSE Architecture in Bookstore](#sse-architecture-in-bookstore)
 - [Implementing SSE in Inventory-MS](#implementing-sse-in-inventory-ms)
-- [Consuming SSE: Browser, Postman, CLI](#consuming-sse-browser-postman-cli)
-- [Testing SSE Endpoints](#testing-sse-endpoints)
-- [Security & Observability for SSE](#security--observability-for-sse)
+- [Consuming SSE with Browser and CLI Clients](#consuming-sse-with-browser-and-cli-clients)
+- [Testing and Validating SSE](#testing-and-validating-sse)
+- [Detailed Test Scenarios (API and Tools)](#detailed-test-scenarios-api-and-tools)
+- [Event Payload Reference](#event-payload-reference)
+- [Troubleshooting Guide](#troubleshooting-guide)
+- [Security and Observability for SSE](#security-and-observability-for-sse)
+- [Companion Assets](#companion-assets)
+- [References](#references)
 - [Summary](#summary)
 
----
+## What Are Server-Sent Events?
 
-# What Are Server-Sent Events?
+Server-Sent Events provide a simple one-way streaming channel from server to client over standard HTTP.
 
-SSE is a web technology for **one-way, real-time streaming** from server to client over HTTP. Unlike WebSockets, SSE is simple, reliable, and ideal for event notifications.
+- The server responds with the media type `text/event-stream`.
+- The browser keeps the connection open and listens for named events.
+- The client automatically retries if the connection is interrupted.
 
-- **Use Cases:** Inventory updates, notifications, live data feeds
-- **Protocol:** HTTP/1.1, text/event-stream
-- **Client Support:** Native in browsers via `EventSource`
+SSE is a strong fit when the server needs to push notifications, but the client does not need a full duplex protocol such as WebSockets.
 
----
+Typical use cases include:
 
-# SSE Architecture in Bookstore
+- Live notification panels
+- Admin dashboards
+- Status streams
+- Inventory and pricing updates
 
-- **Inventory-MS:** Publishes book events (add/update/delete)
-- **Gateway Server:** Routes SSE endpoints securely
-- **User-MS:** Can subscribe to inventory events
-- **Eureka Server:** Service discovery for SSE endpoints
+## SSE Architecture in Bookstore
 
----
+The Bookstore implementation routes all notification traffic through the gateway and keeps the event production logic inside the inventory service.
 
-# Implementing SSE in Inventory-MS
+```text
+Browser / CLI Client
+        |
+        | EventSource / curl -N
+        v
+API Gateway :8080
+        |
+        | /packt/inventory/api/notifications/**
+        v
+Inventory Service :8081
+        |
+        | NotificationController
+        v
+NotificationService (Reactor sink)
+        |
+        | events emitted by BookService
+        v
+Connected subscribers
+```
 
-- Expose `/inventory/api/books/stream` endpoint
-- Use Spring's `SseEmitter` for event streaming
-- Publish events on book creation/update
-- Integrate with existing REST controllers
+Only two business event types are emitted in this chapter:
 
----
+- `NEW_BOOK`
+- `PRICE_CHANGE`
 
-# Consuming SSE: Browser, Postman, CLI
+## Implementing SSE in Inventory-MS
 
-- **Browser:** Open `test-sse-debug.html` or `test-sse.html` and click "Connect"
-- **Postman:** Use collection `Packt- Java and Angular Second Ed.postman_collection.json` to trigger events
-- **CLI:** Run `./test-sse-curl.sh` to subscribe and see events in terminal
+The inventory microservice uses Spring WebFlux and Project Reactor to broadcast events.
 
----
+Core implementation decisions:
 
-# Testing SSE Endpoints
+1. Reactive event broadcasting: `NotificationService` uses a Reactor `Sinks.Many` to fan out events to multiple listeners.
+2. Named SSE events: `NotificationController` emits named SSE frames so clients can subscribe to `NEW_BOOK` and `PRICE_CHANGE` independently.
+3. Heartbeat comments: the stream emits keepalive comments so intermediaries are less likely to time out an otherwise idle connection.
+4. Gateway-first access: clients subscribe through the gateway path at `/packt/inventory/api/notifications/**`, not directly to the service port.
+5. Separate gateway route: the notification route is defined before the general inventory route to avoid circuit breaker behavior interfering with long-lived SSE connections.
 
-- Use browser debug page for step-by-step event validation
-- Use Postman to trigger book events
-- Use CLI for headless testing
-- Troubleshoot with logs and event payloads
+The exposed notification endpoints are:
 
----
+```text
+GET /packt/inventory/api/notifications/stream
+GET /packt/inventory/api/notifications/stream/filtered?eventType=NEW_BOOK
+GET /packt/inventory/api/notifications/status
+```
 
-# Security & Observability for SSE
+## Consuming SSE with Browser and CLI Clients
 
-- SSE endpoints are secured via Spring Security & JWT (see Chapter 08)
-- All events are traceable and logged
-- Distributed tracing and metrics enabled via Micrometer
+This chapter includes three client-side validation tools:
 
----
+- `test-sse-debug.html`: raw event inspector for troubleshooting and payload validation
+- `test-sse.html`: reader-friendly event dashboard for book and price notifications
+- `test-sse-curl.sh`: terminal subscriber with optional event filtering
 
-# Summary
+All three clients read from the public gateway stream. None of them send authenticated write requests themselves. That separation is intentional:
 
-Chapter 09 enables **real-time inventory updates** in the Bookstore system using SSE. You can now push events to clients instantly, improving user experience and system responsiveness. All microservices remain secure, observable, and discoverable.
+- Subscription is unauthenticated.
+- Book creation and updates require a Bearer token.
 
+This makes the validation flow very clear: keep one client subscribed, then trigger authenticated writes from Postman or curl.
 
-## Updated Source Code Notes
+## Testing and Validating SSE
 
+This section is the recommended chapter workflow for proving that the stream, routing, security, and event publication all work together.
 
-## Quick Start
+### Validation Goals
 
+By the end of the test, you should have verified all of the following:
 
-## License
-See LICENSE for details.
+1. The notification status endpoint is reachable through the gateway.
+2. At least one client can subscribe successfully to the SSE stream.
+3. A book creation request emits a `NEW_BOOK` event.
+4. A price patch request emits a `PRICE_CHANGE` event.
+5. The filtered SSE endpoint only emits the requested event type.
 
----
+### Step 1 - Start the Chapter Services
 
-# Server-Sent Events (SSE) Implementation for Book Inventory
+Make sure the four chapter services are running:
 
-## Quick Start
+1. Eureka Server
+2. Inventory Microservice
+3. User Microservice
+4. Gateway Server
 
-**To see SSE in action (STEP-BY-STEP):**
+The gateway entry point used throughout the rest of this chapter is:
 
-### Option 1: Use Debug Page (RECOMMENDED)
+```text
+http://localhost:8080
+```
 
-1. **Open test-sse-debug.html** in your browser → Click "Connect"
-	 - You'll see "✅ Connected" immediately
-	 - The log shows "Listening for events..."
+### Step 2 - Check the Notification Service Health
 
-2. **Keep that page open**, then open Postman:
-	 - Import: `Packt- Java and Angular Second Ed.postman_collection.json`
-	 - Find: `01-Inventory-MS → books → POST /inventory/api/books`
-	 - **Send the request**
+Before opening a stream, confirm the gateway can reach the notification endpoint:
 
-3. **Watch test-sse-debug.html** - event appears within 1 second! 🎉
-	 - Shows full raw event data
-	 - Easier to debug than fancy UI
+```bash
+curl http://localhost:8080/packt/inventory/api/notifications/status
+```
 
-### Option 2: Use Command Line
+Expected shape:
 
-1. **Terminal 1** - Subscribe to events:
+```json
+{
+  "status": "UP",
+  "activeSubscribers": 0,
+  "message": "Notification service is operating normally"
+}
+```
+
+The exact subscriber count will vary. Once a browser page or terminal client connects, the count should increase.
+
+### Step 3 - Open an SSE Client
+
+Use one of the included chapter tools.
+
+#### Option A - Raw Debug Console
+
+Open `test-sse-debug.html`, confirm the gateway URL, and click Connect.
+
+Use this page when you want to validate:
+
+- Raw JSON payloads
+- Event IDs
+- Reconnect behavior
+- Subscriber count from the status endpoint
+
+#### Option B - Visual Dashboard
+
+Open `test-sse.html` and click Connect Stream.
+
+Use this page when you want to validate:
+
+- Event totals
+- `NEW_BOOK` and `PRICE_CHANGE` counters
+- Filtered display tabs
+- Active subscriber count alongside the event list
+
+#### Option C - Terminal Subscriber
+
 ```bash
 ./test-sse-curl.sh
-# Shows: "Waiting for events..."
 ```
 
-2. **Postman** - Create a book (POST request)
+To point the script to a non-default gateway URL:
 
-3. **Terminal 1** - See the event appear instantly!
-
-### Option 3: Use test-sse.html (Full UI)
-
-Same steps as debug page, but with prettier interface.
-
----
-
-**✅ If you don't see events:**
-- Check browser console (F12) for JavaScript errors
-- Verify Postman request succeeded (should return book with ID)
-- Try test-sse-debug.html - shows raw event data
-- Check service status: `curl http://localhost:8080/packt/inventory/api/notifications/status`
-
----
-
-## Overview
-
-This implements real-time notifications for book inventory events using Server-Sent Events (SSE) with Spring WebFlux reactive programming.
-
-**Event Types:**
-- `NEW_BOOK` - When books are created
-- `PRICE_CHANGE` - When prices are updated
-
-**⚠️ Authentication Note:**
-- **SSE subscription (read)** - Public, no authentication required
-- **Book operations (write)** - Requires JWT authentication from Keycloak
-- For testing, use Postman or authenticated frontend to create/update books while watching events in test-sse.html
-
-## What Changed
-
-### 1. Inventory Microservice (`inventory-ms`)
-
-**Dependencies Added** (`pom.xml`):
-```xml
-<dependency>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-webflux</artifactId>
-</dependency>
-<dependency>
-		<groupId>io.projectreactor</groupId>
-		<artifactId>reactor-core</artifactId>
-</dependency>
-```
-
-**New Classes:**
-- `event/BookEvent.java` - Base event structure with EventType enum
-- `event/NewBookEventData.java` - Data for new book events  
-- `event/PriceChangeEventData.java` - Data for price change events
-- `service/NotificationService.java` - Manages SSE broadcasting with Reactor Sinks
-- `controller/NotificationController.java` - Exposes SSE endpoints
-
-**Modified:**
-- `service/BookService.java` - Publishes events when books are created/updated
-
-**SSE Endpoints:**
-```
-GET /api/notifications/stream           - All events
-GET /api/notifications/stream/filtered   - Filtered by type
-GET /api/notifications/status            - Service health
-```
-
-### 2. Gateway Server (`gateway-server`)
-
-**Route Configuration** (`GatewayRouteConfig.java`):
-- Added notification route **BEFORE** general inventory route (critical for SSE)
-- No circuit breaker on SSE route (long-lived connections)
-- 1-hour timeout for SSE connections
-
-**Security** (`SecurityConfig.java`):
-- Enabled CORS for SSE endpoints (`.cors(cors -> {})`)
-- Configured `allowedOriginPatterns` for local development
-- Public access to notification endpoints (`.permitAll()`)
-
-**Application Config** (`application.yml`):
-- Extended `response-timeout` from 10s to 3600s (1 hour)
-
-## Architecture
-
-```
-Client (Browser/App)
-		↓
-EventSource Connection
-		↓
-API Gateway (port 8080)
-		↓
-Inventory Service (port 8081)
-		↓
-NotificationController
-		↓
-NotificationService (Reactor Sink)
-		↓ (broadcasts to all)
-SSE Subscribers
-```
-
-### Key Technical Decisions
-
-1. **Project Reactor Sinks** - Thread-safe pub-sub pattern with backpressure
-2. **Separate SSE Route** - Must be before general routes to avoid circuit breaker interference
-3. **Extended Timeout** - SSE connections are long-lived, need 1+ hour timeouts
-4. **Keepalive Heartbeat** - 15-second heartbeat prevents connection timeouts
-5. **CORS Configuration** - Supports local file:// testing with `allowedOriginPatterns`
-
-## Testing
-
-### Step 1: Verify SSE Connection
 ```bash
-# Check service is running and see active subscribers
-curl http://localhost:8080/packt/inventory/api/notifications/status
+SSE_GATEWAY_URL=http://localhost:8080 ./test-sse-curl.sh
 ```
 
-Expected response:
-```json
-{
-	"status": "UP",
-	"activeSubscribers": 27,
-	"message": "Notification service is operating normally"
-}
-```
+To validate a filtered stream from the terminal:
 
-✅ If you see `activeSubscribers > 0`, your test-sse.html IS connected and working!
-
-### Step 2: Subscribe to Events
-
-**Using Browser (RECOMMENDED):**
-1. Open `test-sse.html` in your browser
-2. Click "🔌 Connect to SSE Stream"
-3. Status should show "Connected - Listening for events..."
-4. Leave this tab open
-
-**Using cURL (alternative):**
 ```bash
-curl -N -H "Accept: text/event-stream" \
-	http://localhost:8080/packt/inventory/api/notifications/stream
+./test-sse-curl.sh NEW_BOOK
+./test-sse-curl.sh PRICE_CHANGE
 ```
 
-### Step 3: Trigger Events
+### Step 4 - Obtain a JWT Access Token
 
-**⚠️ Important:** Book creation/updates require JWT authentication. Use your **existing Postman collection**.
+SSE subscriptions are public, but writes still require authentication. Sign in through the gateway and capture the `accessToken` field from the response.
 
-#### Using Your Postman Collection:
+Example request shape:
 
-1. **Import Collection:**
-	 - Open: `Packt- Java and Angular Second Ed.postman_collection.json`
-	 - This collection already has authentication configured!
+```bash
+curl -X POST http://localhost:8080/packt/user/api/users/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "<your-email>",
+    "password": "<your-password>"
+  }'
+```
 
-2. **Create Book** (watch test-sse.html for NEW_BOOK event):
-	 - Use: `01-Inventory-MS → books → POST /inventory/api/books`
-	 - Body example:
-	 ```json
-	 {
-		 "title": "Reactive Spring WebFlux",
-		 "isbn": "978-TEST-001",
-		 "price": 49.99,
-		 "quantity": 100,
-		 "authorName": "Josh Long",
-		 "genre": "Technology"
-	 }
-	 ```
-	 - Send the request
-	 - **Watch test-sse.html** - you'll see a NEW_BOOK event appear immediately! 🎉
+After sign-in, export the token in your shell or Postman environment:
 
-3. **Update Price** (watch test-sse.html for PRICE_CHANGE event):
-	 - Use: `01-Inventory-MS → books → PATCH /inventory/api/books/{id}`
-	 - Body:
-	 ```json
-	 {
-		 "price": 39.99
-	 }
-	 ```
-	 - Send the request
-	 - **Watch test-sse.html** - you'll see a PRICE_CHANGE event appear! 💰
+```bash
+export ACCESS_TOKEN="<paste-access-token-here>"
+```
 
-**Check status:**
+### Step 5 - Fetch or Create an Author
+
+The current book creation API expects `authorId`. That means the validation flow must use an existing author or create one first.
+
+List authors:
+
+```bash
+curl http://localhost:8080/packt/inventory/api/authors \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
+```
+
+If needed, create an author:
+
+```bash
+curl -X POST http://localhost:8080/packt/inventory/api/authors \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Josh Long",
+    "nationality": "American"
+  }'
+```
+
+Save the returned author id for the next step.
+
+### Step 6 - Validate the `NEW_BOOK` Event
+
+With the SSE client still connected, create a book through the gateway:
+
+```bash
+curl -X POST http://localhost:8080/packt/inventory/api/books \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Reactive Spring WebFlux",
+    "isbn": "978-1617297571",
+    "authorId": 1,
+    "price": 49.99,
+    "genre": "Technology",
+    "description": "Hands-on reactive Spring guide",
+    "pageCount": 420
+  }'
+```
+
+Expected results:
+
+- The write request returns `201 Created`.
+- The SSE client receives a `NEW_BOOK` event.
+- The event payload includes `bookId`, `bookTitle`, `isbn`, and `eventData.authorName`.
+
+### Step 7 - Validate the `PRICE_CHANGE` Event
+
+Patch the same book with a different price:
+
+```bash
+curl -X PATCH http://localhost:8080/packt/inventory/api/books/<book-id> \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "price": 39.99
+  }'
+```
+
+Expected results:
+
+- The write request returns `200 OK`.
+- The SSE client receives a `PRICE_CHANGE` event.
+- The payload contains `oldPrice`, `newPrice`, `priceChange`, and `percentageChange`.
+
+### Step 8 - Validate the Filtered Stream
+
+The filtered endpoint should only emit the selected event type.
+
+Browser or debug page:
+
+- Choose `NEW_BOOK` or `PRICE_CHANGE` in the stream filter before connecting.
+
+CLI:
+
+```bash
+./test-sse-curl.sh PRICE_CHANGE
+```
+
+Then repeat both write operations and confirm that only matching event frames appear in the filtered subscriber.
+
+### Step 9 - Re-check Subscriber Counts
+
+Run the status endpoint again while a client is connected:
+
 ```bash
 curl http://localhost:8080/packt/inventory/api/notifications/status
 ```
 
-## Event Format
+Expected behavior:
 
-### NEW_BOOK Event
+- `activeSubscribers` increases when a stream is open.
+- `activeSubscribers` drops after the browser page or terminal subscriber disconnects.
+
+## Detailed Test Scenarios (API and Tools)
+
+This section provides a deeper, tool-by-tool validation flow so you can prove not only that events are emitted, but that each test client behaves correctly.
+
+### Shared Variables for API Calls
+
+Use these shell variables to keep commands repeatable during testing:
+
+```bash
+export BASE_URL="http://localhost:8080"
+export ACCESS_TOKEN="<paste-access-token-here>"
+```
+
+Optional helper values for repeated calls:
+
+```bash
+export AUTHOR_ID="1"
+export BOOK_ID="1"
+```
+
+### Scenario A - CLI Subscriber + API Calls (Fastest End-to-End Check)
+
+Terminal 1 (subscriber):
+
+```bash
+./test-sse-curl.sh
+```
+
+Terminal 2 (writes):
+
+1. Create or confirm an author.
+
+```bash
+curl "${BASE_URL}/packt/inventory/api/authors" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
+```
+
+```bash
+curl -X POST "${BASE_URL}/packt/inventory/api/authors" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Josh Long","nationality":"American"}'
+```
+
+1. Create a book and capture `id` from the response.
+
+```bash
+curl -X POST "${BASE_URL}/packt/inventory/api/books" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Reactive Spring WebFlux",
+    "isbn": "978-1617297571",
+    "authorId": 1,
+    "price": 49.99,
+    "genre": "Technology",
+    "description": "Hands-on reactive Spring guide",
+    "pageCount": 420
+  }'
+```
+
+1. Patch price for the created book.
+
+```bash
+curl -X PATCH "${BASE_URL}/packt/inventory/api/books/${BOOK_ID}" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"price":39.99}'
+```
+
+Validate in Terminal 1:
+
+- you receive a `NEW_BOOK` frame after create
+- you receive a `PRICE_CHANGE` frame after patch
+- each event contains `eventId`, `bookId`, and `eventData`
+
+### Scenario B - Dashboard Validation with `test-sse.html`
+
+1. Open `test-sse.html`.
+2. Connect to stream using the gateway URL.
+3. Trigger create and patch API calls.
+
+Validate in dashboard:
+
+- `Total Events` increases by 2
+- `New Books` increases by 1
+- `Price Changes` increases by 1
+- `Active Subscribers` is greater than 0 while connected
+
+Use this scenario to validate user-facing behavior and visual counters.
+
+### Scenario C - Raw Protocol Validation with `test-sse-debug.html`
+
+1. Open `test-sse-debug.html`.
+2. Connect and click `Check Service Status`.
+3. Trigger the same create and patch API calls.
+
+Validate in debug log:
+
+- named events appear as `NEW_BOOK` and `PRICE_CHANGE`
+- payload structure is complete and parseable JSON
+- reconnect attempts are visible if the stream is interrupted
+
+Use this scenario when you need low-level troubleshooting, especially for malformed payloads or missing event names.
+
+### Scenario D - Filter Contract Test
+
+Terminal 1:
+
+```bash
+./test-sse-curl.sh NEW_BOOK
+```
+
+Terminal 2:
+
+```bash
+./test-sse-curl.sh PRICE_CHANGE
+```
+
+Terminal 3:
+
+- run one create call and one patch call
+
+Expected behavior:
+
+- `NEW_BOOK` terminal receives create events only
+- `PRICE_CHANGE` terminal receives patch events only
+- no cross-delivery between filtered subscribers
+
+### Scenario E - Subscriber Lifecycle Validation
+
+1. Query status before subscribing.
+2. Subscribe from one or more clients.
+3. Query status again.
+4. Disconnect clients.
+5. Query status a final time.
+
+Commands:
+
+```bash
+curl "${BASE_URL}/packt/inventory/api/notifications/status"
+```
+
+Expected behavior:
+
+- subscriber count rises after connect
+- subscriber count drops after disconnect
+
+This confirms the SSE lifecycle is managed correctly and helps identify ghost connections.
+
+### Minimum Acceptance Checklist for Chapter Completion
+
+Mark SSE testing complete when all are true:
+
+1. Notification status endpoint is reachable and returns `UP`.
+2. At least one subscriber connects from each tool family (CLI and browser).
+3. `NEW_BOOK` is emitted after successful create.
+4. `PRICE_CHANGE` is emitted after successful patch.
+5. Filtered subscriptions isolate event types correctly.
+6. Subscriber counts rise and fall as clients connect and disconnect.
+
+## Event Payload Reference
+
+The payload examples below are aligned with the current event model in `inventory-ms`.
+
+### `NEW_BOOK` Event
+
 ```json
 {
-	"eventType": "NEW_BOOK",
-	"timestamp": "2026-02-15T10:30:00",
-	"eventId": "550e8400-e29b-41d4-a716-446655440000",
-	"bookId": 42,
-	"bookTitle": "Reactive Spring",
-	"isbn": "978-1234567890",
-	"eventData": {
-		"authorName": "Josh Long",
-		"genre": "Technology",
-		"price": 49.99,
-		"quantity": 100
-	}
+  "eventType": "NEW_BOOK",
+  "timestamp": "2026-02-15T10:30:00",
+  "eventId": "550e8400-e29b-41d4-a716-446655440000",
+  "bookId": 42,
+  "bookTitle": "Reactive Spring WebFlux",
+  "isbn": "978-1617297571",
+  "eventData": {
+    "authorName": "Josh Long",
+    "genre": "Technology",
+    "price": 49.99,
+    "quantity": 100,
+    "published": "2025-01-15",
+    "description": "Hands-on reactive Spring guide",
+    "pageCount": 420,
+    "coverImageUrl": null
+  }
 }
 ```
 
-### PRICE_CHANGE Event
+`eventData` fields come from `NewBookEventData` and may be null when optional values are not set.
+
+### `PRICE_CHANGE` Event
+
 ```json
 {
-	"eventType": "PRICE_CHANGE",
-	"timestamp": "2026-02-15T10:35:00",
-	"eventId": "660f9511-f30c-52e5-b827-557766551111",
-	"bookId": 42,
-	"bookTitle": "Reactive Spring",
-	"isbn": "978-1234567890",
-	"eventData": {
-		"oldPrice": 49.99,
-		"newPrice": 39.99,
-		"priceChange": -10.00,
-		"percentageChange": -20.0
-	}
+  "eventType": "PRICE_CHANGE",
+  "timestamp": "2026-02-15T10:35:00",
+  "eventId": "660f9511-f30c-52e5-b827-557766551111",
+  "bookId": 42,
+  "bookTitle": "Reactive Spring WebFlux",
+  "isbn": "978-1617297571",
+  "eventData": {
+    "oldPrice": 49.99,
+    "newPrice": 39.99,
+    "priceChange": -10.0,
+    "percentageChange": -20.0
+  }
 }
 ```
 
-## Client Integration Examples
+`eventData` fields come from `PriceChangeEventData`.
 
-### JavaScript (Browser)
-```javascript
-const eventSource = new EventSource(
-	'http://localhost:8080/packt/inventory/api/notifications/stream'
-);
+## Troubleshooting Guide
 
-eventSource.addEventListener('NEW_BOOK', (event) => {
-	const book = JSON.parse(event.data);
-	console.log('New book:', book.bookTitle);
-});
+### Stream connects but no events arrive
 
-eventSource.addEventListener('PRICE_CHANGE', (event) => {
-	const change = JSON.parse(event.data);
-	console.log('Price changed:', change.bookTitle);
-});
+- Confirm the write request succeeded and returned `200` or `201`.
+- Verify the request carried `Authorization: Bearer ${ACCESS_TOKEN}`.
+- Use `test-sse-debug.html` to inspect raw frames and confirm events are not filtered out by the UI.
 
-eventSource.onerror = (error) => {
-	console.error('SSE error:', error);
-};
-```
+### Create-book fails with validation errors
 
-### Angular
-```typescript
-@Injectable({ providedIn: 'root' })
-export class NotificationService {
-	subscribeToNotifications(): Observable<BookEvent> {
-		return new Observable(observer => {
-			const eventSource = new EventSource(
-				'http://localhost:8080/packt/inventory/api/notifications/stream'
-			);
-      
-			eventSource.onmessage = (event) => {
-				observer.next(JSON.parse(event.data));
-			};
-      
-			eventSource.onerror = (error) => observer.error(error);
-      
-			return () => eventSource.close();
-		});
-	}
-}
-```
+- Use `authorId`, not `authorName`.
+- Verify required fields (`title`, `isbn`, `authorId`, `price`) are present.
+- Create or fetch an author first if the id is unknown.
 
-## Production Considerations
+### `401 Unauthorized` on writes
 
-1. **Authentication** - Add JWT token validation for SSE endpoints
-2. **Rate Limiting** - Limit connections per user/IP
-3. **Load Balancing** - Use sticky sessions or Redis Pub/Sub for multi-instance
-4. **Monitoring** - Track active subscriber count and event emission rates
-5. **Buffer Size** - Adjust Sink buffer (currently 256) based on load
+- This is expected if sign-in was skipped or the token expired.
+- SSE subscriptions are public, but book and author writes are authenticated.
 
-## Troubleshooting
+### Browser reconnect loops
 
-**HTML shows connected but no events appear:**
-- ✅ Connection works (check status endpoint for active subscribers)
-- ❌ No events generated because book operations require authentication
-- **Solution:** Use Postman with JWT token to create/update books, or use the Angular frontend with authentication
+- Confirm the gateway and inventory service are both running.
+- Verify `GET /packt/inventory/api/notifications/status` returns `UP`.
+- Check gateway timeout and CORS settings if this appears only in browser clients.
 
-**401 Unauthorized when creating books:**
-- This is **expected** - the API requires authentication for write operations
-- SSE notifications are public (read-only)
-- Use Postman or authenticated frontend to trigger events
+### `test-sse-curl.sh` exits with code 22
 
-**No events received:**
-- Check service logs for errors
-- Verify SSE connection is active (`status` endpoint shows subscribers)
-- Ensure operations happen AFTER connecting
+- Exit code `22` comes from curl when HTTP status is `>= 400` while `--fail-with-body` is enabled.
+- Check the gateway URL in `SSE_GATEWAY_URL` and verify the notification endpoint path.
+- Confirm the gateway route for `/packt/inventory/api/notifications/**` is active.
 
-**Connection drops:**
-- Check gateway timeout settings (needs > 1 hour)
-- Verify network stability
-- Check for proxy/firewall issues
+## Security and Observability for SSE
 
-**CORS errors:**
-- Verify `.cors(cors -> {})` is enabled in SecurityConfig
-- Check `allowedOriginPatterns` includes your origin
-- For file:// protocol, use `null` origin pattern
+The security model is deliberately split:
 
-## Files Modified
+- `GET /packt/inventory/api/notifications/**` is public.
+- Write operations under `/packt/inventory/api/**` still require authentication.
 
-- `inventory-ms/pom.xml`
-- `inventory-ms/src/main/java/com/packt/bookstore/inventory/event/*.java` (3 files)
-- `inventory-ms/src/main/java/com/packt/bookstore/inventory/service/NotificationService.java`
-- `inventory-ms/src/main/java/com/packt/bookstore/inventory/controller/NotificationController.java`
-- `inventory-ms/src/main/java/com/packt/bookstore/inventory/service/BookService.java`
-- `gateway-server/src/main/java/com/packt/bookstore/gateway_server/config/GatewayRouteConfig.java`
-- `gateway-server/src/main/java/com/packt/bookstore/gateway_server/config/SecurityConfig.java`
-- `gateway-server/src/main/resources/application.yml`
+That separation lets you validate SSE with a simple browser page while still protecting inventory mutations.
+
+Observability remains important for SSE because the most common failures are integration failures:
+
+- Bad routing
+- Premature connection timeouts
+- Missing event publication after successful writes
+- Authentication failures on the write path
+
+Use the notification status endpoint, service logs, and gateway traces together when diagnosing issues.
+
+## Companion Assets
+
+This chapter ships with the following validation aids:
+
+- `test-sse-debug.html`
+- `test-sse.html`
+- `test-sse-curl.sh`
+- `SSE-IMPLEMENTATION.md`
+
+`SSE-IMPLEMENTATION.md` remains available as a compact lab companion, while this README now contains the full end-to-end chapter flow.
 
 ## References
 
 - [Spring WebFlux Documentation](https://docs.spring.io/spring-framework/reference/web/webflux.html)
-- [Project Reactor](https://projectreactor.io/docs/core/release/reference/)
+- [Project Reactor Reference](https://projectreactor.io/docs/core/release/reference/)
 - [SSE Specification](https://html.spec.whatwg.org/multipage/server-sent-events.html)
 - [MDN EventSource API](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)
 
----
-## License
-See LICENSE for details.
+## Summary
+
+In this chapter, you added a reactive notification stream to the Bookstore inventory service and validated it end to end through the gateway.
+
+You now have:
+
+- Real-time `NEW_BOOK` and `PRICE_CHANGE` notifications
+- A public SSE read path through the gateway
+- Authenticated write operations that emit those events
+- Browser and CLI tools for stream validation
+
+The next logical step is to consume the stream from a richer frontend or operational dashboard and use the same validation flow to prove those clients stay in sync with the backend.

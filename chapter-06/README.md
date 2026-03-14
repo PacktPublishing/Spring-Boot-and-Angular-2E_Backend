@@ -24,10 +24,7 @@ This chapter introduces **Service Discovery** and **API Gateway** patterns in a 
 
 This chapter brings together service discovery and API Gateway patterns to create a robust, scalable microservices infrastructure. You'll learn:
 
-
-
 ## ✅ Before You Run This Chapter
-
 
 Please confirm the required runtime dependencies before running this chapter:
 
@@ -35,55 +32,58 @@ Please confirm the required runtime dependencies before running this chapter:
 - Confirm any infrastructure dependencies are running (for example Docker services, if used).
 - Confirm any dependencies from previous chapters are running as needed for your flow.
 
-
 ### Sequence for Running Databases and Microservices
 
 1. **Start Databases First**
-  - Start PostgreSQL (Inventory DB):
-    ```bash
-    docker run -d \
-     --name bookstore-postgres \
-     -e POSTGRES_USER=bookstore \
-     -e POSTGRES_PASSWORD=bookstore123 \
-     -e POSTGRES_DB=inventory \
-     -p 5432:5432 \
-     postgres:17
-    ```
-  - Start MongoDB (User DB):
-    ```bash
-    docker run -d \
-     --name bookstore-mongo \
-     -e MONGO_INITDB_ROOT_USERNAME=bookstore \
-     -e MONGO_INITDB_ROOT_PASSWORD=bookstore123 \
-     -e MONGO_INITDB_DATABASE=userDB \
-     -p 27017:27017 \
-     mongo:8
-    ```
-  - Confirm both databases are running:
-    ```bash
-    docker ps | grep bookstore-postgres
-    docker ps | grep bookstore-mongo
-    ```
+
+- Start PostgreSQL (Inventory DB):
+  ```bash
+  docker run -d \
+   --name bookstore-postgres \
+   -e POSTGRES_USER=bookstore \
+   -e POSTGRES_PASSWORD=bookstore123 \
+   -e POSTGRES_DB=inventory \
+   -p 5432:5432 \
+   postgres:17
+  ```
+- Start MongoDB (User DB):
+  ```bash
+  docker run -d \
+   --name bookstore-mongo \
+   -e MONGO_INITDB_ROOT_USERNAME=bookstore \
+   -e MONGO_INITDB_ROOT_PASSWORD=bookstore123 \
+   -e MONGO_INITDB_DATABASE=userDB \
+   -p 27017:27017 \
+   mongo:8
+  ```
+- Confirm both databases are running:
+  ```bash
+  docker ps | grep bookstore-postgres
+  docker ps | grep bookstore-mongo
+  ```
 
 2. **Start Eureka Discovery Server**
-  ```bash
-  cd discovery-server
-  ./mvnw spring-boot:run
-  ```
-  - Verify at: http://localhost:8761
+
+```bash
+cd discovery-server
+./mvnw spring-boot:run
+```
+
+- Verify at: http://localhost:8761
 
 3. **Start Inventory Microservice**
-  ```bash
-  cd inventory-service
-  ./mvnw spring-boot:run
-  ```
+
+```bash
+cd inventory-service
+./mvnw spring-boot:run
+```
 
 4. **Start User Microservice**
-  ```bash
-  cd user-service
-  ./mvnw spring-boot:run
-  ```
 
+```bash
+cd user-service
+./mvnw spring-boot:run
+```
 
 ## 📦 Chapter Source Code Availability
 
@@ -105,24 +105,26 @@ Microservices run in distributed environments where IPs and ports change frequen
 
 ### Static vs Dynamic Discovery
 
-| Aspect | Static Configuration | Dynamic Discovery |
-|--------|---------------------|-------------------|
-| Location | Hardcoded IPs/ports | Registry-based lookup |
-| Scaling | Manual updates required | Auto-updated on registration |
-| Failover | Requires external monitoring | Built-in health checks |
-| Deployment | Restart/reconfigure clients | Automatic discovery |
-| Best For | Small, stable projects | Cloud-native microservices |
+| Aspect     | Static Configuration         | Dynamic Discovery            |
+| ---------- | ---------------------------- | ---------------------------- |
+| Location   | Hardcoded IPs/ports          | Registry-based lookup        |
+| Scaling    | Manual updates required      | Auto-updated on registration |
+| Failover   | Requires external monitoring | Built-in health checks       |
+| Deployment | Restart/reconfigure clients  | Automatic discovery          |
+| Best For   | Small, stable projects       | Cloud-native microservices   |
 
 ### Discovery Approaches
 
 #### DNS-based Discovery
 
 **Pros:**
+
 - Built into infrastructure
 - No additional components needed
 - Works with all clients
 
 **Cons:**
+
 - Slow TTL-based updates
 - No health checking
 - Limited metadata support
@@ -131,6 +133,7 @@ Microservices run in distributed environments where IPs and ports change frequen
 #### Registry-based Discovery (Eureka)
 
 **Pros:**
+
 - Real-time health checks
 - Rich service metadata
 - Instant updates on changes
@@ -138,6 +141,7 @@ Microservices run in distributed environments where IPs and ports change frequen
 - Programmatic service discovery
 
 **Cons:**
+
 - Additional infrastructure component
 - Learning curve
 - Network dependency
@@ -187,7 +191,7 @@ Add to `pom.xml`:
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
     </dependency>
-    
+
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-actuator</artifactId>
@@ -201,7 +205,7 @@ Add to `pom.xml`:
 @SpringBootApplication
 @EnableEurekaServer
 public class DiscoveryServerApplication {
-    
+
     public static void main(String[] args) {
         SpringApplication.run(DiscoveryServerApplication.class, args);
     }
@@ -210,7 +214,7 @@ public class DiscoveryServerApplication {
 
 ### Step 4 — Configure application.yml
 
-```yaml
+````yaml
 server:
   port: 8761
 
@@ -220,12 +224,13 @@ spring:
 
 eureka:
     register-with-eureka: false
-  
+
   ```yaml
   server:
     port: 8761
 
-```
+````
+
     application:
       name: discovery-server
 
@@ -247,11 +252,12 @@ eureka:
       enable-self-preservation: true
       eviction-interval-timer-in-ms: 60000
 
-  logging:
-    level:
-      com.netflix.eureka: INFO
-      com.netflix.discovery: INFO
-  ```
+logging:
+level:
+com.netflix.eureka: INFO
+com.netflix.discovery: INFO
+
+````
 Visit **http://localhost:8761** to see the Eureka dashboard.
 
 ---
@@ -266,15 +272,15 @@ Add to each microservice `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 </dependency>
 
 <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
-```
+````
 
 ### Step 2 — Configure Inventory Service
 
@@ -296,7 +302,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-  
+
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 30
@@ -332,7 +338,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-  
+
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 30
@@ -374,16 +380,16 @@ An API Gateway acts as a **reverse proxy** and **single entry point** for all cl
 
 ### Key Benefits
 
-| Benefit | Description | Impact |
-|---------|-------------|--------|
-| **Centralized routing** | One public URL for all services | Simplified client configuration |
-| **Unified security** | Single place for authentication/authorization | Consistent security policies |
-| **Protocol translation** | Convert between HTTP/gRPC/WebSocket | Client flexibility |
-| **API versioning** | Route v1/v2 traffic seamlessly | Backward compatibility |
-| **Rate limiting** | Throttle requests per client | Prevent abuse |
-| **Request aggregation** | Combine multiple service calls | Reduced network overhead |
-| **Caching** | Cache responses at gateway level | Improved performance |
-| **Monitoring** | Centralized logging and metrics | Better observability |
+| Benefit                  | Description                                   | Impact                          |
+| ------------------------ | --------------------------------------------- | ------------------------------- |
+| **Centralized routing**  | One public URL for all services               | Simplified client configuration |
+| **Unified security**     | Single place for authentication/authorization | Consistent security policies    |
+| **Protocol translation** | Convert between HTTP/gRPC/WebSocket           | Client flexibility              |
+| **API versioning**       | Route v1/v2 traffic seamlessly                | Backward compatibility          |
+| **Rate limiting**        | Throttle requests per client                  | Prevent abuse                   |
+| **Request aggregation**  | Combine multiple service calls                | Reduced network overhead        |
+| **Caching**              | Cache responses at gateway level              | Improved performance            |
+| **Monitoring**           | Centralized logging and metrics               | Better observability            |
 
 ### Gateway Use Cases
 
@@ -397,16 +403,17 @@ An API Gateway acts as a **reverse proxy** and **single entry point** for all cl
 
 ## Gateway Technology Comparison
 
-| Gateway | Type | Pros | Cons | Best For |
-|---------|------|------|------|----------|
-| **Spring Cloud Gateway** | Java, Reactive | Spring ecosystem integration, Eureka support | Smaller plugin ecosystem | Spring microservices |
-| **Kong** | Nginx-based | Fast, extensive plugins, OpenAPI support | External infrastructure, Lua config | Polyglot services |
-| **Apigee** | Enterprise SaaS | Advanced analytics, monetization, developer portal | Expensive, vendor lock-in | Large enterprises |
-| **AWS API Gateway** | Managed service | Serverless, AWS integration, auto-scaling | AWS lock-in, cost at scale | AWS-native apps |
-| **Traefik** | Go-based | Auto-discovery, Docker/K8s native, modern | Less mature for complex routing | Container environments |
-| **Netflix Zuul** | Java | Battle-tested | Deprecated, blocking I/O | Legacy projects only |
+| Gateway                  | Type            | Pros                                               | Cons                                | Best For               |
+| ------------------------ | --------------- | -------------------------------------------------- | ----------------------------------- | ---------------------- |
+| **Spring Cloud Gateway** | Java, Reactive  | Spring ecosystem integration, Eureka support       | Smaller plugin ecosystem            | Spring microservices   |
+| **Kong**                 | Nginx-based     | Fast, extensive plugins, OpenAPI support           | External infrastructure, Lua config | Polyglot services      |
+| **Apigee**               | Enterprise SaaS | Advanced analytics, monetization, developer portal | Expensive, vendor lock-in           | Large enterprises      |
+| **AWS API Gateway**      | Managed service | Serverless, AWS integration, auto-scaling          | AWS lock-in, cost at scale          | AWS-native apps        |
+| **Traefik**              | Go-based        | Auto-discovery, Docker/K8s native, modern          | Less mature for complex routing     | Container environments |
+| **Netflix Zuul**         | Java            | Battle-tested                                      | Deprecated, blocking I/O            | Legacy projects only   |
 
 **We choose Spring Cloud Gateway** for:
+
 - Seamless Spring Boot integration
 - Reactive non-blocking architecture
 - Built-in Eureka support
@@ -485,12 +492,12 @@ Use Spring Initializr with:
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-gateway</artifactId>
     </dependency>
-    
+
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
     </dependency>
-    
+
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-actuator</artifactId>
@@ -514,7 +521,7 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
-      
+
       routes:
         # Inventory Service Route
         - id: inventory-route
@@ -565,7 +572,7 @@ logging:
 ```java
 @SpringBootApplication
 public class GatewayServerApplication {
-    
+
     public static void main(String[] args) {
         SpringApplication.run(GatewayServerApplication.class, args);
     }
@@ -677,7 +684,7 @@ public class FallbackController {
         response.put("status", "SERVICE_UNAVAILABLE");
         response.put("message", "Inventory service is temporarily unavailable. Please try again later.");
         response.put("timestamp", LocalDateTime.now());
-        
+
         return ResponseEntity
             .status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(response);
@@ -689,7 +696,7 @@ public class FallbackController {
         response.put("status", "SERVICE_UNAVAILABLE");
         response.put("message", "User service is temporarily unavailable. Please try again later.");
         response.put("timestamp", LocalDateTime.now());
-        
+
         return ResponseEntity
             .status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(response);
@@ -709,10 +716,10 @@ curl http://localhost:8080/packt/inventory/api/books
 
 ### Circuit Breaker States
 
-| State | Description | Behavior |
-|-------|-------------|----------|
-| **CLOSED** | Normal operation | All requests go through |
-| **OPEN** | Service failing | All requests return fallback immediately |
+| State         | Description      | Behavior                                      |
+| ------------- | ---------------- | --------------------------------------------- |
+| **CLOSED**    | Normal operation | All requests go through                       |
+| **OPEN**      | Service failing  | All requests return fallback immediately      |
 | **HALF_OPEN** | Testing recovery | Limited requests to test if service recovered |
 
 ---
@@ -750,6 +757,7 @@ cd gateway-server
 ### 4. Verify Registration
 
 Check Eureka dashboard — all three services should be registered:
+
 - `GATEWAY-SERVER`
 - `INVENTORY-SERVICE`
 - `USER-MS`
@@ -786,6 +794,5 @@ cd inventory-service
 - **Resilience4j Documentation**: <https://resilience4j.readme.io/>
 - **Eureka Wiki**: <https://github.com/Netflix/eureka/wiki>
 - **API Gateway Pattern**: <https://microservices.io/patterns/apigateway.html>
-
 
 ---

@@ -10,23 +10,22 @@ import com.packt.bookstore.inventory.entity.Book;
 @Component
 public class AuthorMapper {
 
-    public Author toEntity(AuthorRequest req) {
-        return Author.builder()
-                .name(req.name())
-                .nationality(req.nationality())
-                .build();
-    }
+        public Author toEntity(AuthorRequest req) {
+                return Author.builder()
+                                .name(req.name())
+                                .nationality(req.nationality())
+                                .build();
+        }
 
-  public AuthorResponse toResponse(Author author) {
-    return new AuthorResponse(
-        author.getId(),
-        author.getName(),
-        author.getNationality(),
-        author.getBooks() != null
-            ? author.getBooks().stream()
-                .map(Book::getTitle)
-                .toList()
-            : null
-    );
-}
+        public AuthorResponse toResponse(Author author) {
+                return new AuthorResponse(
+                                author.getId(),
+                                author.getName(),
+                                author.getNationality(),
+                                author.getBooks() != null
+                                                ? author.getBooks().stream()
+                                                                .map(Book::getTitle)
+                                                                .toList()
+                                                : null);
+        }
 }

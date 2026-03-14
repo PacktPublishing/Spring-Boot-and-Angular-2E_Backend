@@ -35,7 +35,6 @@ public class UserController {
         return ResponseEntity.ok("Hello from User Service");
     }
 
-
     private final UserService userService;
 
     @PostMapping("/signup")
@@ -47,19 +46,17 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(Map.of(
-                        "success", true,
-                        "message", "User registered successfully",
-                        "data", user
-                    ));
+                            "success", true,
+                            "message", "User registered successfully",
+                            "data", user));
 
         } catch (RuntimeException e) {
             log.error("Signup failed: {}", e.getMessage());
             return ResponseEntity
                     .badRequest()
                     .body(Map.of(
-                        "success", false,
-                        "message", e.getMessage()
-                    ));
+                            "success", false,
+                            "message", e.getMessage()));
         }
     }
 
@@ -76,9 +73,8 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of(
-                        "success", false,
-                        "message", "Invalid email or password"
-                    ));
+                            "success", false,
+                            "message", "Invalid email or password"));
         }
     }
 
@@ -103,9 +99,8 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Map.of(
-                        "success", false,
-                        "message", "User profile not found"
-                    ));
+                            "success", false,
+                            "message", "User profile not found"));
         }
     }
 
@@ -132,9 +127,8 @@ public class UserController {
             return ResponseEntity
                     .badRequest()
                     .body(Map.of(
-                        "success", false,
-                        "message", e.getMessage()
-                    ));
+                            "success", false,
+                            "message", e.getMessage()));
         }
     }
 
@@ -159,9 +153,8 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Map.of(
-                        "success", false,
-                        "message", "User profile not found"
-                    ));
+                            "success", false,
+                            "message", "User profile not found"));
         }
     }
 
@@ -178,9 +171,8 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of(
-                        "success", false,
-                        "message", "Invalid or expired refresh token"
-                    ));
+                            "success", false,
+                            "message", "Invalid or expired refresh token"));
         }
     }
 
@@ -200,20 +192,17 @@ public class UserController {
             userService.logout(keycloakId);
 
             return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Logged out successfully"
-            ));
+                    "success", true,
+                    "message", "Logged out successfully"));
 
         } catch (RuntimeException e) {
             log.error("Logout failed: {}", e.getMessage());
             return ResponseEntity
                     .badRequest()
                     .body(Map.of(
-                        "success", false,
-                        "message", "Logout failed"
-                    ));
+                            "success", false,
+                            "message", "Logout failed"));
         }
     }
 
 }
-

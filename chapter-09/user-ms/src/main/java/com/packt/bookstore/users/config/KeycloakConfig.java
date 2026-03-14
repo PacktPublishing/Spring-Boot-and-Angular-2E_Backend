@@ -16,6 +16,7 @@ public class KeycloakConfig {
     private String adminUsername;
     @Value("${keycloak.admin-password}")
     private String adminPassword;
+
     @Bean
     public Keycloak keycloak() {
         return KeycloakBuilder.builder()
@@ -27,4 +28,3 @@ public class KeycloakConfig {
                 .build();
     }
 }
-

@@ -29,24 +29,23 @@ public class BookMapper {
         AuthorResponse authorResponse = null;
         if (b.getAuthor() != null) {
             authorResponse = new AuthorResponse(
-                b.getAuthor().getId(),
-                b.getAuthor().getName(),
-                b.getAuthor().getNationality(),
-                null // books list omitted for brevity
+                    b.getAuthor().getId(),
+                    b.getAuthor().getName(),
+                    b.getAuthor().getNationality(),
+                    null // books list omitted for brevity
             );
         }
         return new BookResponse(
-            b.getId(),
-            b.getTitle(),
-            b.getIsbn(),
-            authorResponse,
-            b.getPrice(),
-            b.getGenre(),
-            b.getPublished(),
-            b.getDescription(),
-            b.getPageCount(),
-            b.getCoverImageUrl()
-        );
+                b.getId(),
+                b.getTitle(),
+                b.getIsbn(),
+                authorResponse,
+                b.getPrice(),
+                b.getGenre(),
+                b.getPublished(),
+                b.getDescription(),
+                b.getPageCount(),
+                b.getCoverImageUrl());
     }
 
     public void overwrite(Book target, BookRequest req, Author author) {
@@ -80,7 +79,5 @@ public class BookMapper {
         if (req.coverImageUrl() != null)
             target.setCoverImageUrl(req.coverImageUrl());
     }
-
-
 
 }

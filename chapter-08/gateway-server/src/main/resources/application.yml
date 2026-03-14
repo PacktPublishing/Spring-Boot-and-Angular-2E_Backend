@@ -31,7 +31,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8090/realms/bookstore
-  
+
 # Circuit Breaker Configuration
 resilience4j:
   circuitbreaker:
@@ -59,7 +59,7 @@ management:
       show-details: always
   tracing:
     sampling:
-      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+      probability: 1.0 # Trace all requests (use 0.1 for 10% in production)
     baggage:
       correlation:
         enabled: true

@@ -21,57 +21,57 @@ class BookRepositoryTest {
 
     @Autowired
     private BookRepository bookRepository;
-    
+
     @Autowired
     private AuthorRepository authorRepository;
 
     private Author author;
     private Book book;
 
-   @BeforeEach
-void setUp() {
-    // Clear previous data
-    bookRepository.deleteAll();
-    authorRepository.deleteAll();
-    
-    // Create and save author first
-    author = Author.builder()
-            .name("Ahmad Gohar")
-            .nationality("Egyptian")
-            .build();
-    author = authorRepository.save(author);  // Save and get the ID
-    
-    // Now create and save book with the author
-    book = Book.builder()
-            .title("Spring Boot and Angular 2E")
-            .isbn("1234567890")
-            .author(author)
-            .price(BigDecimal.valueOf(29.99))
-            .quantity(10)
-            .build();
-    book = bookRepository.save(book);  // Save the book and get the ID
-    
-    // Verify the book was actually saved
-    assert bookRepository.count() > 0 : "Book was not saved correctly";
-}
+    @BeforeEach
+    void setUp() {
+        // Clear previous data
+        bookRepository.deleteAll();
+        authorRepository.deleteAll();
+
+        // Create and save author first
+        author = Author.builder()
+                .name("Ahmad Gohar")
+                .nationality("Egyptian")
+                .build();
+        author = authorRepository.save(author); // Save and get the ID
+
+        // Now create and save book with the author
+        book = Book.builder()
+                .title("Spring Boot and Angular 2E")
+                .isbn("1234567890")
+                .author(author)
+                .price(BigDecimal.valueOf(29.99))
+                .quantity(10)
+                .build();
+        book = bookRepository.save(book); // Save the book and get the ID
+
+        // Verify the book was actually saved
+        assert bookRepository.count() > 0 : "Book was not saved correctly";
+    }
 
     @Test
-void testFindAll() {
-    System.out.println("Book count: " + bookRepository.count());
-    var books = bookRepository.findAll();
-    System.out.println("Books found: " + books.size());
-    assertThat(books).hasSize(1);
-}
-    
-@Test
-void testFindByTitle() {
-    // Method returns a List<Book> not a single Book
-    var foundBooks = bookRepository.findByTitleContainingIgnoreCase("Spring Boot and Angular 2E");
-    assertThat(foundBooks).isNotEmpty();
-    
-    // Get the first book from the list
-    var foundBook = foundBooks.get(0);
-    assertThat(foundBook).isNotNull();
-    assertThat(foundBook.getIsbn()).isEqualTo("1234567890");
-}
+    void testFindAll() {
+        System.out.println("Book count: " + bookRepository.count());
+        var books = bookRepository.findAll();
+        System.out.println("Books found: " + books.size());
+        assertThat(books).hasSize(1);
+    }
+
+    @Test
+    void testFindByTitle() {
+        // Method returns a List<Book> not a single Book
+        var foundBooks = bookRepository.findByTitleContainingIgnoreCase("Spring Boot and Angular 2E");
+        assertThat(foundBooks).isNotEmpty();
+
+        // Get the first book from the list
+        var foundBook = foundBooks.get(0);
+        assertThat(foundBook).isNotNull();
+        assertThat(foundBook.getIsbn()).isEqualTo("1234567890");
+    }
 }

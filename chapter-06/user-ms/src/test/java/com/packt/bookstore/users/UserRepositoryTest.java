@@ -1,4 +1,5 @@
 package com.packt.bookstore.users;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -55,10 +56,11 @@ class UserRepositoryTest {
         assertThat(users).isNotEmpty();
         assertThat(users.get(0).getEmail()).isEqualTo("agohar@packt.com");
     }
+
     @Test
     void testFindByLanguagePreference() {
         List<User> users = userRepository.findByLanguagePreference("en");
         assertThat(users).isNotEmpty();
         assertThat(users.get(0).getPreferences().getLanguage()).isEqualTo("en");
-    }   
+    }
 }

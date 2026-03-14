@@ -21,7 +21,7 @@ spring:
             connect-timeout: 5000
             response-timeout: 10s
       # Routes are configured in GatewayRouteConfig.java
-  
+
 # Circuit Breaker Configuration
 resilience4j:
   circuitbreaker:
@@ -49,7 +49,7 @@ management:
       show-details: always
   tracing:
     sampling:
-      probability: 1.0  # Trace all requests (use 0.1 for 10% in production)
+      probability: 1.0 # Trace all requests (use 0.1 for 10% in production)
     baggage:
       correlation:
         enabled: true
@@ -73,5 +73,3 @@ logging:
     "[com.packt.bookstore]": INFO
     "[org.springframework.cloud.gateway]": DEBUG
     "[io.micrometer.tracing]": DEBUG
-
-

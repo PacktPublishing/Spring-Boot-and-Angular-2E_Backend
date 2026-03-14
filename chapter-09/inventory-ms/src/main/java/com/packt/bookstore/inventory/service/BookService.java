@@ -34,8 +34,8 @@ public class BookService implements IBookService {
     private final BookMapper bookMapper;
     private final NotificationService notificationService;
 
-    public BookService(BookRepository bookRepository, AuthorRepository authorRepository, 
-                      BookMapper bookMapper, NotificationService notificationService) {
+    public BookService(BookRepository bookRepository, AuthorRepository authorRepository,
+            BookMapper bookMapper, NotificationService notificationService) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.bookMapper = bookMapper;
@@ -133,9 +133,9 @@ public class BookService implements IBookService {
         return "desc".equals(dir) ? Sort.by(field).descending() : Sort.by(field).ascending();
     }
 
-
     private Author resolveAuthorById(Long id) {
-        if (id == null) throw new DomainRuleViolationException("Author ID is required");
+        if (id == null)
+            throw new DomainRuleViolationException("Author ID is required");
         return authorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Author " + id + " not found"));
     }
@@ -226,7 +226,7 @@ public class BookService implements IBookService {
     private void publishPriceChangeEvent(Book book, BigDecimal oldPrice, BigDecimal newPrice) {
         try {
             BigDecimal priceChange = newPrice.subtract(oldPrice);
-            double percentageChange = oldPrice.compareTo(BigDecimal.ZERO) > 0 
+            double percentageChange = oldPrice.compareTo(BigDecimal.ZERO) > 0
                     ? priceChange.divide(oldPrice, 4, java.math.RoundingMode.HALF_UP)
                             .multiply(new BigDecimal("100")).doubleValue()
                     : 0.0;
@@ -247,7 +247,7 @@ public class BookService implements IBookService {
                     .build();
 
             notificationService.publishEvent(event);
-            log.info("Published PRICE_CHANGE event for book: {} (ID: {}) - Old: {}, New: {}", 
+            log.info("Published PRICE_CHANGE event for book: {} (ID: {}) - Old: {}, New: {}",
                     book.getTitle(), book.getId(), oldPrice, newPrice);
         } catch (Exception e) {
             log.error("Failed to publish PRICE_CHANGE event for book ID: {}", book.getId(), e);

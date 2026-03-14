@@ -7,9 +7,9 @@ import lombok.Data;
 @Builder
 public class Preferences {
 
-    private String language;   // e.g., "en", "fr"
+    private String language; // e.g., "en", "fr"
     private Boolean newsletter;
-    private String currency;   // e.g., "USD", "EUR"
+    private String currency; // e.g., "USD", "EUR"
 
-    private String [] favoriteGenres; // e.g., ["Fiction", "Science Fiction"]
+    private String[] favoriteGenres; // e.g., ["Fiction", "Science Fiction"]
 }

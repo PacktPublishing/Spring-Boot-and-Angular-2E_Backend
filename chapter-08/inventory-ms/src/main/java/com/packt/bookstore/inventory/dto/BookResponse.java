@@ -13,6 +13,5 @@ public record BookResponse(
                 LocalDate published,
                 String description,
                 Integer pageCount,
-                String coverImageUrl
-) {
+                String coverImageUrl) {
 }

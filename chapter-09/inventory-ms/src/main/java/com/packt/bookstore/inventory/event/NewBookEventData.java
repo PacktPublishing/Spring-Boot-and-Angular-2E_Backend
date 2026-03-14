@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewBookEventData {
-    
+
     private String authorName;
     private String genre;
     private BigDecimal price;

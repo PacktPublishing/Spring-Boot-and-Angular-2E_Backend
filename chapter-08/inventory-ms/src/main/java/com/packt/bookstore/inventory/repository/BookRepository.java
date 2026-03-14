@@ -17,28 +17,25 @@ import com.packt.bookstore.inventory.entity.Book;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
-        // Override the default findAll to always fetch authors
+    // Override the default findAll to always fetch authors
     @Override
-    @EntityGraph(attributePaths = {"author"})
+    @EntityGraph(attributePaths = { "author" })
     Page<Book> findAll(Pageable pageable);
-    
+
     // Override findById to fetch author
     @Override
-    @EntityGraph(attributePaths = {"author"})
+    @EntityGraph(attributePaths = { "author" })
     Optional<Book> findById(Long id);
-    
-    
-     // Find books by title containing (case insensitive) with author loaded
-    @EntityGraph(attributePaths = {"author"})
-    List<Book> findByTitleContainingIgnoreCase(String title);
-    
-    
-    // Find books by title containing with pagination and author loaded
-    @EntityGraph(attributePaths = {"author"})
-    Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);
-    
 
-    @EntityGraph(attributePaths = {"author"})
+    // Find books by title containing (case insensitive) with author loaded
+    @EntityGraph(attributePaths = { "author" })
+    List<Book> findByTitleContainingIgnoreCase(String title);
+
+    // Find books by title containing with pagination and author loaded
+    @EntityGraph(attributePaths = { "author" })
+    Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    @EntityGraph(attributePaths = { "author" })
     Optional<Book> findByIsbnIgnoreCase(String isbn);
 
     boolean existsByIsbnIgnoreCase(String isbn);
