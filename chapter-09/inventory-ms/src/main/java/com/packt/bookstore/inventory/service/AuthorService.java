@@ -11,6 +11,7 @@ import com.packt.bookstore.inventory.dto.AuthorRequest;
 import com.packt.bookstore.inventory.dto.AuthorResponse;
 import com.packt.bookstore.inventory.entity.Author;
 import com.packt.bookstore.inventory.exception.DomainRuleViolationException;
+import com.packt.bookstore.inventory.exception.ResourceNotFoundException;
 import com.packt.bookstore.inventory.mapper.AuthorMapper;
 import com.packt.bookstore.inventory.repository.AuthorRepository;
 
@@ -42,14 +43,14 @@ public class AuthorService {
     @Transactional(readOnly = true)
     public AuthorResponse findById(Long id) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         return authorMapper.toResponse(author);
     }
 
     public AuthorResponse findByName(String name) {
         Author author = authorRepository.findByName(name);
         if (author == null)
-            throw new RuntimeException("Author not found");
+            throw new ResourceNotFoundException("Author not found");
         return authorMapper.toResponse(author);
     }
 
@@ -58,7 +59,7 @@ public class AuthorService {
         Author author = authorRepository.findByNameIgnoreCaseWithBooks(name)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         return authorMapper.toResponse(author);
     }
 
@@ -76,7 +77,7 @@ public class AuthorService {
 
     public AuthorResponse update(Long id, AuthorRequest request) {
         Author existing = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
         // Create new author with updated fields
         Author updated = Author.builder()
@@ -92,7 +93,7 @@ public class AuthorService {
 
     public void delete(Long id) {
         if (!authorRepository.existsById(id)) {
-            throw new RuntimeException("Author not found");
+            throw new ResourceNotFoundException("Author not found");
         }
         authorRepository.deleteById(id);
     }

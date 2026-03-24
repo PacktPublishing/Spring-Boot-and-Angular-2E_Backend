@@ -31,10 +31,9 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     @Query("SELECT a FROM Author a")
     Page<Author> findAllWithBooksPaginated(Pageable pageable);
 
-    // Find author by name (case-insensitive) with eager loading - returns list to
-    // handle duplicates
+    // Find author by name (case-insensitive, contains) with eager loading - returns list of authors
     @EntityGraph(attributePaths = { "books" })
-    @Query("SELECT a FROM Author a WHERE LOWER(a.name) = LOWER(:name)")
+    @Query("SELECT a FROM Author a WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Author> findByNameIgnoreCaseWithBooks(@Param("name") String name);
 
     // Find author by name (case-insensitive) - returns list to handle duplicates
