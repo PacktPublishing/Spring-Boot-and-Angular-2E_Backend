@@ -1,7 +1,6 @@
 package com.packt.bookstore.inventory.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.packt.bookstore.inventory.dto.AuthorRequest;
 import com.packt.bookstore.inventory.dto.AuthorResponse;
 import com.packt.bookstore.inventory.entity.Author;
+import com.packt.bookstore.inventory.exception.DomainRuleViolationException;
+import com.packt.bookstore.inventory.exception.ResourceNotFoundException;
 import com.packt.bookstore.inventory.mapper.AuthorMapper;
 import com.packt.bookstore.inventory.repository.AuthorRepository;
 
@@ -33,32 +34,42 @@ public class AuthorService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Page<AuthorResponse> findAllPaginated(int page, int size) {
-        return authorRepository.findAll(PageRequest.of(page, size))
+        return authorRepository.findAllWithBooksPaginated(PageRequest.of(page, size))
                 .map(authorMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
     public AuthorResponse findById(Long id) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         return authorMapper.toResponse(author);
     }
 
     public AuthorResponse findByName(String name) {
         Author author = authorRepository.findByName(name);
         if (author == null)
-            throw new RuntimeException("Author not found");
+            throw new ResourceNotFoundException("Author not found");
         return authorMapper.toResponse(author);
     }
 
+    @Transactional(readOnly = true)
     public AuthorResponse findByNameIgnoreCase(String name) {
-        Optional<Author> authorOpt = authorRepository.findByNameIgnoreCase(name);
-        Author author = authorOpt.orElseThrow(() -> new RuntimeException("Author not found"));
+        Author author = authorRepository.findByNameIgnoreCaseWithBooks(name)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         return authorMapper.toResponse(author);
     }
 
     public AuthorResponse create(AuthorRequest request) {
+        // Validate that author name is unique (case-insensitive)
+        List<Author> existingAuthors = authorRepository.findByNameIgnoreCase(request.name());
+        if (!existingAuthors.isEmpty()) {
+            throw new DomainRuleViolationException("Author with name '" + request.name() + "' already exists");
+        }
+
         Author author = authorMapper.toEntity(request);
         Author saved = authorRepository.save(author);
         return authorMapper.toResponse(saved);
@@ -66,7 +77,7 @@ public class AuthorService {
 
     public AuthorResponse update(Long id, AuthorRequest request) {
         Author existing = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
         // Create new author with updated fields
         Author updated = Author.builder()
@@ -82,7 +93,7 @@ public class AuthorService {
 
     public void delete(Long id) {
         if (!authorRepository.existsById(id)) {
-            throw new RuntimeException("Author not found");
+            throw new ResourceNotFoundException("Author not found");
         }
         authorRepository.deleteById(id);
     }
