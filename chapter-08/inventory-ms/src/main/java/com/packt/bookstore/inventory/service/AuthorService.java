@@ -55,12 +55,11 @@ public class AuthorService {
     }
 
     @Transactional(readOnly = true)
-    public AuthorResponse findByNameIgnoreCase(String name) {
-        Author author = authorRepository.findByNameIgnoreCaseWithBooks(name)
+    public List<AuthorResponse> findByNameIgnoreCase(String name) {
+        return authorRepository.findByNameIgnoreCaseWithBooks(name)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
-        return authorMapper.toResponse(author);
+                .map(authorMapper::toResponse)
+                .toList();
     }
 
     public AuthorResponse create(AuthorRequest request) {

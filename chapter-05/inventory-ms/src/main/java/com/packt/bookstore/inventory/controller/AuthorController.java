@@ -55,9 +55,9 @@ public class AuthorController {
     }
 
     @GetMapping("/by-name-ignore-case")
-    public ResponseEntity<AuthorResponse> getAuthorByNameIgnoreCase(@RequestParam String name) {
-        AuthorResponse author = authorService.findByNameIgnoreCase(name);
-        return ResponseEntity.ok(author);
+    public ResponseEntity<List<AuthorResponse>> getAuthorByNameIgnoreCase(@RequestParam String name) {
+        List<AuthorResponse> authors = authorService.findByNameIgnoreCase(name);
+        return ResponseEntity.ok(authors);
     }
 
     @PostMapping
