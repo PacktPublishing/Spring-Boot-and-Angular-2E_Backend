@@ -47,6 +47,7 @@ public class AuthorService {
         return authorMapper.toResponse(author);
     }
 
+    @Transactional(readOnly = true)
     public AuthorResponse findByName(String name) {
         Author author = authorRepository.findByName(name);
         if (author == null)
