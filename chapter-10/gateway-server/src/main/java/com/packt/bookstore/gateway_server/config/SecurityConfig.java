@@ -75,7 +75,11 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Make GET /packt/inventory/api/books public (gateway-exposed path)
-                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books", "/packt/inventory/api/books/paged")
+                        .permitAll()
+
+                        // Make GET /packt/inventory/api/authors public (gateway-exposed path)
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/authors", "/packt/inventory/api/authors/paged")
                         .permitAll()
 
                         // All other gateway inventory routes - require authentication
@@ -99,7 +103,7 @@ public class SecurityConfig {
                         .authenticated()
 
                         // Make GET /packt/inventory/api/books public (gateway-exposed path)
-                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books", "/packt/inventory/api/books/paged")
                         .permitAll()
 
                         // Get inventory - requires USER, AUTHOR or ADMIN role (direct API path)
