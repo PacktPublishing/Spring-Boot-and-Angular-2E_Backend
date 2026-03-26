@@ -2,6 +2,7 @@ package com.packt.bookstore.inventory.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +40,15 @@ public class BookController {
         return ResponseEntity.ok(books);
     }
 
+
+    @GetMapping("/paged")
+    public ResponseEntity<Page<BookResponse>> getBooksPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<BookResponse> paged = bookService.findAllPaginated(page, size);
+        return ResponseEntity.ok(paged);
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getBookById(@PathVariable Long id) {
         BookResponse book = bookService.findOne(id);
