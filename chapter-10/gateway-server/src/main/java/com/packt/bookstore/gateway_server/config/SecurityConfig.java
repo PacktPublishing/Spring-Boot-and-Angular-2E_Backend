@@ -75,14 +75,19 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Make GET /packt/inventory/api/books public (gateway-exposed path)
-                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books", "/packt/inventory/api/books/paged")
+                        .permitAll()
+
+                        // Make GET /packt/inventory/api/authors public (gateway-exposed path)
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/authors", "/packt/inventory/api/authors/paged")
                         .permitAll()
 
                         // All other gateway inventory routes - require authentication
                         .pathMatchers("/packt/inventory/api/**")
                         .authenticated()
 
-                        // Direct API routes - public endpoints
+                        // Direct API routes - intentionally kept separate from gateway-exposed
+                        // /packt/** routes
                         .pathMatchers(HttpMethod.POST, "/api/users/signup")
                         .permitAll()
 
@@ -97,10 +102,6 @@ public class SecurityConfig {
                         // Update user profile - authentication required
                         .pathMatchers(HttpMethod.PUT, "/api/users/profile")
                         .authenticated()
-
-                        // Make GET /packt/inventory/api/books public (gateway-exposed path)
-                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
-                        .permitAll()
 
                         // Get inventory - requires USER, AUTHOR or ADMIN role (direct API path)
                         .pathMatchers(HttpMethod.GET, "/api/inventory/books")
