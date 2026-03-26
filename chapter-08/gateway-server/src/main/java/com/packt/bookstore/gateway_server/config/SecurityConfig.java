@@ -5,15 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -36,12 +33,6 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    @Bean
-    public ReactiveJwtDecoder reactiveJwtDecoder(
-            @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) {
-        return NimbusReactiveJwtDecoder.withIssuerLocation(issuerUri).build();
-    }
-
     /**
      * Configures the security filter chain for reactive endpoints.
      * 
@@ -53,6 +44,10 @@ public class SecurityConfig {
         return http
                 // Disable CSRF for stateless API (using JWT instead)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+
+                // Enable CORS with the configuration from corsConfigurationSource()
+                .cors(cors -> {
+                })
 
                 // Configure authorization for different endpoints
                 .authorizeExchange(exchange -> exchange
@@ -75,15 +70,24 @@ public class SecurityConfig {
                         .pathMatchers("/packt/user/api/**")
                         .authenticated()
 
+                        // SSE Notification endpoints - allow public access for real-time updates
+                        .pathMatchers("/packt/inventory/api/notifications/**")
+                        .permitAll()
+
                         // Make GET /packt/inventory/api/books public (gateway-exposed path)
-                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books")
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/books", "/packt/inventory/api/books/paged")
+                        .permitAll()
+
+                        // Make GET /packt/inventory/api/authors public (gateway-exposed path)
+                        .pathMatchers(HttpMethod.GET, "/packt/inventory/api/authors", "/packt/inventory/api/authors/paged")
                         .permitAll()
 
                         // All other gateway inventory routes - require authentication
                         .pathMatchers("/packt/inventory/api/**")
                         .authenticated()
 
-                        // Direct API routes - public endpoints
+                        // Direct API routes - intentionally kept separate from gateway-exposed
+                        // /packt/** routes
                         .pathMatchers(HttpMethod.POST, "/api/users/signup")
                         .permitAll()
 
@@ -99,8 +103,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.PUT, "/api/users/profile")
                         .authenticated()
 
-                        // Get inventory - requires USER, AUTHOR or ADMIN role
-                        // Make GET /api/inventory/books public
+                        // Get inventory - requires USER, AUTHOR or ADMIN role (direct API path)
                         .pathMatchers(HttpMethod.GET, "/api/inventory/books")
                         .permitAll()
 
@@ -162,15 +165,10 @@ public class SecurityConfig {
             }
 
             // Get roles collection from realm_access
-            Object rolesObject = realmAccess.get("roles");
-            if (!(rolesObject instanceof Collection<?> roles)) {
-                return List.of();
-            }
+            Collection<String> roles = (Collection<String>) realmAccess.get("roles");
 
             // Convert role strings to SimpleGrantedAuthority with ROLE_ prefix
             return roles.stream()
-                    .filter(String.class::isInstance)
-                    .map(String.class::cast)
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                     .collect(Collectors.toList());
         });
@@ -190,14 +188,34 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of(
-                "http://localhost:4200", // Angular
-                "http://localhost:3000", // React
-                "http://localhost:5173" // Vite
+
+        // Use allowedOriginPatterns to support both specific origins and file://
+        // protocol
+        corsConfig.setAllowedOriginPatterns(List.of(
+                // localhost with any port
+                "http://localhost:*",
+                "https://localhost:*",
+                "http://127.0.0.1:*",
+                "https://127.0.0.1:*",
+
+                // Common frontend framework development servers
+                "http://localhost:4200", // Angular default
+                "http://localhost:3000", // React/Next.js default
+
+                // HTTPS versions for production-like testing
+                "https://localhost:4200",
+                "https://localhost:3000",
+                "https://localhost:5173",
+
+                // For local testing with HTML files
+                "file://*", // Local file system
+                "null" // null origin (browser sends for file://)
         ));
+
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setAllowCredentials(true);
+        corsConfig.setExposedHeaders(List.of("*")); // Expose all headers for SSE
+        corsConfig.setAllowCredentials(false); // Must be false when allowing null origin
         corsConfig.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
