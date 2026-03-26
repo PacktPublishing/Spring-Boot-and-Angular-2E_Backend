@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.packt.bookstore.inventory.dto.BookRequest;
 import com.packt.bookstore.inventory.dto.BookResponse;
@@ -23,7 +24,6 @@ import com.packt.bookstore.inventory.mapper.BookMapper;
 import com.packt.bookstore.inventory.repository.AuthorRepository;
 import com.packt.bookstore.inventory.repository.BookRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -54,6 +54,12 @@ public class BookService implements IBookService {
                 .stream()
                 .map(bookMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BookResponse> findAllPaginated(int page, int size) {
+        return bookRepository.findAll(PageRequest.of(page, size, Sort.by("title").ascending()))
+                .map(bookMapper::toResponse);
     }
 
     @Override
