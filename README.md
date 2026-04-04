@@ -24,6 +24,7 @@ This repository contains all backend code, resources, and configuration for **Pa
 ## 🛠️ Troubleshooting & Environment Setup
 
 - [Troubleshooting & Environment Setup Guide](ENVIRONMENT_SETUP.md)
+- [Docker Compose User Guide (Run Full Backend Stack)](containerization/README.md)
 
 ---
 
@@ -54,3 +55,4 @@ This repository contains all backend code, resources, and configuration for **Pa
 - [Chapter 08 README](chapter-08/README.md)
 - [Chapter 09 README](chapter-09/README.md)
 - [Chapter 10 README](chapter-10/README.md)
+- [Docker Compose User Guide](containerization/README.md)
