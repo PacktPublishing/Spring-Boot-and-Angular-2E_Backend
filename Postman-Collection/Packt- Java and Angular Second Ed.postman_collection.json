@@ -4043,14 +4043,7 @@
               },
               "request": {
                 "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{access-token}}",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "noauth"
                 },
                 "method": "GET",
                 "header": [],
@@ -4064,6 +4057,263 @@
                     "inventory",
                     "api",
                     "books"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "packt/inventory/api/books",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books",
+                      "host": [
+                        "{{api-gatewayaseurl}}"
+                      ],
+                      "path": [
+                        "packt",
+                        "inventory",
+                        "api",
+                        "books"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": null,
+                  "header": [
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Origin"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Method"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Mon, 26 Jan 2026 06:51:45 GMT"
+                    },
+                    {
+                      "key": "X-Processed-By",
+                      "value": "Spring-Gateway"
+                    },
+                    {
+                      "key": "Cache-Control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "Pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "X-Content-Type-Options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "X-Frame-Options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "X-XSS-Protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "Referrer-Policy",
+                      "value": "no-referrer"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n    {\n        \"id\": 1,\n        \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n        \"isbn\": \"9780132350884\",\n        \"authorName\": \"Robert C. Martin\",\n        \"price\": 59.99,\n        \"genre\": \"Computing & Software Engineering\",\n        \"published\": \"2008-08-01\",\n        \"description\": \"Even bad code can function. But if code isn’t clean, it can bring a development organization to its knees. This book presents principles, patterns, and practices of writing clean code, case studies, and heuristics for developers.\",\n        \"pageCount\": 464,\n        \"coverImageUrl\": \"https://covers1.booksamillion.com/covers/bam/0/13/235/088/0132350882_b.jpg\"\n    },\n    {\n        \"id\": 2,\n        \"title\": \"The Great Gatsby\",\n        \"isbn\": \"9780743273565\",\n        \"authorName\": \"F. Scott Fitzgerald\",\n        \"price\": 15.99,\n        \"genre\": \"Fiction\",\n        \"published\": \"1925-04-10\",\n        \"description\": \"The Great Gatsby is a novel set in the Jazz Age on Long Island, near New York City, and follows narrator Nick Carraway’s interactions with Jay Gatsby, a mysterious millionaire obsessed with reuniting with his former lover Daisy Buchanan.\",\n        \"pageCount\": 180,\n        \"coverImageUrl\": \"https://images-na.ssl-images-amazon.com/images/I/81af+MCATTL.jpg\"\n    }\n]"
+                }
+              ]
+            },
+            {
+              "name": "packt/inventory/api/books/paged",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books/paged?page=0&size=2",
+                  "host": [
+                    "{{api-gatewayaseurl}}"
+                  ],
+                  "path": [
+                    "packt",
+                    "inventory",
+                    "api",
+                    "books",
+                    "paged"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "packt/inventory/api/authors/paged",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/paged?page=1&size=2",
+                      "host": [
+                        "{{api-gatewayaseurl}}"
+                      ],
+                      "path": [
+                        "packt",
+                        "inventory",
+                        "api",
+                        "authors",
+                        "paged"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "1"
+                        },
+                        {
+                          "key": "size",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": null,
+                  "header": [
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Origin"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Method"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Mon, 26 Jan 2026 07:02:50 GMT"
+                    },
+                    {
+                      "key": "X-Processed-By",
+                      "value": "Spring-Gateway"
+                    },
+                    {
+                      "key": "Cache-Control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "Pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "X-Content-Type-Options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "X-Frame-Options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "X-XSS-Protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "Referrer-Policy",
+                      "value": "no-referrer"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"content\": [\n        {\n            \"name\": \"F. Scott Fitzgerald\",\n            \"nationality\": null,\n            \"books\": [\n                \"The Great Gatsby\"\n            ]\n        }\n    ],\n    \"pageable\": {\n        \"pageNumber\": 1,\n        \"pageSize\": 2,\n        \"sort\": {\n            \"empty\": true,\n            \"unsorted\": true,\n            \"sorted\": false\n        },\n        \"offset\": 2,\n        \"unpaged\": false,\n        \"paged\": true\n    },\n    \"totalPages\": 2,\n    \"totalElements\": 3,\n    \"last\": true,\n    \"size\": 2,\n    \"number\": 1,\n    \"sort\": {\n        \"empty\": true,\n        \"unsorted\": true,\n        \"sorted\": false\n    },\n    \"numberOfElements\": 1,\n    \"first\": false,\n    \"empty\": false\n}"
+                }
+              ]
+            },
+            {
+              "name": "packt/inventory/api/books paged (Different Patter)",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access-token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books?page=0&size=2",
+                  "host": [
+                    "{{api-gatewayaseurl}}"
+                  ],
+                  "path": [
+                    "packt",
+                    "inventory",
+                    "api",
+                    "books"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "2"
+                    }
                   ]
                 }
               },
@@ -4287,7 +4537,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"New Spring Book\",\n  \"isbn\": \"978-1234397897\",\n  \"price\": 49.99,\n  \"quantity\": 20,\n  \"authorId\": 211,\n  \"genre\": \"Technology\",\n  \"published\": \"2024-01-15\",\n  \"description\": \"A new book about Spring\",\n  \"authorName\": \"Ahmad Gohar\",\n  \"pageCount\": 400,\n  \"coverImageUrl\": \"https://example.com/new-cover.jpg\"\n}",
+                  "raw": "{\n  \"title\": \"New Spring Book2\",\n  \"isbn\": \"978-1234397898\",\n  \"price\": 49.99,\n  \"quantity\": 20,\n  \"authorId\": 11,\n  \"genre\": \"Technology\",\n  \"published\": \"2024-01-15\",\n  \"description\": \"A new book about Spring\",\n  \"authorName\": \"Ahmad Gohar\",\n  \"pageCount\": 400,\n  \"coverImageUrl\": \"https://example.com/new-cover.jpg\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -4719,14 +4969,7 @@
               },
               "request": {
                 "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{access-token}}",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "noauth"
                 },
                 "method": "GET",
                 "header": [],
@@ -4835,132 +5078,7 @@
               },
               "request": {
                 "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{access-token}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/paged",
-                  "host": [
-                    "{{api-gatewayaseurl}}"
-                  ],
-                  "path": [
-                    "packt",
-                    "inventory",
-                    "api",
-                    "authors",
-                    "paged"
-                  ]
-                }
-              },
-              "response": [
-                {
-                  "name": "packt/inventory/api/authors/paged",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/paged",
-                      "host": [
-                        "{{api-gatewayaseurl}}"
-                      ],
-                      "path": [
-                        "packt",
-                        "inventory",
-                        "api",
-                        "authors",
-                        "paged"
-                      ]
-                    }
-                  },
-                  "status": "OK",
-                  "code": 200,
-                  "_postman_previewlanguage": null,
-                  "header": [
-                    {
-                      "key": "transfer-encoding",
-                      "value": "chunked"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Origin"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Access-Control-Request-Method"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Access-Control-Request-Headers"
-                    },
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    },
-                    {
-                      "key": "Date",
-                      "value": "Mon, 26 Jan 2026 06:57:02 GMT"
-                    },
-                    {
-                      "key": "X-Processed-By",
-                      "value": "Spring-Gateway"
-                    },
-                    {
-                      "key": "Cache-Control",
-                      "value": "no-cache, no-store, max-age=0, must-revalidate"
-                    },
-                    {
-                      "key": "Pragma",
-                      "value": "no-cache"
-                    },
-                    {
-                      "key": "Expires",
-                      "value": "0"
-                    },
-                    {
-                      "key": "X-Content-Type-Options",
-                      "value": "nosniff"
-                    },
-                    {
-                      "key": "X-Frame-Options",
-                      "value": "DENY"
-                    },
-                    {
-                      "key": "X-XSS-Protection",
-                      "value": "0"
-                    },
-                    {
-                      "key": "Referrer-Policy",
-                      "value": "no-referrer"
-                    }
-                  ],
-                  "cookie": [],
-                  "body": "{\n    \"content\": [\n        {\n            \"name\": \"Ahmad Gohar\",\n            \"nationality\": \"Egypt\",\n            \"books\": []\n        },\n        {\n            \"name\": \"Ahmad Gohar\",\n            \"nationality\": \"Egypt\",\n            \"books\": []\n        },\n        {\n            \"name\": null,\n            \"nationality\": \"Egypt\",\n            \"books\": []\n        },\n        {\n            \"name\": \"Robert C. Martin\",\n            \"nationality\": null,\n            \"books\": [\n                \"Clean Code: A Handbook of Agile Software Craftsmanship\"\n            ]\n        },\n        {\n            \"name\": \"F. Scott Fitzgerald\",\n            \"nationality\": null,\n            \"books\": [\n                \"The Great Gatsby\"\n            ]\n        }\n    ],\n    \"pageable\": {\n        \"pageNumber\": 0,\n        \"pageSize\": 10,\n        \"sort\": {\n            \"empty\": true,\n            \"unsorted\": true,\n            \"sorted\": false\n        },\n        \"offset\": 0,\n        \"unpaged\": false,\n        \"paged\": true\n    },\n    \"totalPages\": 1,\n    \"totalElements\": 5,\n    \"last\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"sort\": {\n        \"empty\": true,\n        \"unsorted\": true,\n        \"sorted\": false\n    },\n    \"numberOfElements\": 5,\n    \"first\": true,\n    \"empty\": false\n}"
-                }
-              ]
-            },
-            {
-              "name": "packt/inventory/api/authors/paged",
-              "protocolProfileBehavior": {
-                "disabledSystemHeaders": {}
-              },
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{access-token}}",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "noauth"
                 },
                 "method": "GET",
                 "header": [],
@@ -5221,7 +5339,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name-ignore-case?name=Ahmad Gohar",
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name-ignore-case?name=dimitri",
                   "host": [
                     "{{api-gatewayaseurl}}"
                   ],
@@ -5231,6 +5349,136 @@
                     "api",
                     "authors",
                     "by-name-ignore-case"
+                  ],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "dimitri"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "packt/inventory/api/authors/by-name-ignore-case",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name-ignore-case?name=Ahmad Gohar",
+                      "host": [
+                        "{{api-gatewayaseurl}}"
+                      ],
+                      "path": [
+                        "packt",
+                        "inventory",
+                        "api",
+                        "authors",
+                        "by-name-ignore-case"
+                      ],
+                      "query": [
+                        {
+                          "key": "name",
+                          "value": "Ahmad Gohar"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": null,
+                  "header": [
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Origin"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Method"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Mon, 26 Jan 2026 07:01:03 GMT"
+                    },
+                    {
+                      "key": "X-Processed-By",
+                      "value": "Spring-Gateway"
+                    },
+                    {
+                      "key": "Cache-Control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "Pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "X-Content-Type-Options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "X-Frame-Options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "X-XSS-Protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "Referrer-Policy",
+                      "value": "no-referrer"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"name\": \"Ahmad Gohar\",\n    \"nationality\": \"Egypt\",\n    \"books\": []\n}"
+                }
+              ]
+            },
+            {
+              "name": "packt/inventory/api/authors/by-name",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access-token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name?name=Ahmad Gohar",
+                  "host": [
+                    "{{api-gatewayaseurl}}"
+                  ],
+                  "path": [
+                    "packt",
+                    "inventory",
+                    "api",
+                    "authors",
+                    "by-name"
                   ],
                   "query": [
                     {
@@ -5349,7 +5597,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n        \"name\": \"Dimitris Kiriakakis\",\n        \"nationality\": \"Greece\"\n}",
+                  "raw": "{\n        \"name\": \"dimitri Kiriak\",\n        \"nationality\": \"Greece\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -5706,22 +5954,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "New Request",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
-    },
-    {
-      "name": "New Request",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
     }
   ],
   "variable": [
