@@ -1,0 +1,44 @@
+{
+  "id": "bookstore",
+  "realm": "bookstore",
+  "displayName": "Bookstore Realm",
+  "enabled": true,
+  "registrationAllowed": false,
+  "rememberMe": true,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Default bookstore user role"
+      },
+      {
+        "name": "admin",
+        "description": "Bookstore admin role"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "bookstore-gateway",
+      "name": "Bookstore Gateway",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "fullScopeAllowed": true,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ]
+}

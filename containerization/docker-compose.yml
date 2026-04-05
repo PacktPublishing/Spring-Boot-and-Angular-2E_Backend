@@ -67,8 +67,8 @@ services:
     container_name: bookstore-keycloak
     command: start-dev --import-realm
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_PORT: 8090
     volumes:
       - ./Keycloak/bookstore-realm.json:/opt/keycloak/data/import/bookstore-realm.json:ro
@@ -187,7 +187,7 @@ services:
       zipkin:
         condition: service_healthy
       keycloak:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -232,7 +232,7 @@ services:
       zipkin:
         condition: service_healthy
       keycloak:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test:
         [
