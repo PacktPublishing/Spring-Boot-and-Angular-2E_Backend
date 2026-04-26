@@ -1,4 +1,4 @@
-# Chapter 04 — Setting Up Databases and Repositories Using Spring Data JPA & MongoDB
+# Chapter 04 — Setting Up Databases and Repositories Using Spring Data
 
 This chapter focuses on building the persistence layer for the Bookstore application using **Spring Data JPA** with PostgreSQL and **Spring Data MongoDB** with MongoDB. You'll learn how to configure databases, design JPA entities and MongoDB documents, create repository interfaces, and apply best practices for scalable microservices.
 

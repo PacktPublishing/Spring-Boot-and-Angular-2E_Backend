@@ -11,7 +11,7 @@ This repository contains all backend code, resources, and configuration for **Pa
 1. Spring Boot and Angular – Understand the Big Picture and Kickstart the Environment
 2. Getting Started With Microservices Using Spring Boot
 3. Setting up your development AI Assistant
-4. Setting up Database and Repositories using Spring Data JPA
+4. Setting up Database and Repositories using Spring Data
 5. Building Application Services and APIs with Spring
 6. Developing Service Discovery and API Gateway using Spring Cloud
 7. Documenting APIs with OpenAPI and logging the events
