@@ -11,13 +11,14 @@ This chapter focuses on building the persistence layer for the Bookstore applica
 3. [Building the Inventory Microservice (PostgreSQL + JPA)](#building-the-inventory-microservice-postgresql--jpa)
 4. [JPA Entities](#jpa-entities)
 5. [Building JPA Repositories](#building-jpa-repositories)
-6. [Building the User Microservice (MongoDB + Spring Data MongoDB)](#building-the-user-microservice-mongodb--spring-data-mongodb)
-7. [MongoDB Documents](#mongodb-documents)
-8. [MongoDB Repository](#mongodb-repository)
-9. [Repository Best Practices (JPA vs MongoDB)](#repository-best-practices-jpa-vs-mongodb)
-10. [Testing the Repository Layer](#testing-the-repository-layer)
-11. [Installation & Setup Steps](#installation--setup-steps)
-12. [Resources & References](#resources--references)
+6. [JPA Quick Summary and Query-Derivation Notes](#jpa-quick-summary-and-query-derivation-notes)
+7. [Building the User Microservice (MongoDB + Spring Data MongoDB)](#building-the-user-microservice-mongodb--spring-data-mongodb)
+8. [MongoDB Documents](#mongodb-documents)
+9. [MongoDB Repository](#mongodb-repository)
+10. [Repository Best Practices (JPA vs MongoDB)](#repository-best-practices-jpa-vs-mongodb)
+11. [Testing the Repository Layer](#testing-the-repository-layer)
+12. [Installation & Setup Steps](#installation--setup-steps)
+13. [Resources & References](#resources--references)
 
 ---
 
@@ -290,6 +291,30 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     Optional<Author> findByIdWithBooks(@Param("id") Long id);
 }
 ```
+
+---
+
+## JPA Quick Summary and Query-Derivation Notes
+
+- For a focused summary of the main JPA components used in this chapter, see [JPA.md](JPA.md).
+- The derived query examples in this chapter are intentionally simple. In real projects, query derivation has naming rules, parser constraints, and edge cases.
+- Derived methods are best for straightforward lookups; for complex filtering or clearer intent, prefer explicit `@Query` methods.
+- Validate derived queries with repository tests (`@DataJpaTest`) so behavior is confirmed early.
+
+### Quick Decision Table: Derived Query vs `@Query`
+
+| Scenario | Preferred Approach | Why |
+| -------- | ------------------ | --- |
+| Simple equality or small filters (`findByEmail`, `findByTitleContaining`) | Derived query method | Fast to write, readable, and easy to maintain |
+| Nested or lengthy method names becoming hard to read | `@Query` (JPQL) | Makes intent explicit and avoids very long method signatures |
+| Complex joins, grouped logic, or tuning for performance | `@Query` (JPQL or native SQL) | Better control over query behavior and execution |
+| Database-specific SQL feature is required | `@Query(nativeQuery = true)` | Full SQL control for vendor-specific capabilities |
+| Team is unsure about parser behavior or edge cases | `@Query` + repository tests | Reduces ambiguity and verifies behavior explicitly |
+
+- Official references for deeper understanding:
+  - Spring Data JPA: <https://spring.io/projects/spring-data-jpa>
+  - Spring Data JPA Reference: <https://docs.spring.io/spring-data/jpa/reference/>
+  - Query Methods Details: <https://docs.spring.io/spring-data/jpa/reference/repositories/query-methods-details.html>
 
 ---
 
@@ -639,6 +664,7 @@ cd user-service
 
 ## Resources & References
 
+- **Chapter JPA Summary**: [JPA.md](JPA.md)
 - **Spring Data JPA Documentation**: <https://spring.io/projects/spring-data-jpa>
 - **Spring Data MongoDB Documentation**: <https://spring.io/projects/spring-data-mongodb>
 - **PostgreSQL Documentation**: <https://www.postgresql.org/docs/>

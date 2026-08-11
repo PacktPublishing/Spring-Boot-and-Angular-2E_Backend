@@ -80,7 +80,7 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(
-            @RequestHeader(value = "X-User-Id", required = false) String keycloakId) {
+            @RequestHeader(value = "X-User-Id", required = true) String keycloakId) {
 
         if (keycloakId == null || keycloakId.isEmpty()) {
             log.warn("X-User-Id header missing - request should have been blocked by gateway");
@@ -106,7 +106,7 @@ public class UserController {
 
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
-            @RequestHeader(value = "X-User-Id", required = false) String keycloakId,
+            @RequestHeader(value = "X-User-Id", required = true) String keycloakId,
             @Valid @RequestBody UpdateProfileRequest request) {
 
         if (keycloakId == null || keycloakId.isEmpty()) {
@@ -134,7 +134,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(
-            @RequestHeader(value = "X-User-Id", required = false) String keycloakId) {
+            @RequestHeader(value = "X-User-Id", required = true) String keycloakId) {
 
         if (keycloakId == null || keycloakId.isEmpty()) {
             log.warn("X-User-Id header missing - request should have been blocked by gateway");
@@ -178,7 +178,7 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-            @RequestHeader(value = "X-User-Id", required = false) String keycloakId) {
+            @RequestHeader(value = "X-User-Id", required = true) String keycloakId) {
 
         if (keycloakId == null || keycloakId.isEmpty()) {
             log.warn("X-User-Id header missing - request should have been blocked by gateway");

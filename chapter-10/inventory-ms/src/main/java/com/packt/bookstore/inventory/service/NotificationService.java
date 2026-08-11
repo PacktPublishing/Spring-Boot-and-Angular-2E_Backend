@@ -62,12 +62,8 @@ public class NotificationService {
                     activeSubscribers.put(subscriberId, LocalDateTime.now());
                     log.info("New SSE subscriber connected. Total subscribers: {}", activeSubscribers.size());
                 })
-                .doOnCancel(() -> {
-                    log.info("SSE subscriber cancelled. Remaining subscribers: {}", activeSubscribers.size());
-                })
-                .doOnError(error -> {
-                    log.error("Error in SSE stream", error);
-                })
+                .doOnCancel(() -> log.info("SSE subscriber cancelled. Remaining subscribers: {}", activeSubscribers.size()))
+                .doOnError(error -> log.error("Error in SSE stream", error))
                 .share(); // Share the flux among multiple subscribers
 
         log.info("NotificationService initialized with reactive SSE support");

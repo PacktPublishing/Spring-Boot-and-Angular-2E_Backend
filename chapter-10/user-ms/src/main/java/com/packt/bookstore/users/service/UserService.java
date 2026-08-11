@@ -10,15 +10,15 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.packt.bookstore.users.dto.RefreshTokenRequest;
 import com.packt.bookstore.users.dto.SignInRequest;
@@ -40,9 +40,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserService {
 
+    private static final String REFRESH_TOKEN_GRANT = "refresh_token";
+
     private final Keycloak keycloak;
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient webClient;
 
     @Value("${keycloak.realm}")
     private String realm;
@@ -74,12 +76,11 @@ public class UserService {
                 .build();
     }
 
-    @Transactional
     public UserProfileDTO signUp(SignUpRequest request) {
         log.info("Processing signup for email: {}", request.getEmail());
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new IllegalStateException("Email already registered");
         }
 
         RealmResource realmResource = keycloak.realm(realm);
@@ -98,53 +99,24 @@ public class UserService {
         if (response.getStatus() != 201) {
             String error = response.readEntity(String.class);
             log.error("Failed to create user in Keycloak: {}", error);
-            throw new RuntimeException("Failed to create user: " + error);
+            throw new IllegalStateException("Failed to create user: " + error);
         }
 
         String locationHeader = response.getHeaderString("Location");
         String keycloakId = locationHeader.substring(locationHeader.lastIndexOf('/') + 1);
         log.info("Created Keycloak user: {}", keycloakId);
 
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(request.getPassword());
-        credential.setTemporary(false);
-        usersResource.get(keycloakId).resetPassword(credential);
-        log.info("Password set for user: {}", keycloakId);
-
         try {
-            RoleRepresentation userRole = realmResource.roles().get("user").toRepresentation();
-            usersResource.get(keycloakId).roles().realmLevel()
-                    .add(Collections.singletonList(userRole));
-            log.info("Assigned user role to: {}", keycloakId);
-        } catch (Exception e) {
-            log.error("Failed to assign role: {}", e.getMessage());
+            User savedUser = createUserProfile(request, realmResource, usersResource, keycloakId);
+            log.info("User profile saved with ID: {}", savedUser.getId());
+
+            return mapToDTO(savedUser);
+        } catch (RuntimeException e) {
+            deleteKeycloakUser(keycloakId);
+            throw e;
+        } finally {
+            response.close();
         }
-        Address address = Address.builder()
-                .street(request.getAddress())
-                .city(request.getCity())
-                .state(request.getState())
-                .postalCode(request.getZipCode())
-                .country(request.getCountry())
-                .build();
-        Profile profile = Profile.builder()
-                .address(address)
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .birthDate(request.getDateOfBirth())
-                .build();
-
-        User user = User.builder()
-                .username(request.getEmail())
-                .keycloakId(keycloakId)
-                .email(request.getEmail())
-                .profile(profile)
-                .build();
-
-        User savedUser = userRepository.save(user);
-        log.info("User profile saved with ID: {}", savedUser.getId());
-
-        return mapToDTO(savedUser);
     }
 
     public SignInResponse signIn(SignInRequest request) {
@@ -152,25 +124,17 @@ public class UserService {
 
         String tokenUrl = authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "password");
         body.add("client_id", clientId);
         body.add("username", request.getEmail());
         body.add("password", request.getPassword());
 
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
-
         try {
-            @SuppressWarnings("unchecked")
-            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate
-                    .postForEntity(tokenUrl, entity, Map.class);
-            Map<String, Object> tokenResponse = response.getBody();
+            Map<String, Object> tokenResponse = requestToken(tokenUrl, body);
 
             if (tokenResponse == null) {
-                throw new RuntimeException("Failed to obtain tokens from Keycloak");
+                throw new IllegalStateException("Failed to obtain tokens from Keycloak");
             }
 
             log.info("Tokens obtained from Keycloak");
@@ -180,15 +144,15 @@ public class UserService {
 
             return SignInResponse.builder()
                     .accessToken((String) tokenResponse.get("access_token"))
-                    .refreshToken((String) tokenResponse.get("refresh_token"))
+                        .refreshToken((String) tokenResponse.get(REFRESH_TOKEN_GRANT))
                     .tokenType("Bearer")
                     .expiresIn(((Number) tokenResponse.get("expires_in")).longValue())
                     .user(mapToDTO(user))
                     .build();
 
-        } catch (Exception e) {
+            } catch (RuntimeException e) {
             log.error("Signin failed: {}", e.getMessage());
-            throw new RuntimeException("Invalid email or password");
+                throw new IllegalArgumentException("Invalid email or password", e);
         }
     }
 
@@ -247,24 +211,16 @@ public class UserService {
 
         String tokenUrl = authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "refresh_token");
+        body.add("grant_type", REFRESH_TOKEN_GRANT);
         body.add("client_id", clientId);
-        body.add("refresh_token", request.getRefreshToken());
-
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+        body.add(REFRESH_TOKEN_GRANT, request.getRefreshToken());
 
         try {
-            @SuppressWarnings("unchecked")
-            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (Object) restTemplate
-                    .postForEntity(tokenUrl, entity, Map.class);
-            Map<String, Object> tokenResponse = response.getBody();
+            Map<String, Object> tokenResponse = requestToken(tokenUrl, body);
 
             if (tokenResponse == null || tokenResponse.containsKey("error")) {
-                throw new RuntimeException("Failed to refresh token");
+                throw new IllegalStateException("Failed to refresh token");
             }
 
             log.info("Token refreshed successfully");
@@ -272,15 +228,15 @@ public class UserService {
             // Return new tokens without user profile (client already has it)
             return SignInResponse.builder()
                     .accessToken((String) tokenResponse.get("access_token"))
-                    .refreshToken((String) tokenResponse.get("refresh_token"))
+                    .refreshToken((String) tokenResponse.get(REFRESH_TOKEN_GRANT))
                     .tokenType("Bearer")
                     .expiresIn(((Number) tokenResponse.get("expires_in")).longValue())
                     .user(null) // No need to fetch user again
                     .build();
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Token refresh failed: {}", e.getMessage());
-            throw new RuntimeException("Invalid or expired refresh token");
+            throw new IllegalArgumentException("Invalid or expired refresh token", e);
         }
     }
 
@@ -301,6 +257,69 @@ public class UserService {
         } catch (Exception e) {
             log.warn("Logout cleanup failed: {}", e.getMessage());
             // Don't throw exception - logout should succeed even if cleanup fails
+        }
+    }
+
+    private Map<String, Object> requestToken(String tokenUrl, MultiValueMap<String, String> body) {
+        return webClient.post()
+                .uri(tokenUrl)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(body))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .block();
+    }
+
+    private User createUserProfile(SignUpRequest request, RealmResource realmResource, UsersResource usersResource,
+            String keycloakId) {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(request.getPassword());
+        credential.setTemporary(false);
+        usersResource.get(keycloakId).resetPassword(credential);
+        log.info("Password set for user: {}", keycloakId);
+
+        try {
+            RoleRepresentation userRole = realmResource.roles().get("user").toRepresentation();
+            usersResource.get(keycloakId).roles().realmLevel().add(Collections.singletonList(userRole));
+            log.info("Assigned user role to: {}", keycloakId);
+        } catch (WebClientResponseException e) {
+            log.error("Failed to assign role: {}", e.getMessage());
+        }
+
+        Address address = Address.builder()
+                .street(request.getAddress())
+                .city(request.getCity())
+                .state(request.getState())
+                .postalCode(request.getZipCode())
+                .country(request.getCountry())
+                .build();
+        Profile profile = Profile.builder()
+                .address(address)
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .birthDate(request.getDateOfBirth())
+                .build();
+
+        User user = User.builder()
+                .username(request.getEmail())
+                .keycloakId(keycloakId)
+                .email(request.getEmail())
+                .profile(profile)
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    private void deleteKeycloakUser(String keycloakId) {
+        try {
+            RealmResource realmResource = keycloak.realm(realm);
+            realmResource.users().delete(keycloakId);
+            log.warn("Rolled back Keycloak user creation for {} after profile save failure", keycloakId);
+        } catch (Exception cleanupException) {
+            log.warn("Failed to clean up Keycloak user {} after profile save failure: {}", keycloakId,
+                    cleanupException.getMessage());
         }
     }
 

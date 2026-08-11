@@ -5,6 +5,7 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class KeycloakConfig {
@@ -26,5 +27,10 @@ public class KeycloakConfig {
                 .password(adminPassword)
                 .clientId("admin-cli")
                 .build();
+    }
+
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder().build();
     }
 }

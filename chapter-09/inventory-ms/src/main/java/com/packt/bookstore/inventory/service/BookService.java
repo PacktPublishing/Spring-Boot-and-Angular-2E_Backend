@@ -29,6 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class BookService implements IBookService {
+    private static final String BOOK_PREFIX = "Book ";
+    private static final String AUTHOR_PREFIX = "Author ";
+    private static final String NOT_FOUND_SUFFIX = " not found";
+
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final BookMapper bookMapper;
@@ -56,6 +60,7 @@ public class BookService implements IBookService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Page<BookResponse> findAllPaginated(int page, int size) {
         return bookRepository.findAll(PageRequest.of(page, size, Sort.by("title").ascending()))
@@ -66,7 +71,7 @@ public class BookService implements IBookService {
     public BookResponse findOne(Long id) {
         log.info("Fetching book with id {}", id);
         var book = bookRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(BOOK_PREFIX + id + NOT_FOUND_SUFFIX));
         log.debug("Found book: {}", book.getTitle());
         return bookMapper.toResponse(book);
     }
@@ -88,7 +93,7 @@ public class BookService implements IBookService {
     public BookResponse replace(Long id, BookRequest req) {
         validateSemanticsForReplace(req); // 422 on rule violation
         var existing = bookRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(BOOK_PREFIX + id + NOT_FOUND_SUFFIX));
         var author = resolveAuthorById(req.authorId());
         bookMapper.overwrite(existing, req, author);
         var saved = trySave(existing);
@@ -99,7 +104,7 @@ public class BookService implements IBookService {
     @Transactional
     public BookResponse patch(Long id, BookRequest req) {
         var existing = bookRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(BOOK_PREFIX + id + NOT_FOUND_SUFFIX));
 
         validateSemanticsForPatch(req, existing); // 422 only on provided fields
 
@@ -124,7 +129,7 @@ public class BookService implements IBookService {
     @Transactional
     public void delete(Long id) {
         if (!bookRepository.existsById(id))
-            throw new ResourceNotFoundException("Book " + id + " not found");
+            throw new ResourceNotFoundException(BOOK_PREFIX + id + NOT_FOUND_SUFFIX);
         bookRepository.deleteById(id);
     }
 
@@ -143,7 +148,7 @@ public class BookService implements IBookService {
         if (id == null)
             throw new DomainRuleViolationException("Author ID is required");
         return authorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Author " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(AUTHOR_PREFIX + id + NOT_FOUND_SUFFIX));
     }
 
     private Book trySave(Book entity) {
