@@ -4,6 +4,8 @@
 
 This chapter extends the Bookstore microservices with real-time inventory notifications delivered through Server-Sent Events (SSE). The inventory service publishes domain events when books are created or repriced, the gateway exposes those events through a long-lived HTTP stream, and browser or CLI clients consume them without polling.
 
+Use JDK 26 or newer for this chapter. The source is configured with `java.version=26`, so older JDKs will fail with `release version 26 not supported` during Maven builds.
+
 The implementation builds directly on the secured gateway from Chapter 08:
 
 - SSE reads are public so dashboards and monitoring pages can subscribe easily.
@@ -50,6 +52,8 @@ The Bookstore implementation routes all notification traffic through the gateway
 Browser / CLI Client
         |
         | EventSource / curl -N
+
+        This chapter source is configured for JDK 26. If you are using an older JDK, Maven will fail with `release version 26 not supported`.
         v
 API Gateway :8080
         |

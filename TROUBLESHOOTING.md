@@ -12,7 +12,7 @@ Run:
     java -version
     mvn -version
 
-Ensure: - Java 21 or higher - Maven uses the same Java version -
+Ensure: - Java 26 or higher for this repository snapshot - Maven uses the same Java version -
 JAVA_HOME is correctly set - VS Code restarted after changes
 
 ---
@@ -30,8 +30,8 @@ Example:
 Optional multiple runtimes:
 
     "java.configuration.runtimes": [
-      { "name": "JavaSE-21", "path": "/path/to/jdk-21" },
-      { "name": "JavaSE-24", "path": "/path/to/jdk-24", "default": true }
+            { "name": "JavaSE-21", "path": "/path/to/jdk-21" },
+            { "name": "JavaSE-26", "path": "/path/to/jdk-26", "default": true }
     ]
 
 Restart VS Code after updating settings.
@@ -46,7 +46,7 @@ List JDKs:
 
 Set JAVA_HOME in \~/.zshrc:
 
-    export JAVA_HOME=$(/usr/libexec/java_home -v 24)
+    export JAVA_HOME=$(/usr/libexec/java_home -v 26)
     export PATH=$JAVA_HOME/bin:$PATH
 
 Reload:
@@ -63,7 +63,7 @@ List JDKs:
 
 Set JAVA_HOME in \~/.bashrc:
 
-    export JAVA_HOME=/usr/lib/jvm/jdk-24
+    export JAVA_HOME=/usr/lib/jvm/jdk-26
     export PATH=$JAVA_HOME/bin:$PATH
 
 Reload:
@@ -81,7 +81,7 @@ Check version:
 
 Set JAVA_HOME in System Environment Variables to:
 
-    C:\Program Files\Java\jdk-24
+    C:\Program Files\Java\jdk-26
 
 Ensure PATH includes:
 

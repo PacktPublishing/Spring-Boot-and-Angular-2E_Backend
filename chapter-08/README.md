@@ -11,6 +11,7 @@ You will secure the API Gateway and microservices with **role-based access contr
 
 Please confirm the required runtime dependencies before running this chapter:
 
+- Use JDK 26 or newer. The chapter source code is configured with `java.version=26`, so older JDKs will fail with `release version 26 not supported` during Maven builds.
 - Confirm the database is started (PostgreSQL and MongoDB for this chapter).
 - Confirm any infrastructure dependencies are running (for example Docker services, if used).
 - Confirm any dependencies from previous chapters are running as needed for your flow.

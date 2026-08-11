@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.3</version>
+		<version>4.1.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.packt.bookstore</groupId>
@@ -28,8 +28,8 @@
 		<url />
 	</scm>
 	<properties>
-		<java.version>25</java.version>
-		<spring-cloud.version>2025.1.1</spring-cloud.version>
+		<java.version>26</java.version>
+		<spring-cloud.version>2025.1.2</spring-cloud.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.3</version>
 		</dependency>
 
 		<!-- Micrometer Tracing with Brave (Zipkin-compatible) -->

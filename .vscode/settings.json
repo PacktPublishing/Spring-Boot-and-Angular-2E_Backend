@@ -4,5 +4,16 @@
     "java.format.settings.url": "eclipse-formatter.xml",
     "java.format.settings.profile": "GoogleStyle",
     "maven.view": "flat",
-    "java.home": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home"
+    "java.jdt.ls.java.home": "/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-26",
+            "path": "/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home",
+            "default": true
+        }
+    ],
+    "terminal.integrated.env.osx": {
+        "JAVA_HOME": "/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home",
+        "PATH": "/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home/bin:${env:PATH}"
+    }
 }
