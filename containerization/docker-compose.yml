@@ -1,7 +1,7 @@
 services:
   # Database Services
   postgres:
-    image: postgres:17
+    image: postgres:18
     container_name: bookstore-postgres
     environment:
       POSTGRES_USER: bookstore
@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bookstore"]
       interval: 10s
@@ -20,7 +20,7 @@ services:
       - bookstore-network
 
   mongodb:
-    image: mongo:8
+    image: mongo:8.0
     container_name: bookstore-mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: bookstore
@@ -63,7 +63,7 @@ services:
 
   # Identity Provider
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0.0
+    image: quay.io/keycloak/keycloak:26.7.1
     container_name: bookstore-keycloak
     command: start-dev --import-realm
     environment:
@@ -106,16 +106,13 @@ services:
     healthcheck:
       test:
         [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:8761/eureka/status",
+          "CMD", "bash", "-c",
+          "exec 3<>/dev/tcp/localhost/8761 && printf 'GET /actuator/health HTTP/1.1\r\nHost: localhost:8761\r\nConnection: close\r\n\r\n' >&3 && cat <&3 | grep -q '\"status\":\"UP\"'",
         ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
     networks:
       - bookstore-network
 
@@ -147,18 +144,11 @@ services:
       zipkin:
         condition: service_healthy
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:8081/inventory/actuator/health",
-        ]
+      test: ["CMD", "sh", "-c", "cat /proc/net/tcp6 /proc/net/tcp 2>/dev/null | grep -q ':1F91 '"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 40s
     networks:
       - bookstore-network
 
@@ -189,15 +179,7 @@ services:
       keycloak:
         condition: service_healthy
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:8082/user/actuator/health",
-        ]
+      test: ["CMD", "sh", "-c", "cat /proc/net/tcp6 /proc/net/tcp 2>/dev/null | grep -q ':1F92 '"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -234,18 +216,11 @@ services:
       keycloak:
         condition: service_healthy
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:8080/actuator/health",
-        ]
+      test: ["CMD", "sh", "-c", "cat /proc/net/tcp6 /proc/net/tcp 2>/dev/null | grep -q ':1F90 '"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 40s
     networks:
       - bookstore-network
 
