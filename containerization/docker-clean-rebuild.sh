@@ -8,7 +8,8 @@
 set -euo pipefail
 
 PROJECT_NAME="bookstore"
-COMPOSE_FILE="containerization/docker-compose.yml"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 
 echo "[INFO] Stopping all running containers related to the project and infra..."
 docker ps -a --format '{{.Names}}' | grep -E 'eureka|gateway|inventory|user|postgres|mongo|zipkin|keycloak' | xargs -r docker stop || true
@@ -63,7 +64,7 @@ else
 fi
 
 # Build latest images and recreate everything
-if docker compose build --no-cache && docker compose up -d --remove-orphans; then
+if docker compose -f "$COMPOSE_FILE" build --no-cache && docker compose -f "$COMPOSE_FILE" up -d --remove-orphans; then
   echo "Docker Compose environment rebuilt and started."
 else
   echo "Docker Compose build or up failed."
