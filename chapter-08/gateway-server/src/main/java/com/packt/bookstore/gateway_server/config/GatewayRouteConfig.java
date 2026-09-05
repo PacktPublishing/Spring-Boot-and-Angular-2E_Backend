@@ -12,6 +12,12 @@ public class GatewayRouteConfig {
 
         private static final Logger log = LoggerFactory.getLogger(GatewayRouteConfig.class);
 
+        private final AddUserIdHeaderGatewayFilter addUserIdHeaderGatewayFilter;
+
+        public GatewayRouteConfig(AddUserIdHeaderGatewayFilter addUserIdHeaderGatewayFilter) {
+                this.addUserIdHeaderGatewayFilter = addUserIdHeaderGatewayFilter;
+        }
+
         @Bean
         public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
                 log.info("Configuring Gateway Routes with Tracing Support");
@@ -27,7 +33,8 @@ public class GatewayRouteConfig {
                                                                                 "/inventory/api/notifications/${segment}")
                                                                 .addResponseHeader("X-Processed-By", "Spring-Gateway")
                                                                 .addRequestHeader("X-Gateway-Trace",
-                                                                                "notification-route"))
+                                                                                "notification-route")
+                                                                .filter(addUserIdHeaderGatewayFilter.apply(new Object())))
                                                 .uri("lb://inventory-service"))
 
                                 // PredicateEvaluator + PreFilter + URI Resolution
@@ -51,7 +58,8 @@ public class GatewayRouteConfig {
                                                                 .circuitBreaker(config -> config
                                                                                 .setName("inventoryCB")
                                                                                 .setFallbackUri("forward:/fallback/inventory")
-                                                                                .setRouteId("packt-inventory-service")))
+                                                                                .setRouteId("packt-inventory-service"))
+                                                                .filter(addUserIdHeaderGatewayFilter.apply(new Object())))
                                                 .uri("lb://inventory-service"))
 
                                 .route("packt-user-service", r -> r
@@ -71,7 +79,8 @@ public class GatewayRouteConfig {
                                                                                                 traceId);
                                                                         }
                                                                         return chain.filter(exchange);
-                                                                }))
+                                                                })
+                                                                .filter(addUserIdHeaderGatewayFilter.apply(new Object())))
                                                 .uri("lb://user-ms") // HandlerMapping
                                 )
 
