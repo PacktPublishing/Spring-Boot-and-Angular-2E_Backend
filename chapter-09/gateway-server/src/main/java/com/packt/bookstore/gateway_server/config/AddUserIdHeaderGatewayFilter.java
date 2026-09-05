@@ -14,10 +14,12 @@ import lombok.extern.slf4j.Slf4j;
  * custom headers.
  * 
  * This filter:
+ * - Strips any client-supplied X-User-Id/X-User-Email/X-User-Name headers so
+ * they cannot be spoofed by callers
  * - Extracts JWT token from the security context
  * - Gets user information: keycloakId (subject), email, and preferred_username
- * - Adds these as custom headers (X-User-Id, X-User-Email, X-User-Name) to the
- * request
+ * - Sets these as custom headers (X-User-Id, X-User-Email, X-User-Name) on the
+ * request, derived solely from the validated JWT
  * - Allows downstream microservices to access authenticated user information
  * 
  * This is used for routes that need user context, such as /api/users/profile
@@ -26,6 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class AddUserIdHeaderGatewayFilter extends AbstractGatewayFilterFactory<Object> {
+
+    private static final String HEADER_USER_ID = "X-User-Id";
+    private static final String HEADER_USER_EMAIL = "X-User-Email";
+    private static final String HEADER_USER_NAME = "X-User-Name";
 
     /**
      * Constructor initializing the filter factory with Object.class config.
@@ -43,6 +49,15 @@ public class AddUserIdHeaderGatewayFilter extends AbstractGatewayFilterFactory<O
     @Override
     public GatewayFilter apply(Object config) {
         return (exchange, chain) -> {
+            // Always strip these headers first so a caller can never inject its own identity
+            var strippedExchange = exchange.mutate()
+                    .request(r -> r.headers(headers -> {
+                        headers.remove(HEADER_USER_ID);
+                        headers.remove(HEADER_USER_EMAIL);
+                        headers.remove(HEADER_USER_NAME);
+                    }))
+                    .build();
+
             // Get the security context and extract user information from JWT
             return ReactiveSecurityContextHolder.getContext()
                     // Extract the authentication object from security context
@@ -51,7 +66,7 @@ public class AddUserIdHeaderGatewayFilter extends AbstractGatewayFilterFactory<O
                     .filter(authentication -> authentication instanceof JwtAuthenticationToken)
                     // Cast to JwtAuthenticationToken
                     .map(authentication -> (JwtAuthenticationToken) authentication)
-                    // Extract user information from JWT and add as headers
+                    // Extract user information from JWT and set as headers
                     .map(jwtAuth -> {
                         // Get the JWT token
                         Jwt jwt = jwtAuth.getToken();
@@ -62,18 +77,18 @@ public class AddUserIdHeaderGatewayFilter extends AbstractGatewayFilterFactory<O
                         String preferredUsername = jwt.getClaimAsString("preferred_username"); // 'preferred_username'
                                                                                                // claim
 
-                        // Mutate the exchange to add custom headers
-                        return exchange.mutate()
+                        // Mutate the stripped exchange to set the validated headers
+                        return strippedExchange.mutate()
                                 .request(r -> r
-                                        .header("X-User-Id", keycloakId) // Keycloak user ID
-                                        .header("X-User-Email", email) // User email
-                                        .header("X-User-Name", preferredUsername) // User's preferred username
+                                        .header(HEADER_USER_ID, keycloakId) // Keycloak user ID
+                                        .header(HEADER_USER_EMAIL, email) // User email
+                                        .header(HEADER_USER_NAME, preferredUsername) // User's preferred username
                         )
                                 .build();
                     })
-                    // If no authentication found, return the original exchange
-                    .defaultIfEmpty(exchange)
-                    // Continue the filter chain with the modified (or original) exchange
+                    // If no authentication found, continue with the stripped exchange (no spoofed headers)
+                    .defaultIfEmpty(strippedExchange)
+                    // Continue the filter chain with the modified exchange
                     .flatMap(chain::filter);
         };
     }
