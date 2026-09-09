@@ -20,7 +20,13 @@ services:
       - bookstore-network
 
   mongodb:
-    image: mongo:8.0
+    # MongoDB 8.x refuses to start on Linux kernels 6.19 through 7.0.13 (rseq /
+    # TCMalloc ABI break, https://jira.mongodb.org/browse/SERVER-121912). Docker
+    # Desktop 4.87+ ships kernel 7.0.12, so the container exits immediately with
+    # "MongoDB cannot start: Linux kernel versions 6.19 and newer...".
+    # Workaround on an affected kernel: MONGO_IMAGE_TAG=7.0 docker compose up -d
+    # See the "MongoDB exits immediately on startup" section in README.md.
+    image: mongo:${MONGO_IMAGE_TAG:-8.0}
     container_name: bookstore-mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: bookstore
