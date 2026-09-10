@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.packt.bookstore.inventory.dto.ApiError;
 
@@ -37,7 +38,14 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.badRequest().body(
                                 ApiError.badRequest(detail, req.getRequestURI()));
         }
-
+        /** Invalid path/query parameter type → 400 Bad Request */
+        @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+        ResponseEntity<ApiError> typeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+                return ResponseEntity.badRequest().body(
+                               ApiError.badRequest(
+                                              "Invalid value for parameter '" + ex.getName() + "'",
+                                              req.getRequestURI()));
+}
         /** Database constraint violation → 409 Conflict */
         @ExceptionHandler(DataIntegrityViolationException.class)
         ResponseEntity<ApiError> conflict(DataIntegrityViolationException ex, HttpServletRequest req) {
