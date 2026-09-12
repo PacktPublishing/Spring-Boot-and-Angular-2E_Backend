@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -74,6 +76,15 @@ public class BookService implements IBookService {
                 .orElseThrow(() -> new ResourceNotFoundException(BOOK_PREFIX + id + NOT_FOUND_SUFFIX));
         log.debug("Found book: {}", book.getTitle());
         return bookMapper.toResponse(book);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookResponse> findByTitleIgnoreCase(String title) {
+        return bookRepository.findByTitleContainingIgnoreCase(title)
+                .stream()
+                .map(bookMapper::toResponse)
+                .toList();
     }
 
     @Override
