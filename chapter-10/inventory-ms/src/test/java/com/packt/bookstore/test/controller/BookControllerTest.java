@@ -98,6 +98,17 @@ public class BookControllerTest {
     }
 
     @Test
+    void getBookByTitleIgnoreCase_shouldReturnBooks() throws Exception {
+        when(bookService.findByTitleIgnoreCase(anyString())).thenReturn(List.of(bookResponse));
+
+        mockMvc.perform(get("/api/books/by-title-ignore-case")
+                .param("title", "spring boot"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].title").value("Spring Boot and Angular 2E"));
+    }
+
+    @Test
     void createBook_shouldReturnCreatedBook() throws Exception {
         when(bookService.create(any(BookRequest.class))).thenReturn(bookResponse);
 

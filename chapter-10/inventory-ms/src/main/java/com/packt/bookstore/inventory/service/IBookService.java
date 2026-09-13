@@ -14,6 +14,8 @@ public interface IBookService {
 
     BookResponse findOne(Long id);
 
+    List<BookResponse> findByTitleIgnoreCase(String title);
+
     BookResponse create(BookRequest req);
 
     BookResponse replace(Long id, BookRequest req);

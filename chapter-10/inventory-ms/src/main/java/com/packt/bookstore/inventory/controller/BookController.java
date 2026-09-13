@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.packt.bookstore.inventory.dto.ApiError;
 import com.packt.bookstore.inventory.dto.BookRequest;
@@ -30,13 +32,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Tag(name = "Book Inventory", description = "Operations related to book catalog and inventory")
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
+
+    private static final Logger log = LoggerFactory.getLogger(BookController.class);
 
     private final BookService bookService;
 
@@ -118,6 +119,12 @@ public class BookController {
         BookResponse book = bookService.findOne(id);
         log.info("Successfully retrieved book: {}", book.title());
         return ResponseEntity.ok(book);
+    }
+
+    @GetMapping("/by-title-ignore-case")
+    public ResponseEntity<List<BookResponse>> getBookByTitleIgnoreCase(@RequestParam String title) {
+        List<BookResponse> books = bookService.findByTitleIgnoreCase(title);
+        return ResponseEntity.ok(books);
     }
 
     @PostMapping
