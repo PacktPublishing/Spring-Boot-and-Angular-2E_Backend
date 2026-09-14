@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.packt.bookstore.inventory.dto.ApiError;
 
@@ -66,6 +67,15 @@ public class GlobalExceptionHandler {
         ResponseEntity<ApiError> hibernateError(HibernateException ex, HttpServletRequest req) {
                 return ResponseEntity.status(500).body(
                                 ApiError.databaseError("A database operation failed", req.getRequestURI()));
+        }
+
+        /** Path/query parameter of the wrong type (e.g. non-numeric ID) → 400 Bad Request */
+        @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+        ResponseEntity<ApiError> typeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+                String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "the expected type";
+                String detail = "Parameter '" + ex.getName() + "' should be of type " + requiredType;
+                return ResponseEntity.badRequest().body(
+                                ApiError.badRequest(detail, req.getRequestURI()));
         }
 
         /** Fallback for unexpected errors → 500 Internal Server Error */
