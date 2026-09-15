@@ -1,74 +1,94 @@
-#!/bin/bash
-#!/bin/bash
-
-# Robust Docker cleanup and rebuild script for all project and infra containers
-# Services: eureka-server, gateway-server, inventory-ms, user-ms, postgres, mongo, zipkin, keycloak
-# Usage: ./docker-clean-rebuild.sh
-
+#!/usr/bin/env bash
+#
+# Clean rebuild of the bookstore stack: postgres, mongodb, zipkin, keycloak,
+# eureka-server, inventory-service, user-service, gateway-server.
+#
+# Usage:
+#   ./docker-clean-rebuild.sh              # recreate containers, keep database volumes
+#   ./docker-clean-rebuild.sh --wipe-data  # also delete the postgres/mongo volumes
+#   ./docker-clean-rebuild.sh --no-pull    # reuse local images instead of re-pulling
+#
 set -euo pipefail
 
-PROJECT_NAME="bookstore"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 
-echo "[INFO] Stopping all running containers related to the project and infra..."
-docker ps -a --format '{{.Names}}' | grep -E 'eureka|gateway|inventory|user|postgres|mongo|zipkin|keycloak' | xargs -r docker stop || true
+WIPE_DATA=0
+PULL=1
+for arg in "$@"; do
+  case "$arg" in
+    --wipe-data) WIPE_DATA=1 ;;
+    --no-pull) PULL=0 ;;
+    -h | --help)
+      sed -n '3,9p' "$0"
+      exit 0
+      ;;
+    *)
+      echo "[ERROR] Unknown option: $arg (try --help)" >&2
+      exit 2
+      ;;
+  esac
+done
 
-echo "[INFO] Removing all containers related to the project and infra..."
-docker ps -a --format '{{.Names}}' | grep -E 'eureka|gateway|inventory|user|postgres|mongo|zipkin|keycloak' | xargs -r docker rm -f || true
+[ -f "$COMPOSE_FILE" ] || {
+  echo "[ERROR] Compose file not found: $COMPOSE_FILE" >&2
+  exit 1
+}
 
-echo "[INFO] Removing all images related to the project and infra..."
-docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep -E 'eureka|gateway|inventory|user|postgres|mongo|zipkin|keycloak' | awk '{print $2}' | xargs -r docker rmi -f || true
-
-echo "[INFO] Removing all volumes related to the project and infra..."
-docker volume ls --format '{{.Name}}' | grep -E 'eureka|gateway|inventory|user|postgres|mongo|zipkin|keycloak' | xargs -r docker volume rm || true
-
-echo "[INFO] Removing all networks related to the project and infra..."
-docker network ls --format '{{.Name}}' | grep -E 'eureka|gateway|inventory|user|postgres|mongo|zipkin|keycloak' | xargs -r docker network rm || true
-
-echo "[INFO] Pruning unused Docker resources (optional)..."
-docker system prune -f
-
-echo "[INFO] Building latest images using docker-compose..."
-docker-compose -f "$COMPOSE_FILE" build --no-cache
-
-echo "[INFO] Starting up all services with docker-compose..."
-docker-compose -f "$COMPOSE_FILE" up -d
-
-echo "[SUCCESS] All containers rebuilt and started."
-# Remove all images related to the project (by name pattern)
-IMAGES=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "$PROJECT_NAME" || true)
-if [ -n "$IMAGES" ]; then
-  echo "$IMAGES" | xargs -n 1 docker rmi -f || true
-  echo "Project images removed."
+# Prefer the Compose v2 plugin; fall back to the standalone v1 binary. Only v2
+# understands "up --wait", so the health gate below is conditional on it.
+SUPPORTS_WAIT=0
+if docker compose version >/dev/null 2>&1; then
+  compose() { docker compose -f "$COMPOSE_FILE" "$@"; }
+  SUPPORTS_WAIT=1
+elif command -v docker-compose >/dev/null 2>&1; then
+  compose() { docker-compose -f "$COMPOSE_FILE" "$@"; }
+  echo "[WARN] Using legacy docker-compose v1; skipping the health gate."
 else
-  echo "No project images found to remove."
-fi
-
-# Remove all volumes related to the project (by name pattern)
-VOLUMES=$(docker volume ls --format '{{.Name}}' | grep "$PROJECT_NAME" || true)
-if [ -n "$VOLUMES" ]; then
-  echo "$VOLUMES" | xargs -n 1 docker volume rm -f || true
-  echo "Project volumes removed."
-else
-  echo "No project volumes found to remove."
-fi
-
-# Remove all networks related to the project (by name pattern)
-NETWORKS=$(docker network ls --format '{{.Name}}' | grep "$PROJECT_NAME" || true)
-if [ -n "$NETWORKS" ]; then
-  echo "$NETWORKS" | xargs -n 1 docker network rm || true
-  echo "Project networks removed."
-else
-  echo "No project networks found to remove."
-fi
-
-# Build latest images and recreate everything
-if docker compose -f "$COMPOSE_FILE" build --no-cache && docker compose -f "$COMPOSE_FILE" up -d --remove-orphans; then
-  echo "Docker Compose environment rebuilt and started."
-else
-  echo "Docker Compose build or up failed."
+  echo "[ERROR] Neither 'docker compose' nor 'docker-compose' is available." >&2
   exit 1
 fi
 
-echo "All project containers, images, volumes, and networks have been cleaned and recreated."
+docker info >/dev/null 2>&1 || {
+  echo "[ERROR] Cannot reach the Docker daemon. Is Docker running?" >&2
+  exit 1
+}
+
+# "compose down" is scoped to this Compose project, so it removes exactly this
+# stack's containers and network. The previous version grepped global Docker
+# state for names like 'user' and 'mongo', which could delete unrelated
+# containers, images and volumes belonging to other projects on the machine.
+echo "[INFO] Tearing down the stack..."
+if [ "$WIPE_DATA" -eq 1 ]; then
+  echo "[WARN] --wipe-data: the postgres and mongo volumes will be deleted."
+  compose down --volumes --remove-orphans
+else
+  compose down --remove-orphans
+fi
+
+# Every service uses a prebuilt "image:" reference and none declares "build:",
+# so "pull" is what refreshes them. ("compose build" only warns "No services to
+# build" here, which is why the old --no-cache rebuild had no effect.)
+if [ "$PULL" -eq 1 ]; then
+  echo "[INFO] Pulling the latest images..."
+  compose pull
+fi
+
+echo "[INFO] Starting the stack..."
+UP_ARGS=(up -d --force-recreate)
+# --wait blocks until every service with a healthcheck reports healthy and exits
+# non-zero if one never does, so a failing healthcheck surfaces here rather than
+# as a confusing "dependency failed to start" on an unrelated service.
+[ "$SUPPORTS_WAIT" -eq 1 ] && UP_ARGS+=(--wait)
+
+if compose "${UP_ARGS[@]}"; then
+  echo "[SUCCESS] Stack is up."
+  compose ps
+else
+  status=$?
+  echo "[ERROR] The stack did not come up cleanly (exit $status)." >&2
+  compose ps >&2
+  echo "[HINT] Check an unhealthy service with:" >&2
+  echo "         docker compose -f \"$COMPOSE_FILE\" logs <service>" >&2
+  exit "$status"
+fi
