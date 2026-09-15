@@ -192,48 +192,6 @@
                   ],
                   "cookie": [],
                   "body": "[\n    {\n        \"name\": \"Ahmad Gohar\",\n        \"nationality\": \"Egypt\",\n        \"books\": []\n    },\n    {\n        \"name\": \"Dimitris Kiriakakis\",\n        \"nationality\": \"Greece\",\n        \"books\": []\n    }\n]"
-                },
-                {
-                  "name": "/inventory/api/authors Copy",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{inventory-baseurl}}/inventory/api/authors/paged",
-                      "host": [
-                        "{{inventory-baseurl}}"
-                      ],
-                      "path": [
-                        "inventory",
-                        "api",
-                        "authors",
-                        "paged"
-                      ]
-                    }
-                  },
-                  "status": "Internal Server Error",
-                  "code": 500,
-                  "_postman_previewlanguage": null,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    },
-                    {
-                      "key": "Transfer-Encoding",
-                      "value": "chunked"
-                    },
-                    {
-                      "key": "Date",
-                      "value": "Sun, 02 Nov 2025 20:54:24 GMT"
-                    },
-                    {
-                      "key": "Connection",
-                      "value": "close"
-                    }
-                  ],
-                  "cookie": [],
-                  "body": "{\n    \"type\": \"https://api.bookstore.com/errors/data-loading-error\",\n    \"title\": \"Data Loading Error\",\n    \"status\": 500,\n    \"detail\": \"Failed to load related data. Please try again.\",\n    \"instance\": \"/inventory/api/authors/paged\",\n    \"timestamp\": \"2025-11-02T20:54:24.043568Z\"\n}"
                 }
               ]
             },
@@ -246,7 +204,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{inventory-baseurl}}/inventory/api/authors/397",
+                  "raw": "{{inventory-baseurl}}/inventory/api/authors/1",
                   "host": [
                     "{{inventory-baseurl}}"
                   ],
@@ -254,7 +212,7 @@
                     "inventory",
                     "api",
                     "authors",
-                    "397"
+                    "1"
                   ]
                 }
               },
@@ -358,7 +316,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{inventory-baseurl}}/inventory/api/authors/by-name-ignore-case?name=Ahmad Gohar",
+                  "raw": "{{inventory-baseurl}}/inventory/api/authors/by-name-ignore-case?name=Gohar",
                   "host": [
                     "{{inventory-baseurl}}"
                   ],
@@ -371,8 +329,7 @@
                   "query": [
                     {
                       "key": "name",
-                      "value": "Ahmad Gohar",
-                      "type": "text"
+                      "value": "Gohar"
                     }
                   ]
                 }
@@ -465,185 +422,6 @@
                   ],
                   "cookie": [],
                   "body": "{\n    \"type\": \"https://api.bookstore.com/errors/internal-server-error\",\n    \"title\": \"Internal Server Error\",\n    \"status\": 500,\n    \"detail\": \"An unexpected error occurred: Author not found\",\n    \"instance\": \"/inventory/api/authors/3970\",\n    \"timestamp\": \"2025-11-02T20:42:27.198322Z\"\n}"
-                }
-              ]
-            },
-            {
-              "name": "/inventory/api/authors/{name}",
-              "protocolProfileBehavior": {
-                "disabledSystemHeaders": {}
-              },
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{inventory-baseurl}}/user/api/authors/by-name?name=Ahmad Gohar",
-                  "host": [
-                    "{{inventory-baseurl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "api",
-                    "authors",
-                    "by-name"
-                  ],
-                  "query": [
-                    {
-                      "key": "name",
-                      "value": "Ahmad Gohar"
-                    }
-                  ]
-                }
-              },
-              "response": [
-                {
-                  "name": "Success",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{inventory-baseurl}}/inventory/api/authors/397",
-                      "host": [
-                        "{{inventory-baseurl}}"
-                      ],
-                      "path": [
-                        "inventory",
-                        "api",
-                        "authors",
-                        "397"
-                      ]
-                    }
-                  },
-                  "status": "OK",
-                  "code": 200,
-                  "_postman_previewlanguage": "json",
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    },
-                    {
-                      "key": "Transfer-Encoding",
-                      "value": "chunked"
-                    },
-                    {
-                      "key": "Date",
-                      "value": "Sun, 02 Nov 2025 20:41:51 GMT"
-                    },
-                    {
-                      "key": "Keep-Alive",
-                      "value": "timeout=60"
-                    },
-                    {
-                      "key": "Connection",
-                      "value": "keep-alive"
-                    }
-                  ],
-                  "cookie": [],
-                  "body": "{\n    \"name\": \"Ahmad Gohar\",\n    \"nationality\": \"Egypt\",\n    \"books\": []\n}"
-                },
-                {
-                  "name": "Author not found",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{inventory-baseurl}}/inventory/api/authors/3970",
-                      "host": [
-                        "{{inventory-baseurl}}"
-                      ],
-                      "path": [
-                        "inventory",
-                        "api",
-                        "authors",
-                        "3970"
-                      ]
-                    }
-                  },
-                  "status": "Internal Server Error",
-                  "code": 500,
-                  "_postman_previewlanguage": "json",
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    },
-                    {
-                      "key": "Transfer-Encoding",
-                      "value": "chunked"
-                    },
-                    {
-                      "key": "Date",
-                      "value": "Sun, 02 Nov 2025 20:42:27 GMT"
-                    },
-                    {
-                      "key": "Connection",
-                      "value": "close"
-                    }
-                  ],
-                  "cookie": [],
-                  "body": "{\n    \"type\": \"https://api.bookstore.com/errors/internal-server-error\",\n    \"title\": \"Internal Server Error\",\n    \"status\": 500,\n    \"detail\": \"An unexpected error occurred: Author not found\",\n    \"instance\": \"/inventory/api/authors/3970\",\n    \"timestamp\": \"2025-11-02T20:42:27.198322Z\"\n}"
-                },
-                {
-                  "name": "/user/api/users/{id} Copy",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{inventory-baseurl}}/user/api/by-name?name=Ahmad Gohar",
-                      "host": [
-                        "{{inventory-baseurl}}"
-                      ],
-                      "path": [
-                        "user",
-                        "api",
-                        "by-name"
-                      ],
-                      "query": [
-                        {
-                          "key": "name",
-                          "value": "Ahmad Gohar"
-                        }
-                      ]
-                    }
-                  },
-                  "status": "Not Found",
-                  "code": 404,
-                  "_postman_previewlanguage": "",
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "text/html;charset=utf-8"
-                    },
-                    {
-                      "key": "Content-Language",
-                      "value": "en"
-                    },
-                    {
-                      "key": "Content-Length",
-                      "value": "683"
-                    },
-                    {
-                      "key": "Date",
-                      "value": "Sun, 02 Nov 2025 20:46:43 GMT"
-                    },
-                    {
-                      "key": "Keep-Alive",
-                      "value": "timeout=60"
-                    },
-                    {
-                      "key": "Connection",
-                      "value": "keep-alive"
-                    }
-                  ],
-                  "cookie": [
-                    {
-                      "expires": "Invalid Date",
-                      "domain": "",
-                      "path": ""
-                    }
-                  ],
-                  "body": "<!doctype html><html lang=\"en\"><head><title>HTTP Status 404 – Not Found</title><style type=\"text/css\">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:#525D76;} h1 {font-size:22px;} h2 {font-size:16px;} h3 {font-size:14px;} p {font-size:12px;} a {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Status 404 – Not Found</h1><hr class=\"line\" /><p><b>Type</b> Status Report</p><p><b>Description</b> The origin server did not find a current representation for the target resource or is not willing to disclose that one exists.</p><hr class=\"line\" /><h3>Apache Tomcat/10.1.46</h3></body></html>"
                 }
               ]
             },
@@ -1248,7 +1026,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{inventory-baseurl}}/inventory/api/books/331",
+                  "raw": "{{inventory-baseurl}}/inventory/api/books/1",
                   "host": [
                     "{{inventory-baseurl}}"
                   ],
@@ -1256,7 +1034,129 @@
                     "inventory",
                     "api",
                     "books",
-                    "331"
+                    "1"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{inventory-baseurl}}/inventory/api/books/331",
+                      "host": [
+                        "{{inventory-baseurl}}"
+                      ],
+                      "path": [
+                        "inventory",
+                        "api",
+                        "books",
+                        "331"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Transfer-Encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Sun, 02 Nov 2025 21:28:10 GMT"
+                    },
+                    {
+                      "key": "Keep-Alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "Connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"id\": 331,\n    \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n    \"isbn\": \"9780132350884\",\n    \"authorName\": \"Robert C. Martin\",\n    \"price\": 59.99,\n    \"genre\": \"Computing & Software Engineering\",\n    \"published\": \"2008-08-01\",\n    \"description\": \"Even bad code can function. But if code isn’t clean, it can bring a development organization to its knees. This book presents principles, patterns, and practices of writing clean code, case studies, and heuristics for developers.\",\n    \"pageCount\": 464,\n    \"coverImageUrl\": \"https://covers1.booksamillion.com/covers/bam/0/13/235/088/0132350882_b.jpg\"\n}"
+                },
+                {
+                  "name": "Book not found",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{inventory-baseurl}}/inventory/api/books/3310",
+                      "host": [
+                        "{{inventory-baseurl}}"
+                      ],
+                      "path": [
+                        "inventory",
+                        "api",
+                        "books",
+                        "3310"
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Transfer-Encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Sun, 02 Nov 2025 21:24:18 GMT"
+                    },
+                    {
+                      "key": "Keep-Alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "Connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"type\": \"https://api.bookstore.com/errors/not-found\",\n    \"title\": \"Not Found\",\n    \"status\": 404,\n    \"detail\": \"Book 3310 not found\",\n    \"instance\": \"/inventory/api/books/3310\",\n    \"timestamp\": \"2025-11-02T21:24:18.466098Z\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "/inventory/api/books/by-title-ignore-case",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{inventory-baseurl}}/inventory/api/books/by-title-ignore-case?title=Spring",
+                  "host": [
+                    "{{inventory-baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "api",
+                    "books",
+                    "by-title-ignore-case"
+                  ],
+                  "query": [
+                    {
+                      "key": "title",
+                      "value": "Spring"
+                    }
                   ]
                 }
               },
@@ -1362,7 +1262,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n  \"isbn\": \"9780132350884\",\n  \"authorId\": 248,\n  \"price\": 59.99,\n  \"genre\": \"Computing & Software Engineering\",\n  \"published\": \"2008-08-01\",\n  \"description\": \"Even bad code can function. But if code isn’t clean, it can bring a development organization to its knees. This book presents principles, patterns, and practices of writing clean code, case studies, and heuristics for developers.\",\n  \"pageCount\": 464,\n  \"coverImageUrl\": \"https://covers1.booksamillion.com/covers/bam/0/13/235/088/0132350882_b.jpg\"\n}\n",
+                  "raw": "{\n  \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n  \"isbn\": \"9780132350884\",\n  \"authorId\": 1,\n  \"price\": 59.99,\n  \"genre\": \"Computing & Software Engineering\",\n  \"published\": \"2008-08-01\",\n  \"description\": \"Even bad code can function. But if code isn’t clean, it can bring a development organization to its knees. This book presents principles, patterns, and practices of writing clean code, case studies, and heuristics for developers.\",\n  \"pageCount\": 464,\n  \"coverImageUrl\": \"https://covers1.booksamillion.com/covers/bam/0/13/235/088/0132350882_b.jpg\"\n}\n",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1607,7 +1507,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n        \"name\": \"Ahmad Gohar\",\n        \"nationality\": \"Egypt\"\n}",
+                  "raw": "{\n  \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n  \"isbn\": \"9780132350884\",\n  \"authorId\": 68,\n  \"price\": 59.99,\n  \"genre\": \"Computing & Software Engineering\",\n  \"published\": \"2008-08-01\",\n  \"description\": \"Even bad code can function. But if code isn’t clean, it can bring a development organization to its knees. This book presents principles, patterns, and practices of writing clean code, case studies, and heuristics for developers.\",\n  \"pageCount\": 464,\n  \"coverImageUrl\": \"https://covers1.booksamillion.com/covers/bam/0/13/235/088/0132350882_b.jpg\"\n}\n",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1615,7 +1515,7 @@
                   }
                 },
                 "url": {
-                  "raw": "{{inventory-baseurl}}/inventory/api/books/397",
+                  "raw": "{{inventory-baseurl}}/inventory/api/books/41",
                   "host": [
                     "{{inventory-baseurl}}"
                   ],
@@ -1623,7 +1523,7 @@
                     "inventory",
                     "api",
                     "books",
-                    "397"
+                    "41"
                   ]
                 }
               },
@@ -4277,132 +4177,6 @@
               ]
             },
             {
-              "name": "packt/inventory/api/books paged (Different Patter)",
-              "protocolProfileBehavior": {
-                "disabledSystemHeaders": {}
-              },
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{access-token}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books?page=0&size=2",
-                  "host": [
-                    "{{api-gatewayaseurl}}"
-                  ],
-                  "path": [
-                    "packt",
-                    "inventory",
-                    "api",
-                    "books"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "0"
-                    },
-                    {
-                      "key": "size",
-                      "value": "2"
-                    }
-                  ]
-                }
-              },
-              "response": [
-                {
-                  "name": "packt/inventory/api/books",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books",
-                      "host": [
-                        "{{api-gatewayaseurl}}"
-                      ],
-                      "path": [
-                        "packt",
-                        "inventory",
-                        "api",
-                        "books"
-                      ]
-                    }
-                  },
-                  "status": "OK",
-                  "code": 200,
-                  "_postman_previewlanguage": null,
-                  "header": [
-                    {
-                      "key": "transfer-encoding",
-                      "value": "chunked"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Origin"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Access-Control-Request-Method"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Access-Control-Request-Headers"
-                    },
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    },
-                    {
-                      "key": "Date",
-                      "value": "Mon, 26 Jan 2026 06:51:45 GMT"
-                    },
-                    {
-                      "key": "X-Processed-By",
-                      "value": "Spring-Gateway"
-                    },
-                    {
-                      "key": "Cache-Control",
-                      "value": "no-cache, no-store, max-age=0, must-revalidate"
-                    },
-                    {
-                      "key": "Pragma",
-                      "value": "no-cache"
-                    },
-                    {
-                      "key": "Expires",
-                      "value": "0"
-                    },
-                    {
-                      "key": "X-Content-Type-Options",
-                      "value": "nosniff"
-                    },
-                    {
-                      "key": "X-Frame-Options",
-                      "value": "DENY"
-                    },
-                    {
-                      "key": "X-XSS-Protection",
-                      "value": "0"
-                    },
-                    {
-                      "key": "Referrer-Policy",
-                      "value": "no-referrer"
-                    }
-                  ],
-                  "cookie": [],
-                  "body": "[\n    {\n        \"id\": 1,\n        \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n        \"isbn\": \"9780132350884\",\n        \"authorName\": \"Robert C. Martin\",\n        \"price\": 59.99,\n        \"genre\": \"Computing & Software Engineering\",\n        \"published\": \"2008-08-01\",\n        \"description\": \"Even bad code can function. But if code isn’t clean, it can bring a development organization to its knees. This book presents principles, patterns, and practices of writing clean code, case studies, and heuristics for developers.\",\n        \"pageCount\": 464,\n        \"coverImageUrl\": \"https://covers1.booksamillion.com/covers/bam/0/13/235/088/0132350882_b.jpg\"\n    },\n    {\n        \"id\": 2,\n        \"title\": \"The Great Gatsby\",\n        \"isbn\": \"9780743273565\",\n        \"authorName\": \"F. Scott Fitzgerald\",\n        \"price\": 15.99,\n        \"genre\": \"Fiction\",\n        \"published\": \"1925-04-10\",\n        \"description\": \"The Great Gatsby is a novel set in the Jazz Age on Long Island, near New York City, and follows narrator Nick Carraway’s interactions with Jay Gatsby, a mysterious millionaire obsessed with reuniting with his former lover Daisy Buchanan.\",\n        \"pageCount\": 180,\n        \"coverImageUrl\": \"https://images-na.ssl-images-amazon.com/images/I/81af+MCATTL.jpg\"\n    }\n]"
-                }
-              ]
-            },
-            {
               "name": "packt/inventory/api/books/{id}",
               "protocolProfileBehavior": {
                 "disabledSystemHeaders": {}
@@ -4421,7 +4195,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books/110",
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books/1",
                   "host": [
                     "{{api-gatewayaseurl}}"
                   ],
@@ -4430,7 +4204,7 @@
                     "inventory",
                     "api",
                     "books",
-                    "110"
+                    "1"
                   ]
                 }
               },
@@ -4537,7 +4311,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"New Spring Book2\",\n  \"isbn\": \"978-1234397898\",\n  \"price\": 49.99,\n  \"quantity\": 20,\n  \"authorId\": 11,\n  \"genre\": \"Technology\",\n  \"published\": \"2024-01-15\",\n  \"description\": \"A new book about Spring\",\n  \"authorName\": \"Ahmad Gohar\",\n  \"pageCount\": 400,\n  \"coverImageUrl\": \"https://example.com/new-cover.jpg\"\n}",
+                  "raw": "{\n  \"title\": \"New Spring Book\",\n  \"isbn\": \"978-12343978951\",\n  \"price\": 49.99,\n  \"quantity\": 20,\n  \"authorId\": 1,\n  \"genre\": \"Technology\",\n  \"published\": \"2024-01-15\",\n  \"description\": \"A new book about Spring\",\n  \"authorName\": \"Ahmad Gohar\",\n  \"pageCount\": 400,\n  \"coverImageUrl\": \"https://example.com/new-cover.jpg\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -4956,6 +4730,136 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "packt/inventory/api/books/by-title-ignore-case",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access-token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/books/by-title-ignore-case?title=Spring",
+                  "host": [
+                    "{{api-gatewayaseurl}}"
+                  ],
+                  "path": [
+                    "packt",
+                    "inventory",
+                    "api",
+                    "books",
+                    "by-title-ignore-case"
+                  ],
+                  "query": [
+                    {
+                      "key": "title",
+                      "value": "Spring"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "packt/inventory/api/authors/by-name-ignore-case",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name-ignore-case?name=Ahmad Gohar",
+                      "host": [
+                        "{{api-gatewayaseurl}}"
+                      ],
+                      "path": [
+                        "packt",
+                        "inventory",
+                        "api",
+                        "authors",
+                        "by-name-ignore-case"
+                      ],
+                      "query": [
+                        {
+                          "key": "name",
+                          "value": "Ahmad Gohar"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": null,
+                  "header": [
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Origin"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Method"
+                    },
+                    {
+                      "key": "Vary",
+                      "value": "Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Mon, 26 Jan 2026 07:01:03 GMT"
+                    },
+                    {
+                      "key": "X-Processed-By",
+                      "value": "Spring-Gateway"
+                    },
+                    {
+                      "key": "Cache-Control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "Pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "X-Content-Type-Options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "X-Frame-Options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "X-XSS-Protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "Referrer-Policy",
+                      "value": "no-referrer"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"name\": \"Ahmad Gohar\",\n    \"nationality\": \"Egypt\",\n    \"books\": []\n}"
+                }
+              ]
             }
           ]
         },
@@ -5339,7 +5243,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name-ignore-case?name=dimitri",
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name-ignore-case?name=d",
                   "host": [
                     "{{api-gatewayaseurl}}"
                   ],
@@ -5353,7 +5257,7 @@
                   "query": [
                     {
                       "key": "name",
-                      "value": "dimitri"
+                      "value": "d"
                     }
                   ]
                 }
@@ -5469,7 +5373,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name?name=Ahmad Gohar",
+                  "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name?name=Ahmad Gohar2",
                   "host": [
                     "{{api-gatewayaseurl}}"
                   ],
@@ -5483,102 +5387,12 @@
                   "query": [
                     {
                       "key": "name",
-                      "value": "Ahmad Gohar"
+                      "value": "Ahmad Gohar2"
                     }
                   ]
                 }
               },
-              "response": [
-                {
-                  "name": "packt/inventory/api/authors/by-name-ignore-case",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{api-gatewayaseurl}}/packt/inventory/api/authors/by-name-ignore-case?name=Ahmad Gohar",
-                      "host": [
-                        "{{api-gatewayaseurl}}"
-                      ],
-                      "path": [
-                        "packt",
-                        "inventory",
-                        "api",
-                        "authors",
-                        "by-name-ignore-case"
-                      ],
-                      "query": [
-                        {
-                          "key": "name",
-                          "value": "Ahmad Gohar"
-                        }
-                      ]
-                    }
-                  },
-                  "status": "OK",
-                  "code": 200,
-                  "_postman_previewlanguage": null,
-                  "header": [
-                    {
-                      "key": "transfer-encoding",
-                      "value": "chunked"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Origin"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Access-Control-Request-Method"
-                    },
-                    {
-                      "key": "Vary",
-                      "value": "Access-Control-Request-Headers"
-                    },
-                    {
-                      "key": "Content-Type",
-                      "value": "application/json"
-                    },
-                    {
-                      "key": "Date",
-                      "value": "Mon, 26 Jan 2026 07:01:03 GMT"
-                    },
-                    {
-                      "key": "X-Processed-By",
-                      "value": "Spring-Gateway"
-                    },
-                    {
-                      "key": "Cache-Control",
-                      "value": "no-cache, no-store, max-age=0, must-revalidate"
-                    },
-                    {
-                      "key": "Pragma",
-                      "value": "no-cache"
-                    },
-                    {
-                      "key": "Expires",
-                      "value": "0"
-                    },
-                    {
-                      "key": "X-Content-Type-Options",
-                      "value": "nosniff"
-                    },
-                    {
-                      "key": "X-Frame-Options",
-                      "value": "DENY"
-                    },
-                    {
-                      "key": "X-XSS-Protection",
-                      "value": "0"
-                    },
-                    {
-                      "key": "Referrer-Policy",
-                      "value": "no-referrer"
-                    }
-                  ],
-                  "cookie": [],
-                  "body": "{\n    \"name\": \"Ahmad Gohar\",\n    \"nationality\": \"Egypt\",\n    \"books\": []\n}"
-                }
-              ]
+              "response": []
             },
             {
               "name": "packt/inventory/api/authors",
@@ -5597,7 +5411,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n        \"name\": \"dimitri Kiriak\",\n        \"nationality\": \"Greece\"\n}",
+                  "raw": "{\n        \"name\": \"Ahmad Gohar\",\n        \"nationality\": \"Egypt\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -6007,6 +5821,30 @@
     },
     {
       "key": "user-email",
+      "value": ""
+    },
+    {
+      "key": "inventory-baseurl",
+      "value": ""
+    },
+    {
+      "key": "user-baseurl",
+      "value": ""
+    },
+    {
+      "key": "discovery-server-baseurl",
+      "value": ""
+    },
+    {
+      "key": "api-gatewayaseurl",
+      "value": ""
+    },
+    {
+      "key": "zipkin-baseurl",
+      "value": ""
+    },
+    {
+      "key": "user-password",
       "value": ""
     }
   ]
