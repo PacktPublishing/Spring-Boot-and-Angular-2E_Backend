@@ -1256,6 +1256,97 @@
               ]
             },
             {
+              "name": "/inventory/api/books/paged",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{inventory-baseurl}}/inventory/api/books/paged?page=0&size=2",
+                  "host": [
+                    "{{inventory-baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "api",
+                    "books",
+                    "paged"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "/inventory/api/books/paged",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{inventory-baseurl}}/inventory/api/books/paged?page=0&size=2",
+                      "host": [
+                        "{{inventory-baseurl}}"
+                      ],
+                      "path": [
+                        "inventory",
+                        "api",
+                        "books",
+                        "paged"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "0"
+                        },
+                        {
+                          "key": "size",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "content-type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "date",
+                      "value": "Wed, 16 Sep 2026 01:30:19 GMT"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"content\": [\n    {\n      \"id\": 2,\n      \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n      \"isbn\": \"9780132350884\",\n      \"author\": {\n        \"id\": 1,\n        \"name\": \"Ahmad Gohar\",\n        \"nationality\": \"Egypt\",\n        \"books\": null\n      },\n      \"price\": 59.99,\n      \"genre\": \"Computing & Software Engineering\",\n      \"published\": \"2008-08-01\",\n      \"description\": \"Even bad code can function. But if code isn’t clean, it can bring a development organization to its knees. This book presents principles, patterns, and practices of writing clean code, case studies, and heuristics for developers.\",\n      \"pageCount\": 464,\n      \"coverImageUrl\": \"https://covers1.booksamillion.com/covers/bam/0/13/235/088/0132350882_b.jpg\"\n    },\n    {\n      \"id\": 1,\n      \"title\": \"Spring book\",\n      \"isbn\": \"978-1234397897\",\n      \"author\": {\n        \"id\": 1,\n        \"name\": \"Ahmad Gohar\",\n        \"nationality\": \"Egypt\",\n        \"books\": null\n      },\n      \"price\": 49.99,\n      \"genre\": \"Technology\",\n      \"published\": \"2024-01-15\",\n      \"description\": \"A new book about Spring\",\n      \"pageCount\": 400,\n      \"coverImageUrl\": \"https://example.com/new-cover.jpg\"\n    }\n  ],\n  \"empty\": false,\n  \"first\": true,\n  \"last\": true,\n  \"number\": 0,\n  \"numberOfElements\": 2,\n  \"pageable\": {\n    \"offset\": 0,\n    \"pageNumber\": 0,\n    \"pageSize\": 2,\n    \"paged\": true,\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": false\n    },\n    \"unpaged\": false\n  },\n  \"size\": 2,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": false\n  },\n  \"totalElements\": 2,\n  \"totalPages\": 1\n}"
+                }
+              ]
+            },
+            {
               "name": "inventory/api/books",
               "request": {
                 "method": "POST",
