@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.stereotype.Service;
 
@@ -45,24 +46,43 @@ public class NotificationService {
      */
     private final ConcurrentMap<String, LocalDateTime> activeSubscribers;
 
+    /**
+     * Holds the subscriber ID generated on the most recent doOnSubscribe, so the matching
+     * doOnCancel can remove it. See the constructor for why one ID at a time is sufficient.
+     */
+    private final AtomicReference<String> currentSubscriberId = new AtomicReference<>();
+
     public NotificationService() {
         // Initialize active subscribers map first
         this.activeSubscribers = new ConcurrentHashMap<>();
 
-        // Create a multicast sink that can be safely shared across threads
-        // onBackpressureBuffer: Buffer events if subscriber can't keep up (buffer size:
-        // 256)
-        this.bookEventSink = Sinks.many().multicast().onBackpressureBuffer(256);
+        // Create a multicast sink that can be safely shared across threads.
+        // onBackpressureBuffer: buffer events if a subscriber can't keep up (buffer size: 256).
+        // autoCancel=false: the default (true) permanently shuts the sink down the first time
+        // its subscriber count drops to zero (e.g. the first SSE client ever to disconnect),
+        // silently dropping every event published after that for the lifetime of the process -
+        // every subsequent SSE client would connect successfully but never receive an event.
+        this.bookEventSink = Sinks.many().multicast().onBackpressureBuffer(256, false);
 
         // Create a hot flux from the sink - events are broadcast to all active
-        // subscribers
+        // subscribers. doOnSubscribe/doOnCancel fire once per 0->1/1->0 transition of the
+        // shared flux below (share() = publish().refCount(1)), not once per SSE client, so the
+        // subscriber ID is captured here and removed on the matching cancel to avoid an
+        // unbounded, monotonically growing map.
         this.bookEventFlux = bookEventSink.asFlux()
                 .doOnSubscribe(subscription -> {
                     String subscriberId = UUID.randomUUID().toString();
+                    currentSubscriberId.set(subscriberId);
                     activeSubscribers.put(subscriberId, LocalDateTime.now());
                     log.info("New SSE subscriber connected. Total subscribers: {}", activeSubscribers.size());
                 })
-                .doOnCancel(() -> log.info("SSE subscriber cancelled. Remaining subscribers: {}", activeSubscribers.size()))
+                .doOnCancel(() -> {
+                    String subscriberId = currentSubscriberId.getAndSet(null);
+                    if (subscriberId != null) {
+                        activeSubscribers.remove(subscriberId);
+                    }
+                    log.info("SSE subscriber cancelled. Remaining subscribers: {}", activeSubscribers.size());
+                })
                 .doOnError(error -> log.error("Error in SSE stream", error))
                 .share(); // Share the flux among multiple subscribers
 
