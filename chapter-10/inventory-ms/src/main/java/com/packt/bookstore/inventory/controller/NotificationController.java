@@ -96,11 +96,6 @@ public class NotificationController {
         public Flux<ServerSentEvent<BookEvent>> streamAllEvents() {
                 log.info("New SSE client connected to /stream endpoint");
 
-                // Emit immediately so the response headers/first frame flush without waiting for the first heartbeat
-                Flux<ServerSentEvent<BookEvent>> connected = Flux.just(ServerSentEvent.<BookEvent>builder()
-                                .comment("connected")
-                                .build());
-
                 // Create keepalive heartbeat every 15 seconds
                 Flux<ServerSentEvent<BookEvent>> heartbeat = Flux.interval(Duration.ofSeconds(15))
                                 .map(sequence -> ServerSentEvent.<BookEvent>builder()
@@ -116,7 +111,7 @@ public class NotificationController {
                                                 .comment("Book notification event")
                                                 .build());
 
-                return Flux.merge(connected, eventStream, heartbeat)
+                return Flux.merge(eventStream, heartbeat)
                                 .doOnCancel(() -> log.info("SSE client disconnected from /stream"))
                                 .doOnError(error -> log.error("Error in SSE stream", error))
                                 .timeout(Duration.ofHours(1)) // Auto-disconnect after 1 hour of inactivity
@@ -151,11 +146,6 @@ public class NotificationController {
                         @Parameter(name = "eventType", description = "Type of events to receive (NEW_BOOK, PRICE_CHANGE, BOOK_UPDATED, BOOK_DELETED)", required = true, example = "NEW_BOOK") @RequestParam BookEvent.EventType eventType) {
                 log.info("New SSE client connected to /stream/filtered endpoint with filter: {}", eventType);
 
-                // Emit immediately so the response headers/first frame flush without waiting for the first heartbeat
-                Flux<ServerSentEvent<BookEvent>> connected = Flux.just(ServerSentEvent.<BookEvent>builder()
-                                .comment("connected")
-                                .build());
-
                 // Create keepalive heartbeat every 15 seconds
                 Flux<ServerSentEvent<BookEvent>> heartbeat = Flux.interval(Duration.ofSeconds(15))
                                 .map(sequence -> ServerSentEvent.<BookEvent>builder()
@@ -171,7 +161,7 @@ public class NotificationController {
                                                 .comment("Filtered book notification event")
                                                 .build());
 
-                return Flux.merge(connected, eventStream, heartbeat)
+                return Flux.merge(eventStream, heartbeat)
                                 .doOnCancel(() -> log.info("SSE client disconnected from /stream/filtered"))
                                 .doOnError(error -> log.error("Error in filtered SSE stream", error))
                                 .timeout(Duration.ofHours(1))
