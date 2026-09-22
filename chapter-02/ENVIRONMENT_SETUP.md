@@ -8,7 +8,7 @@ This guide provides complete setup steps for the Bookstore backend development e
 
 It covers:
 
-- Java (JDK 25)
+- Java (JDK 26)
 - Maven
 - Git
 - Docker Desktop (or Docker Engine on Linux)
@@ -21,8 +21,8 @@ It covers:
 
 | Tool        | Recommended Version |
 | ----------- | ------------------- |
-| Java        | 25                  |
-| Spring Boot | 4.0.3               |
+| Java        | 26                  |
+| Spring Boot | 4.1.0               |
 | Maven       | 3.9+                |
 | Git         | Latest stable       |
 | Docker      | Latest stable       |
@@ -39,11 +39,11 @@ It covers:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 2) Install Java (JDK 25)
+### 2) Install Java (JDK 26)
 
 ```bash
-brew install openjdk@25
-echo 'export PATH="/opt/homebrew/opt/openjdk@25/bin:$PATH"' >> ~/.zshrc
+brew install openjdk@26
+echo 'export PATH="/opt/homebrew/opt/openjdk@26/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 java -version
 ```
@@ -104,10 +104,10 @@ brew install --cask postman
 sudo apt update
 ```
 
-### 2) Install Java (JDK 25)
+### 2) Install Java (JDK 26)
 
 ```bash
-sudo apt install -y openjdk-25-jdk
+sudo apt install -y openjdk-26-jdk
 java -version
 ```
 
@@ -158,16 +158,16 @@ sudo snap install postman
 
 ## Windows Setup
 
-### 1) Install Java (JDK 25)
+### 1) Install Java (JDK 26)
 
 Option A (Installer):
 
-- Download and install JDK 25 from Oracle, Temurin, or Microsoft Build of OpenJDK.
+- Download and install JDK 26 from Oracle, Temurin, or Microsoft Build of OpenJDK.
 
 Option B (Winget):
 
 ```powershell
-winget install EclipseAdoptium.Temurin.25.JDK
+winget install EclipseAdoptium.Temurin.26.JDK
 java -version
 ```
 
@@ -248,17 +248,17 @@ git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend
 
 ### macOS Troubleshooting
 
-#### Java (JDK 25)
+#### Java (JDK 26)
 
 - If `java -version` shows an older JDK, run:
   ```bash
   /usr/libexec/java_home -V
-  export JAVA_HOME=$(/usr/libexec/java_home -v 25)
+  export JAVA_HOME=$(/usr/libexec/java_home -v 26)
   export PATH="$JAVA_HOME/bin:$PATH"
   ```
 - If Homebrew Java is not detected, ensure this line exists in `~/.zshrc`:
   ```bash
-  export PATH="/opt/homebrew/opt/openjdk@25/bin:$PATH"
+  export PATH="/opt/homebrew/opt/openjdk@26/bin:$PATH"
   ```
 
 #### Maven
@@ -288,7 +288,7 @@ git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend
 #### VS Code + Extensions
 
 - If Java/Spring extensions do not activate, run `Cmd+Shift+P` → `Developer: Reload Window`.
-- If Java language features fail, set JDK 25 in `Cmd+Shift+P` → `Java: Configure Java Runtime`.
+- If Java language features fail, set JDK 26 in `Cmd+Shift+P` → `Java: Configure Java Runtime`.
 
 #### Postman
 
@@ -299,7 +299,7 @@ git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend
 
 ### Linux (Ubuntu/Debian) Troubleshooting
 
-#### Java (JDK 25)
+#### Java (JDK 26)
 
 - If multiple JDKs are installed, select the correct one:
   ```bash
@@ -355,7 +355,7 @@ git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend
 
 ### Windows Troubleshooting
 
-#### Java (JDK 25)
+#### Java (JDK 26)
 
 - If `java` is not recognized, reopen PowerShell and verify `JAVA_HOME` and `Path` in System Environment Variables.
 - Confirm active runtime:
@@ -390,7 +390,7 @@ git clone https://github.com/PacktPublishing/Spring-Boot-and-Angular-2E_Frontend
 #### VS Code + Extensions
 
 - If extensions fail to install, run VS Code as administrator once.
-- If Java project import fails, select JDK 25 in `Java: Configure Java Runtime`.
+- If Java project import fails, select JDK 26 in `Java: Configure Java Runtime`.
 
 #### Postman
 
