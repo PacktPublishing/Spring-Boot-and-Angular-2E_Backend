@@ -138,8 +138,8 @@ Planned platform additions in later chapters:
 
 Install and verify:
 
-- Java 25
-- Spring Boot 4.0.3
+- Java 26
+- Spring Boot 4.1.0
 - Maven
 - Git
 - Docker Desktop
@@ -164,11 +164,11 @@ Project configuration used in this chapter:
 <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.3</version>
+    <version>4.1.0</version>
 </parent>
 
 <properties>
-    <java.version>25</java.version>
+    <java.version>26</java.version>
 </properties>
 ```
 
@@ -187,8 +187,8 @@ Create a starter service from Spring Initializr:
 
 - Project: Maven
 - Language: Java
-- Spring Boot: 4.0.3
-- Java: 25
+- Spring Boot: 4.1.0
+- Java: 26
 - Dependencies: Spring Web, DevTools, Actuator
 
 Recommended package structure:

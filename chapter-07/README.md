@@ -146,7 +146,7 @@ It defines:
 | Errors | Failure scenarios |
 | Security | Authentication methods |
 
-In Spring Boot 4.0.3, the recommended tool is **springdoc-openapi**.
+In the current repository setup, the recommended tool is **springdoc-openapi** with the Spring Boot 4.1.0-based project configuration.
 
 ---
 
