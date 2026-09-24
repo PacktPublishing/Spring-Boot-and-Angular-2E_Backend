@@ -15,9 +15,6 @@ import com.packt.bookstore.inventory.dto.BookRequest;
 import com.packt.bookstore.inventory.dto.BookResponse;
 import com.packt.bookstore.inventory.entity.Author;
 import com.packt.bookstore.inventory.entity.Book;
-import com.packt.bookstore.inventory.event.BookEvent;
-import com.packt.bookstore.inventory.event.NewBookEventData;
-import com.packt.bookstore.inventory.event.PriceChangeEventData;
 import com.packt.bookstore.inventory.exception.DomainRuleViolationException;
 import com.packt.bookstore.inventory.exception.ResourceNotFoundException;
 import com.packt.bookstore.inventory.mapper.BookMapper;
@@ -32,14 +29,12 @@ public class BookService implements IBookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final BookMapper bookMapper;
-    private final NotificationService notificationService;
 
     public BookService(BookRepository bookRepository, AuthorRepository authorRepository,
-            BookMapper bookMapper, NotificationService notificationService) {
+            BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.bookMapper = bookMapper;
-        this.notificationService = notificationService;
     }
 
     @Override
@@ -78,8 +73,6 @@ public class BookService implements IBookService {
         var author = resolveAuthorById(req.authorId());
         var toSave = bookMapper.toEntity(req, author);
         var saved = trySave(toSave); // may raise DataIntegrityViolationException → 409
-        // Emit NEW_BOOK event for SSE subscribers
-        publishNewBookEvent(saved);
         return bookMapper.toResponse(saved);
     }
 
@@ -103,20 +96,12 @@ public class BookService implements IBookService {
 
         validateSemanticsForPatch(req, existing); // 422 only on provided fields
 
-        // Check if price is changing
-        BigDecimal oldPrice = existing.getPrice();
-        boolean priceChanged = req.price() != null && req.price().compareTo(oldPrice) != 0;
-
         Author author = null;
         if (req.authorId() != null)
             author = resolveAuthorById(req.authorId());
         bookMapper.patch(existing, req, author);
 
         var saved = trySave(existing);
-        // Emit PRICE_CHANGE event if price was updated
-        if (priceChanged) {
-            publishPriceChangeEvent(saved, oldPrice, saved.getPrice());
-        }
         return bookMapper.toResponse(saved);
     }
 
@@ -189,75 +174,6 @@ public class BookService implements IBookService {
             if (bookRepository.existsByIsbnIgnoreCase(req.isbn())) {
                 throw new DomainRuleViolationException("ISBN must be unique");
             }
-        }
-    }
-
-    /* ----------------- Event Publishing ----------------- */
-
-    /**
-     * Publishes a NEW_BOOK event to SSE subscribers
-     */
-    private void publishNewBookEvent(Book book) {
-        try {
-            NewBookEventData eventData = NewBookEventData.builder()
-                    .authorName(book.getAuthor() != null ? book.getAuthor().getName() : null)
-                    .genre(book.getGenre())
-                    .price(book.getPrice())
-                    .quantity(book.getQuantity())
-                    .published(book.getPublished())
-                    .description(book.getDescription())
-                    .pageCount(book.getPageCount())
-                    .coverImageUrl(book.getCoverImageUrl())
-                    .build();
-
-            BookEvent event = BookEvent.builder()
-                    .eventType(BookEvent.EventType.NEW_BOOK)
-                    .bookId(book.getId())
-                    .bookTitle(book.getTitle())
-                    .isbn(book.getIsbn())
-                    .eventData(eventData)
-                    .build();
-
-            notificationService.publishEvent(event);
-            log.info("Published NEW_BOOK event for book: {} (ID: {})", book.getTitle(), book.getId());
-        } catch (Exception e) {
-            log.error("Failed to publish NEW_BOOK event for book ID: {}", book.getId(), e);
-            // Don't fail the transaction if event publishing fails
-        }
-    }
-
-    /**
-     * Publishes a PRICE_CHANGE event to SSE subscribers
-     */
-    private void publishPriceChangeEvent(Book book, BigDecimal oldPrice, BigDecimal newPrice) {
-        try {
-            BigDecimal priceChange = newPrice.subtract(oldPrice);
-            double percentageChange = oldPrice.compareTo(BigDecimal.ZERO) > 0
-                    ? priceChange.divide(oldPrice, 4, java.math.RoundingMode.HALF_UP)
-                            .multiply(new BigDecimal("100")).doubleValue()
-                    : 0.0;
-
-            PriceChangeEventData eventData = PriceChangeEventData.builder()
-                    .oldPrice(oldPrice)
-                    .newPrice(newPrice)
-                    .priceChange(priceChange)
-                    .percentageChange(percentageChange)
-                    .build();
-
-            BookEvent event = BookEvent.builder()
-                    .eventType(BookEvent.EventType.PRICE_CHANGE)
-                    .bookId(book.getId())
-                    .bookTitle(book.getTitle())
-                    .isbn(book.getIsbn())
-                    .eventData(eventData)
-                    .build();
-
-            notificationService.publishEvent(event);
-            log.info("Published PRICE_CHANGE event for book: {} (ID: {}) - Old: {}, New: {}",
-                    book.getTitle(), book.getId(), oldPrice, newPrice);
-        } catch (Exception e) {
-            log.error("Failed to publish PRICE_CHANGE event for book ID: {}", book.getId(), e);
-            // Don't fail the transaction if event publishing fails
         }
     }
 
